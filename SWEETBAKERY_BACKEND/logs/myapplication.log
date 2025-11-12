@@ -1,0 +1,58 @@
+2025-11-12T13:06:50.523+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] i.fit.se.SweetbakeryBackendApplication   : Starting SweetbakeryBackendApplication using Java 17.0.14 with PID 14940 (E:\Mon_Hoc_Truong\HK7\WWW\DoAn\SWEETBAKERY\SWEETBAKERY_BACKEND\target\classes started by ADMIN in E:\Mon_Hoc_Truong\HK7\WWW\DoAn\SWEETBAKERY\SWEETBAKERY_BACKEND)
+2025-11-12T13:06:50.524+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] i.fit.se.SweetbakeryBackendApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-11-12T13:06:50.564+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-11-12T13:06:50.564+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-11-12T13:06:51.655+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-12T13:06:51.711+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 46 ms. Found 7 JPA repository interfaces.
+2025-11-12T13:06:52.094+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2025-11-12T13:06:52.108+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-11-12T13:06:52.108+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-11-12T13:06:52.147+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/api]    : Initializing Spring embedded WebApplicationContext
+2025-11-12T13:06:52.148+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1583 ms
+2025-11-12T13:06:52.614+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-12T13:06:52.642+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-12T13:06:52.803+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@11c2849a
+2025-11-12T13:06:52.804+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-12T13:06:54.074+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-12T13:06:54.628+07:00  WARN 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-12T13:06:54.713+07:00 DEBUG 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 42 mappings in 'requestMappingHandlerMapping'
+2025-11-12T13:06:54.767+07:00 DEBUG 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-11-12T13:06:54.788+07:00 DEBUG 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-11-12T13:06:54.827+07:00 DEBUG 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 2 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-11-12T13:06:54.948+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-11-12T13:06:54.978+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/api'
+2025-11-12T13:06:54.987+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [restartedMain] i.fit.se.SweetbakeryBackendApplication   : Started SweetbakeryBackendApplication in 4.955 seconds (process running for 5.591)
+2025-11-12T13:07:30.323+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-11-12T13:07:30.350+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-11-12T13:07:30.355+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-11-12T13:07:30.360+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-11-12T13:07:30.364+07:00  INFO 14940 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-11-12T13:07:32.602+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] i.fit.se.SweetbakeryBackendApplication   : Starting SweetbakeryBackendApplication using Java 17.0.14 with PID 12268 (E:\Mon_Hoc_Truong\HK7\WWW\DoAn\SWEETBAKERY\SWEETBAKERY_BACKEND\target\classes started by ADMIN in E:\Mon_Hoc_Truong\HK7\WWW\DoAn\SWEETBAKERY\SWEETBAKERY_BACKEND)
+2025-11-12T13:07:32.604+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] i.fit.se.SweetbakeryBackendApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-11-12T13:07:32.631+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-11-12T13:07:32.631+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-11-12T13:07:33.168+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-12T13:07:33.215+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 41 ms. Found 7 JPA repository interfaces.
+2025-11-12T13:07:33.623+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2025-11-12T13:07:33.639+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-11-12T13:07:33.641+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-11-12T13:07:33.694+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/api]    : Initializing Spring embedded WebApplicationContext
+2025-11-12T13:07:33.694+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1063 ms
+2025-11-12T13:07:34.138+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-12T13:07:34.163+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-12T13:07:34.220+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@c35c220
+2025-11-12T13:07:34.221+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-12T13:07:35.481+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-12T13:07:35.863+07:00  WARN 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-12T13:07:35.939+07:00 DEBUG 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 42 mappings in 'requestMappingHandlerMapping'
+2025-11-12T13:07:35.989+07:00 DEBUG 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-11-12T13:07:36.008+07:00 DEBUG 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-11-12T13:07:36.037+07:00 DEBUG 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 2 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-11-12T13:07:36.148+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-11-12T13:07:36.177+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/api'
+2025-11-12T13:07:36.184+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [restartedMain] i.fit.se.SweetbakeryBackendApplication   : Started SweetbakeryBackendApplication in 4.039 seconds (process running for 4.625)
+2025-11-12T13:07:55.121+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-11-12T13:07:55.144+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-11-12T13:07:55.147+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-11-12T13:07:55.149+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-11-12T13:07:55.153+07:00  INFO 12268 --- [SWEETBAKERY_BACKEND] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
