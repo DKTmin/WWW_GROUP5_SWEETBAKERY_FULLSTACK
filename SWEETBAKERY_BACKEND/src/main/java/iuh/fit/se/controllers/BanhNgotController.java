@@ -1,8 +1,14 @@
 package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.BanhNgotDTO;
+import iuh.fit.se.dtos.request.BanhNgotCreationRequest;
+import iuh.fit.se.dtos.response.ApiResponse;
+import iuh.fit.se.dtos.response.BanhNgotCreationResponse;
 import iuh.fit.se.entities.BanhNgot;
 import iuh.fit.se.services.BanhNgotService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,13 +20,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/banhngot")
+@RequestMapping("pastry-management/api/v1/pastries")
 public class BanhNgotController {
-
-    @Autowired
-    private BanhNgotService banhNgotService;
-
+    BanhNgotService banhNgotService;
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable String id) {
         Map<String, Object> response = new LinkedHashMap<>();
@@ -28,13 +33,13 @@ public class BanhNgotController {
         response.put("data", banhNgotService.findById(id));
         return ResponseEntity.ok(response);
     }
-
     @PostMapping
-    public ResponseEntity<Map<String, Object>> save(@RequestBody BanhNgot banhNgot) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.CREATED.value());
-        response.put("data", banhNgotService.save(banhNgot));
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ApiResponse<BanhNgotCreationResponse> save(@RequestBody BanhNgotCreationRequest request) {
+        return ApiResponse.<BanhNgotCreationResponse>builder()
+                .code(200)
+                .message("Success")
+                .data(banhNgotService.save(request))
+                .build();
     }
 
     @PutMapping("/{id}")

@@ -1,12 +1,18 @@
 package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.BanhNgotDTO;
+import iuh.fit.se.dtos.request.BanhNgotCreationRequest;
+import iuh.fit.se.dtos.response.BanhNgotCreationResponse;
 import iuh.fit.se.entities.BanhNgot;
 import iuh.fit.se.exceptions.ItemNotFoundException;
 import iuh.fit.se.exceptions.ValidationException;
+import iuh.fit.se.mapper.BanhNgotMapper;
 import iuh.fit.se.repositories.BanhNgotRepository;
 import iuh.fit.se.services.BanhNgotService;
 import jakarta.validation.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 @Service
 public class BanhNgotServiceImpl implements BanhNgotService {
-
-    private final BanhNgotRepository banhNgotRepository;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public BanhNgotServiceImpl(BanhNgotRepository banhNgotRepository, ModelMapper modelMapper) {
-        this.banhNgotRepository = banhNgotRepository;
-        this.modelMapper = modelMapper;
-    }
-
+    BanhNgotRepository banhNgotRepository;
+    BanhNgotMapper banhNgotMapper;
+    ModelMapper modelMapper;
     private BanhNgotDTO convertToDTO(BanhNgot entity) {
         return modelMapper.map(entity, BanhNgotDTO.class);
     }
@@ -52,10 +53,9 @@ public class BanhNgotServiceImpl implements BanhNgotService {
 
     @Transactional
     @Override
-    public BanhNgotDTO save(BanhNgot banhNgot) {
-        validate(banhNgot);
-        banhNgotRepository.save(banhNgot);
-        return convertToDTO(banhNgot);
+    public BanhNgotCreationResponse save(BanhNgotCreationRequest request) {
+        BanhNgot banhNgot = banhNgotMapper.toBanhNgot(request);
+        return banhNgotMapper.toBanhNgotCreationResponse(banhNgotRepository.save(banhNgot));
     }
 
     @Transactional
