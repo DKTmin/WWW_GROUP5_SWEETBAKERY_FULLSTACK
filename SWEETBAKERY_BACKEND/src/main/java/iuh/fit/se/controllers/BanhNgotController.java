@@ -2,9 +2,12 @@ package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.BanhNgotDTO;
 import iuh.fit.se.dtos.request.BanhNgotCreationRequest;
+import iuh.fit.se.dtos.request.BanhNgotUpdateRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.BanhNgotCreationResponse;
+import iuh.fit.se.dtos.response.BanhNgotUpdateResponse;
 import iuh.fit.se.entities.BanhNgot;
+import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.BanhNgotService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,47 +31,47 @@ import java.util.Map;
 public class BanhNgotController {
     BanhNgotService banhNgotService;
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getById(@PathVariable String id) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.OK.value());
-        response.put("data", banhNgotService.findById(id));
-        return ResponseEntity.ok(response);
+    public ApiResponse<BanhNgotCreationResponse> getById(@PathVariable String id) {
+        return ApiResponse.<BanhNgotCreationResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(banhNgotService.findById(id))
+                .build();
     }
     @PostMapping
     public ApiResponse<BanhNgotCreationResponse> save(@RequestBody BanhNgotCreationRequest request) {
         return ApiResponse.<BanhNgotCreationResponse>builder()
-                .code(200)
-                .message("Success")
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
                 .data(banhNgotService.save(request))
                 .build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable String id, @RequestBody BanhNgot banhNgot) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.OK.value());
-        response.put("data", banhNgotService.update(id, banhNgot));
-        return ResponseEntity.ok(response);
+    public ApiResponse<BanhNgotUpdateResponse> update(@PathVariable String id, @RequestBody BanhNgotUpdateRequest request) {
+        return ApiResponse.<BanhNgotUpdateResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(banhNgotService.update(id, request))
+                .build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> delete(@PathVariable String id) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.OK.value());
-        response.put("data", banhNgotService.delete(id));
-        return ResponseEntity.ok(response);
+    public ApiResponse<?> delete(@PathVariable String id) {
+        return ApiResponse.builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(banhNgotService.delete(id))
+                .build();
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAll(@RequestParam(required = false) String keyword) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", HttpStatus.OK.value());
-        if (keyword == null || keyword.isEmpty()) {
-            response.put("data", banhNgotService.findAll());
-        } else {
-            response.put("data", banhNgotService.search(keyword));
-        }
-        return ResponseEntity.ok(response);
+    public ApiResponse<List<BanhNgotCreationResponse>> getAll(@RequestParam(required = false) String keyword) {
+        return ApiResponse.<List<BanhNgotCreationResponse>>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(banhNgotService.findAll())
+                .build();
     }
 
     @GetMapping("/paging")

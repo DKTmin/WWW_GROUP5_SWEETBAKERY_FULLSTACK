@@ -2,7 +2,9 @@ package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.BanhNgotDTO;
 import iuh.fit.se.dtos.request.BanhNgotCreationRequest;
+import iuh.fit.se.dtos.request.BanhNgotUpdateRequest;
 import iuh.fit.se.dtos.response.BanhNgotCreationResponse;
+import iuh.fit.se.dtos.response.BanhNgotUpdateResponse;
 import iuh.fit.se.entities.BanhNgot;
 import iuh.fit.se.exceptions.ItemNotFoundException;
 import iuh.fit.se.exceptions.ValidationException;
@@ -35,15 +37,19 @@ public class BanhNgotServiceImpl implements BanhNgotService {
     }
 
     @Override
-    public BanhNgotDTO findById(String id) {
-        BanhNgot bn = banhNgotRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException("Không tìm thấy bánh ngọt với id: " + id));
-        return convertToDTO(bn);
+    public BanhNgotCreationResponse findById(String id) {
+        BanhNgot banhNgot = banhNgotRepository.findById(id).orElse(null);
+        if(banhNgot == null)
+            throw new NullPointerException("Banh ngot not found!");
+        return banhNgotMapper.toBanhNgotCreationResponse(banhNgot);
     }
 
     @Override
-    public List<BanhNgotDTO> findAll() {
-        return banhNgotRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+    public List<BanhNgotCreationResponse> findAll() {
+        return banhNgotRepository.findAll()
+                .stream()
+                .map(banhNgotMapper::toBanhNgotCreationResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -57,22 +63,27 @@ public class BanhNgotServiceImpl implements BanhNgotService {
         BanhNgot banhNgot = banhNgotMapper.toBanhNgot(request);
         return banhNgotMapper.toBanhNgotCreationResponse(banhNgotRepository.save(banhNgot));
     }
-
     @Transactional
     @Override
-    public BanhNgotDTO update(String id, BanhNgot banhNgot) {
-        findById(id);
-        validate(banhNgot);
-        banhNgot.setId(id);
-        banhNgotRepository.save(banhNgot);
-        return convertToDTO(banhNgot);
+    public BanhNgotUpdateResponse update(String id, BanhNgotUpdateRequest request) {
+        BanhNgot banhNgot = banhNgotRepository.findById(id).orElse(null);
+        if(banhNgot == null)
+            throw new NullPointerException("Banh ngot not found!");
+        banhNgotMapper.update(banhNgot, request);
+        return banhNgotMapper.toBanhNgotUpdateResponse(banhNgotRepository.save(banhNgot));
     }
 
     @Override
     public boolean delete(String id) {
-        BanhNgotDTO dto = findById(id);
-        banhNgotRepository.deleteById(dto.getId());
-        return true;
+        BanhNgot banhNgot = banhNgotRepository.findById(id).orElse(null);
+        if(banhNgot == null)
+            throw new NullPointerException("Banh ngot not found!");
+        try {
+            banhNgotRepository.delete(banhNgot);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 
     @Override
