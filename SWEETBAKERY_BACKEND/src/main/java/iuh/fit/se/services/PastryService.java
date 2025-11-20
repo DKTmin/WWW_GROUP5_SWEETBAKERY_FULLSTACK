@@ -1,0 +1,18 @@
+package iuh.fit.se.services;
+
+import iuh.fit.se.dtos.request.PastryCreationRequest;
+import iuh.fit.se.dtos.request.PastryUpdateRequest;
+import iuh.fit.se.dtos.response.PastryCreationResponse;
+import iuh.fit.se.dtos.response.PastryUpdateResponse;
+
+import java.util.List;
+
+public interface PastryService {
+    PastryCreationResponse findById(String id);
+    List<PastryCreationResponse> findAll();
+//    Page<BanhNgotDTO> findAllWithPaging(@ParameterObject Pageable pageable);
+    PastryCreationResponse save(PastryCreationRequest request);
+    PastryUpdateResponse update(String id, PastryUpdateRequest request);
+    boolean delete(String id);
+//    List<BanhNgotDTO> search(String keyword);
+}

@@ -1,6 +1,5 @@
 package iuh.fit.se.dtos.request;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,9 +13,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
-public class BanhNgotCreationRequest {
+public class PastryCreationRequest {
     String tenBanh;
     Double gia;
     String moTa;

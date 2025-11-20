@@ -13,9 +13,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
-public class BanhNgotUpdateRequest {
+public class PastryUpdateRequest {
     String tenBanh;
     Double gia;
     String moTa;

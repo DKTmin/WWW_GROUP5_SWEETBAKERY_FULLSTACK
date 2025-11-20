@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
-public class BanhNgotUpdateResponse {
+public class PastryCreationResponse {
     String tenBanh;
     Double gia;
     String moTa;
