@@ -32,8 +32,8 @@ public class AuthenticationController {
     @PostMapping("/register")
     ApiResponse<RegistrationResponse> register(@RequestBody RegistrationRequest request){
         return ApiResponse.<RegistrationResponse>builder()
-                .code(HttpCode.OK.getCODE())
-                .message(HttpCode.OK.getMESSAGE())
+                .code(HttpCode.CREATED.getCODE())
+                .message(HttpCode.CREATED.getMESSAGE())
                 .data(authenticationService.register(request))
                 .build();
     }
