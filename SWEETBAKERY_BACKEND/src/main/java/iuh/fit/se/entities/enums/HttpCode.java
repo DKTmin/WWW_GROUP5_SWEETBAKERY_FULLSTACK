@@ -13,7 +13,8 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum HttpCode {
     OK(200, "Successfully!", HttpStatus.OK),
-    NOT_FOUND(404, "Not found!", HttpStatus.NOT_FOUND);
+    NOT_FOUND(404, "Not found!", HttpStatus.NOT_FOUND),
+    UNAUTHENTICATED(401, "Unauthenticated!", HttpStatus.UNAUTHORIZED);
     final int CODE;
     final String MESSAGE;
     final HttpStatusCode HTTP_CODE;
