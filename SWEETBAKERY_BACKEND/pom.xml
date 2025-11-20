@@ -114,6 +114,12 @@
             <artifactId>spring-dotenv</artifactId>
             <version>4.0.0</version>
         </dependency>
+        <!--Đây là thư viện lõi (core) của Spring Security — chứa toàn bộ logic cốt lõi để xác thực,
+        phân quyền, mã hoá mật khẩu, quản lý người dùng, v.v.-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
