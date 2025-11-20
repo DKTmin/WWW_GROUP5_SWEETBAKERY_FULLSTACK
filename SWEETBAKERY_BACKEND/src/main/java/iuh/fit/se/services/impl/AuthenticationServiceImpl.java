@@ -14,6 +14,7 @@ import iuh.fit.se.services.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     UserMapper userMapper;
     AccountRepository accountRepository;
     UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
     @Override
     public RegistrationResponse register(RegistrationRequest request) {
         User user = userMapper.toUser(request);
@@ -40,10 +42,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         AccountCredential accountCredentialUsedUsername= accountMapper.toAccountUsedUsername(request);
         accountCredentialUsedUsername.setUser(user);
+        accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
         accountRepository.save(accountCredentialUsedUsername);
 
         AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
         accountCredentialUsedEmail.setUser(user);
+        accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
         accountRepository.save(accountCredentialUsedEmail);
 
         Set<AccountCredentialResponse> accountCredentialResponses = new HashSet<>();

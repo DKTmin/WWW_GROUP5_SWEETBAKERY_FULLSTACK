@@ -21,7 +21,7 @@ public interface AccountMapper {
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "type", constant = "USERNAME"),
             @Mapping(target = "credential", source = "username"),
-            @Mapping(target = "password", source = "password")
+            @Mapping(target = "password", ignore = true)
     })
     AccountCredential toAccountUsedUsername(RegistrationRequest request);
 
@@ -33,7 +33,7 @@ public interface AccountMapper {
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "type", constant = "EMAIL"),
             @Mapping(target = "credential", source = "email"),
-            @Mapping(target = "password", source = "password")
+            @Mapping(target = "password", ignore = true)
     })
     AccountCredential toAccountUsedEmail(RegistrationRequest request);
     AccountCredentialResponse toAccountCredentialResponse(AccountCredential accountCredential);
