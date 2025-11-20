@@ -1,14 +1,17 @@
 package iuh.fit.se.services.impl;
 
+import iuh.fit.se.dtos.request.AuthenticationRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.AccountCredentialResponse;
+import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.User;
-import iuh.fit.se.entities.enums.AccountType;
+import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.AccountMapper;
 import iuh.fit.se.mapper.UserMapper;
-import iuh.fit.se.repositories.AccountRepository;
+import iuh.fit.se.repositories.AccountCredentialRepository;
 import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.AuthenticationService;
 import lombok.AccessLevel;
@@ -19,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author : user664dntp
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
 public class AuthenticationServiceImpl implements AuthenticationService {
     AccountMapper accountMapper;
     UserMapper userMapper;
-    AccountRepository accountRepository;
+    AccountCredentialRepository accountCredentialRepository;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
     @Override
@@ -43,12 +45,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AccountCredential accountCredentialUsedUsername= accountMapper.toAccountUsedUsername(request);
         accountCredentialUsedUsername.setUser(user);
         accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
-        accountRepository.save(accountCredentialUsedUsername);
+        accountCredentialRepository.save(accountCredentialUsedUsername);
 
         AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
         accountCredentialUsedEmail.setUser(user);
         accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
-        accountRepository.save(accountCredentialUsedEmail);
+        accountCredentialRepository.save(accountCredentialUsedEmail);
 
         Set<AccountCredentialResponse> accountCredentialResponses = new HashSet<>();
         accountCredentialResponses.add(accountMapper.toAccountCredentialResponse(accountCredentialUsedUsername));
@@ -58,5 +60,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .user(user)
                 .accountCredentials(accountCredentialResponses)
                 .build();
+    }
+
+    @Override
+    public boolean authenticate(AuthenticationRequest request) {
+        AccountCredential accountCredential = accountCredentialRepository.findByCredential(request.getIdentifier());
+        if(accountCredential == null)
+             throw new NullPointerException("Account not found!");
+        return passwordEncoder.matches(request.getPassword(), accountCredential.getPassword());
     }
 }

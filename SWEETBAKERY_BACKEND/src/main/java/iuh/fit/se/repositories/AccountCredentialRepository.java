@@ -11,5 +11,6 @@ import org.springframework.stereotype.Repository;
  **/
 
 @Repository
-public interface AccountRepository extends JpaRepository<AccountCredential, String> {
+public interface AccountCredentialRepository extends JpaRepository<AccountCredential, String> {
+    AccountCredential findByCredential(String identifier);
 }

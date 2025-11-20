@@ -1,7 +1,9 @@
 package iuh.fit.se.controllers;
 
+import iuh.fit.se.dtos.request.AuthenticationRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
+import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.AuthenticationService;
@@ -31,6 +33,19 @@ public class AuthenticationController {
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
                 .data(authenticationService.register(request))
+                .build();
+    }
+
+    @PostMapping("/log-in")
+    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(
+                        AuthenticationResponse.builder()
+                                .authenticated(authenticationService.authenticate(request))
+                                .build()
+                )
                 .build();
     }
 }
