@@ -48,4 +48,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		apiResponse.setMessage(exception.getMessage());
 		return ResponseEntity.status(httpCode.getHTTP_CODE()).body(apiResponse);
 	}
+
+	@ExceptionHandler(AppException.class)
+	ResponseEntity<ApiResponse<?>> handlingAppException(AppException exception){
+		HttpCode httpCode = exception.getHttpCode();
+		ApiResponse<?> apiResponse = new ApiResponse<>();
+		apiResponse.setCode(httpCode.getCODE());
+		apiResponse.setMessage(httpCode.getMESSAGE());
+		return ResponseEntity.status(httpCode.getHTTP_CODE()).body(apiResponse);
+	}
 }
