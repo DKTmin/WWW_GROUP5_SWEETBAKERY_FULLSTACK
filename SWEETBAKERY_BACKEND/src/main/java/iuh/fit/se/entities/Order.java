@@ -2,13 +2,12 @@ package iuh.fit.se.entities;
 
 import iuh.fit.se.entities.enums.TrangThaiDH;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-public class DonHang {
+public class Order {
     @Id
     private String id;
 
@@ -20,26 +19,26 @@ public class DonHang {
 
     @ManyToOne
     @JoinColumn(name = "khach_hang_id")
-    private KhachHang khachHang;
+    private Customer customer;
 
     @ManyToOne
     @JoinColumn(name = "nhan_vien_id")
-    private NhanVien nhanVien;
+    private Employee employee;
 
-    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL)
-    private List<ChiTietDonHang> chiTietDonHangs;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
 
-    public DonHang(String id, LocalDateTime ngayDatHang, double tongTien, TrangThaiDH trangThai, KhachHang khachHang, NhanVien nhanVien, List<ChiTietDonHang> chiTietDonHangs) {
+    public Order(String id, LocalDateTime ngayDatHang, double tongTien, TrangThaiDH trangThai, Customer customer, Employee employee, List<OrderDetail> orderDetails) {
         this.id = id;
         this.ngayDatHang = ngayDatHang;
         this.tongTien = tongTien;
         this.trangThai = trangThai;
-        this.khachHang = khachHang;
-        this.nhanVien = nhanVien;
-        this.chiTietDonHangs = chiTietDonHangs;
+        this.customer = customer;
+        this.employee = employee;
+        this.orderDetails = orderDetails;
     }
 
-    public DonHang() {
+    public Order() {
     }
 
     public String getId() {
@@ -74,40 +73,40 @@ public class DonHang {
         this.trangThai = trangThai;
     }
 
-    public KhachHang getKhachHang() {
-        return khachHang;
+    public Customer getKhachHang() {
+        return customer;
     }
 
-    public void setKhachHang(KhachHang khachHang) {
-        this.khachHang = khachHang;
+    public void setKhachHang(Customer customer) {
+        this.customer = customer;
     }
 
-    public NhanVien getNhanVien() {
-        return nhanVien;
+    public Employee getNhanVien() {
+        return employee;
     }
 
-    public void setNhanVien(NhanVien nhanVien) {
-        this.nhanVien = nhanVien;
+    public void setNhanVien(Employee employee) {
+        this.employee = employee;
     }
 
-    public List<ChiTietDonHang> getChiTietDonHangs() {
-        return chiTietDonHangs;
+    public List<OrderDetail> getChiTietDonHangs() {
+        return orderDetails;
     }
 
-    public void setChiTietDonHangs(List<ChiTietDonHang> chiTietDonHangs) {
-        this.chiTietDonHangs = chiTietDonHangs;
+    public void setChiTietDonHangs(List<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
     }
 
     @Override
     public String toString() {
-        return "DonHang{" +
+        return "Order{" +
                 "id='" + id + '\'' +
                 ", ngayDatHang=" + ngayDatHang +
                 ", tongTien=" + tongTien +
                 ", trangThai=" + trangThai +
-                ", khachHang=" + khachHang +
-                ", nhanVien=" + nhanVien +
-                ", chiTietDonHangs=" + chiTietDonHangs +
+                ", customer=" + customer +
+                ", employee=" + employee +
+                ", orderDetails=" + orderDetails +
                 '}';
     }
 }

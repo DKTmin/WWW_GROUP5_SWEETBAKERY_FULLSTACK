@@ -12,20 +12,13 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class BanhNgot {
+public class PastryCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String tenBanh;
-    Double gia;
-    String moTa;
-    String hinhAnh;
+    private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "loai_banh_id")
-    private LoaiBanh loaiBanh;
+    private String tenLoai;
 
-    @Column(nullable = true)
-    @OneToMany(mappedBy = "banhNgot")
-    private List<ChiTietDonHang> chiTietDonHangs;
+    @OneToMany(mappedBy = "pastryCategory")
+    private List<Pastry> pastries;
 }
