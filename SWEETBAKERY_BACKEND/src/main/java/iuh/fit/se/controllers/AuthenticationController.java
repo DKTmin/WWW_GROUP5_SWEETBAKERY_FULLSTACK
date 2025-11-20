@@ -41,11 +41,7 @@ public class AuthenticationController {
         return ApiResponse.<AuthenticationResponse>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(
-                        AuthenticationResponse.builder()
-                                .authenticated(authenticationService.authenticate(request))
-                                .build()
-                )
+                .data(authenticationService.authenticate(request))
                 .build();
     }
 }

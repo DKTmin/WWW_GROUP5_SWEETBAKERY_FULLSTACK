@@ -12,5 +12,5 @@ import iuh.fit.se.dtos.response.RegistrationResponse;
  **/
 public interface AuthenticationService {
     RegistrationResponse register(RegistrationRequest request);
-    boolean authenticate(AuthenticationRequest request);
+    AuthenticationResponse authenticate(AuthenticationRequest request);
 }

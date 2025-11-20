@@ -1,5 +1,8 @@
 package iuh.fit.se.services.impl;
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
 import iuh.fit.se.dtos.request.AuthenticationRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.AccountCredentialResponse;
@@ -17,9 +20,14 @@ import iuh.fit.se.services.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +45,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     AccountCredentialRepository accountCredentialRepository;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+
+    @NonFinal
+    @Value("${jwt.secret-key}")
+    String SECRET_KEY;
     @Override
     public RegistrationResponse register(RegistrationRequest request) {
         User user = userMapper.toUser(request);
@@ -63,10 +75,43 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public boolean authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(request.getIdentifier());
         if(accountCredential == null)
              throw new NullPointerException("Account not found!");
-        return passwordEncoder.matches(request.getPassword(), accountCredential.getPassword());
+        if(!passwordEncoder.matches(request.getPassword(), accountCredential.getPassword()))
+            throw new AppException(HttpCode.UNAUTHENTICATED);
+        User user = userRepository.findById(accountCredential.getUser().getId())
+                .orElseThrow(()-> new NullPointerException("User not found!"));
+
+        String token = generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .authenticated(true)
+                .token(token)
+                .build();
+    }
+
+    private String generateToken(User user){
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getFirstName() + user.getLastName())
+                .issuer("user664dntp.dev")
+                .issueTime(new Date())
+                .expirationTime(Date.from(Instant.now().plus(500, ChronoUnit.SECONDS)))
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SECRET_KEY.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
