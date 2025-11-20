@@ -56,6 +56,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String SECRET_KEY;
     @Override
     public RegistrationResponse register(RegistrationRequest request) {
+        if(userRepository.findUserByEmail(request.getEmail()) != null)
+            throw new AppException(HttpCode.EMAIL_EXISTED);
+        if(accountCredentialRepository.findByCredential(request.getUsername()) != null)
+            throw new AppException(HttpCode.USERNAME_EXISTED);
+
         User user = userMapper.toUser(request);
         userRepository.save(user);
 
