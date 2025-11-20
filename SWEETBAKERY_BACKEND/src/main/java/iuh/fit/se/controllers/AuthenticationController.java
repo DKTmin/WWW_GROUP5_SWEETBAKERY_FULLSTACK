@@ -1,9 +1,11 @@
 package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.request.AuthenticationRequest;
+import iuh.fit.se.dtos.request.IntrospectRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
+import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.AuthenticationService;
@@ -42,6 +44,15 @@ public class AuthenticationController {
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
                 .data(authenticationService.authenticate(request))
+                .build();
+    }
+
+    @PostMapping("/introspect")
+    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request){
+        return ApiResponse.<IntrospectResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(authenticationService.introspect(request))
                 .build();
     }
 }

@@ -1,8 +1,10 @@
 package iuh.fit.se.services;
 
 import iuh.fit.se.dtos.request.AuthenticationRequest;
+import iuh.fit.se.dtos.request.IntrospectRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
+import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 
 /**
@@ -13,4 +15,5 @@ import iuh.fit.se.dtos.response.RegistrationResponse;
 public interface AuthenticationService {
     RegistrationResponse register(RegistrationRequest request);
     AuthenticationResponse authenticate(AuthenticationRequest request);
+    IntrospectResponse introspect(IntrospectRequest request);
 }

@@ -2,11 +2,15 @@ package iuh.fit.se.services.impl;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import iuh.fit.se.dtos.request.AuthenticationRequest;
+import iuh.fit.se.dtos.request.IntrospectRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.AccountCredentialResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
+import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.User;
@@ -25,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -90,6 +95,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .authenticated(true)
                 .token(token)
                 .build();
+    }
+
+    @Override
+    public IntrospectResponse introspect(IntrospectRequest request) {
+        var token = request.getToken();
+        JWSVerifier verifier = null;
+        try {
+            verifier = new MACVerifier(SECRET_KEY.getBytes());
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+            Date expirationTokenTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            var verified = signedJWT.verify(verifier);
+
+            return IntrospectResponse.builder()
+                    .valid(verified && expirationTokenTime.after(new Date()))
+                    .build();
+        } catch (JOSEException | ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String generateToken(User user){
