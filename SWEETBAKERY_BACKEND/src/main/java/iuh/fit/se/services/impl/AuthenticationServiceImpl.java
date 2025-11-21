@@ -105,7 +105,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findById(accountCredential.getUser().getId())
                 .orElseThrow(()-> new NullPointerException("User not found!"));
 
-        String token = generateToken(user);
+        String token = generateToken(user, accountCredential);
 
         return AuthenticationResponse.builder()
                 .authenticated(true)
@@ -132,11 +132,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    private String generateToken(User user){
+    private String generateToken(User user, AccountCredential accountCredential){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getFirstName() + user.getLastName())
+                .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")
                 .issueTime(new Date())
                 .expirationTime(Date.from(Instant.now().plus(500, ChronoUnit.SECONDS)))
