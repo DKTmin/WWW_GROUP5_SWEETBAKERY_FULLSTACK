@@ -1,13 +1,19 @@
 package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.response.UserResponse;
+import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.User;
+import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.UserMapper;
+import iuh.fit.se.repositories.AccountCredentialRepository;
 import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +30,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
+    AccountCredentialRepository accountCredentialRepository;
     UserMapper userMapper;
     @Override
     public List<UserResponse> findAll() {
@@ -31,4 +38,17 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public UserResponse getInfor() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        AccountCredential accountCredential = accountCredentialRepository.findByCredential(username);
+        if(accountCredential == null)
+            throw new AppException(HttpCode.NOT_FOUND);
+        String userId = accountCredential.getUser().getId();
+        User user = userRepository.findById(userId).orElse(null);
+        return userMapper.toUserResponse(user);
+    }
+
 }

@@ -34,4 +34,12 @@ public class UserController {
                 .data(userService.findAll())
                 .build();
     }
+    @GetMapping("/infor")
+    ApiResponse<UserResponse> infor(){
+        return ApiResponse.<UserResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(userService.getInfor())
+                .build();
+    }
 }
