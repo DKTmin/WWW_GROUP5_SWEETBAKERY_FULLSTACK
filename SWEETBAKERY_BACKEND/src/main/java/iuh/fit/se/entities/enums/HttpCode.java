@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatusCode;
 public enum HttpCode {
     OK(200, "Successfully!", HttpStatus.OK),
     CREATED(201, "Created!", HttpStatus.CREATED),
+    VALIDATION_FAILED(400, "Validation failed!", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(401, "Unauthenticated!", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(403, "You do not have any permissions!", HttpStatus.FORBIDDEN),
     NOT_FOUND(404, "Not found!", HttpStatus.NOT_FOUND),

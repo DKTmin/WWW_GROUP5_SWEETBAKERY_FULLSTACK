@@ -1,5 +1,6 @@
 package iuh.fit.se.dtos.request;
 
+import iuh.fit.se.validator.constraint.PasswordConstraint;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,6 +21,7 @@ public class RegistrationRequest {
     String firstName;
     String lastName;
     String username;
+    @PasswordConstraint(min = 5)
     String password;
     String confirmPassword;
     String email;

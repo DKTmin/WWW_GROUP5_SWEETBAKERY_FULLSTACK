@@ -5,7 +5,6 @@ import iuh.fit.se.dtos.request.PastryUpdateRequest;
 import iuh.fit.se.dtos.response.PastryCreationResponse;
 import iuh.fit.se.dtos.response.PastryUpdateResponse;
 import iuh.fit.se.entities.Pastry;
-import iuh.fit.se.exceptions.ValidationException;
 import iuh.fit.se.mapper.PastryMapper;
 import iuh.fit.se.repositories.PastryRepository;
 import iuh.fit.se.services.PastryService;
@@ -99,15 +98,15 @@ public class PastryServiceImpl implements PastryService {
 //                .collect(Collectors.toList());
 //    }
 
-    private void validate(Pastry bn) {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        Set<ConstraintViolation<Pastry>> violations = validator.validate(bn);
-
-        if (!violations.isEmpty()) {
-            Map<String, Object> errors = new LinkedHashMap<>();
-            violations.forEach(v -> errors.put(v.getPropertyPath().toString(), v.getMessage()));
-            throw new ValidationException("Lỗi khi xử lý bánh ngọt", errors);
-        }
-    }
+//    private void validate(Pastry bn) {
+//        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+//        Validator validator = factory.getValidator();
+//        Set<ConstraintViolation<Pastry>> violations = validator.validate(bn);
+//
+//        if (!violations.isEmpty()) {
+//            Map<String, Object> errors = new LinkedHashMap<>();
+//            violations.forEach(v -> errors.put(v.getPropertyPath().toString(), v.getMessage()));
+//            throw new ValidationException("Lỗi khi xử lý bánh ngọt", errors);
+//        }
+//    }
 }

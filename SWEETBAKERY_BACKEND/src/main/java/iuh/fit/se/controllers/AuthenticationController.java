@@ -9,6 +9,7 @@ import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.AuthenticationService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,7 +31,7 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    ApiResponse<RegistrationResponse> register(@RequestBody RegistrationRequest request){
+    ApiResponse<RegistrationResponse> register(@Valid @RequestBody RegistrationRequest request){
         return ApiResponse.<RegistrationResponse>builder()
                 .code(HttpCode.CREATED.getCODE())
                 .message(HttpCode.CREATED.getMESSAGE())
