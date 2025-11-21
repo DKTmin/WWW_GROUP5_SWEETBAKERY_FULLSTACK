@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.nio.file.AccessDeniedException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
 	}
 
-	@ExceptionHandler(NullPointerException.class)
+	@ExceptionHandler(value = NullPointerException.class)
 	ResponseEntity<ApiResponse<?>> handlingNullPointerException(NullPointerException exception){
 		HttpCode httpCode = HttpCode.NOT_FOUND;
 		ApiResponse<?> apiResponse = new ApiResponse<>();
@@ -49,9 +50,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseEntity.status(httpCode.getHTTP_CODE()).body(apiResponse);
 	}
 
-	@ExceptionHandler(AppException.class)
+	@ExceptionHandler(value = AppException.class)
 	ResponseEntity<ApiResponse<?>> handlingAppException(AppException exception){
 		HttpCode httpCode = exception.getHttpCode();
+		ApiResponse<?> apiResponse = new ApiResponse<>();
+		apiResponse.setCode(httpCode.getCODE());
+		apiResponse.setMessage(httpCode.getMESSAGE());
+		return ResponseEntity.status(httpCode.getHTTP_CODE()).body(apiResponse);
+	}
+
+	@ExceptionHandler(value = AccessDeniedException.class)
+	ResponseEntity<ApiResponse<?>> handlingAccessDeniedException(AccessDeniedException exception){
+		HttpCode httpCode = HttpCode.UNAUTHORIZED;
 		ApiResponse<?> apiResponse = new ApiResponse<>();
 		apiResponse.setCode(httpCode.getCODE());
 		apiResponse.setMessage(httpCode.getMESSAGE());

@@ -1,7 +1,9 @@
 package iuh.fit.se.configs;
 
 import iuh.fit.se.entities.enums.UserRole;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -45,12 +47,11 @@ public class SecurityConfig {
             request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .anyRequest().authenticated();
-        });
-
-        httpSecurity.oauth2ResourceServer(oauth2 -> {
+        }).oauth2ResourceServer(oauth2 -> {
             oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
                             .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                    .authenticationEntryPoint(new JwtAuthenticationEntrypoint());
+                    .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler());
         });
         return httpSecurity.build();
     }

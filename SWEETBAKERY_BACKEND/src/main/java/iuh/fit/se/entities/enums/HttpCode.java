@@ -15,6 +15,7 @@ public enum HttpCode {
     OK(200, "Successfully!", HttpStatus.OK),
     CREATED(201, "Created!", HttpStatus.CREATED),
     UNAUTHENTICATED(401, "Unauthenticated!", HttpStatus.UNAUTHORIZED),
+    UNAUTHORIZED(403, "You do not have any permissions!", HttpStatus.FORBIDDEN),
     NOT_FOUND(404, "Not found!", HttpStatus.NOT_FOUND),
     USERNAME_EXISTED(409, "Username existed!", HttpStatus.CONFLICT),
     EMAIL_EXISTED(409, "Email existed!", HttpStatus.CONFLICT);
