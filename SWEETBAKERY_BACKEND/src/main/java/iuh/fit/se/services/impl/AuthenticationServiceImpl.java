@@ -13,12 +13,15 @@ import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.entities.enums.UserRole;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.AccountMapper;
 import iuh.fit.se.mapper.UserMapper;
 import iuh.fit.se.repositories.AccountCredentialRepository;
+import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.AuthenticationService;
 import lombok.AccessLevel;
@@ -28,6 +31,7 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -35,6 +39,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * @author : user664dntp
@@ -50,6 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     AccountCredentialRepository accountCredentialRepository;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
     @NonFinal
     @Value("${jwt.secret-key}")
@@ -62,6 +68,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new AppException(HttpCode.USERNAME_EXISTED);
 
         User user = userMapper.toUser(request);
+        Set<Role> roles = new HashSet<>();
+        Role customerRole = roleRepository.findById(UserRole.CUSTOMER.name())
+                .orElseThrow(()-> new NullPointerException("Customer role not found!"));
+        roles.add(customerRole);
+        user.setRoles(roles);
         userRepository.save(user);
 
         AccountCredential accountCredentialUsedUsername= accountMapper.toAccountUsedUsername(request);
@@ -129,6 +140,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issuer("user664dntp.dev")
                 .issueTime(new Date())
                 .expirationTime(Date.from(Instant.now().plus(500, ChronoUnit.SECONDS)))
+                .claim("scope", buildScope(user))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -141,6 +153,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (JOSEException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private String buildScope(User user){
+        StringJoiner roles = new StringJoiner(" ");
+        if(!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(role -> roles.add(role.getName()));
+        return roles.toString();
     }
 }
