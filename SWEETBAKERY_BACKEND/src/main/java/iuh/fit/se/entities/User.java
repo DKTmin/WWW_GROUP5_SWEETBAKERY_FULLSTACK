@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 /**
  * @author : user664dntp
  * @mailto : phatdang19052004@gmail.com
@@ -27,4 +29,7 @@ public class User {
     String email;
     String phoneNumber;
     String address;
+
+    @ManyToMany
+    Set<Role> roles;
 }

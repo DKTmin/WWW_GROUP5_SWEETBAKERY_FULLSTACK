@@ -1,5 +1,6 @@
 package iuh.fit.se.configs;
 
+import iuh.fit.se.entities.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,8 @@ public class SecurityConfig {
 
     private final String[] ADMIN_ENDPOINT = {
             "/auth-management/api/v1/auth/*",
-            "/pastry-management/api/v1/pastries/*"
+            "/pastry-management/api/v1/pastries/*",
+            "/user-management/api/v1/users"
     };
 
     @Bean
@@ -41,7 +43,7 @@ public class SecurityConfig {
 
         httpSecurity.authorizeHttpRequests(request -> {
             request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
-                    .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .anyRequest().authenticated();
         });
 

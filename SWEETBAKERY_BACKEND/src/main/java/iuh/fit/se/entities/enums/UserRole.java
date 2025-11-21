@@ -1,7 +1,8 @@
 package iuh.fit.se.entities.enums;
 
-public enum Role {
+public enum UserRole {
     ADMIN,
     GUEST,
-    CUSTOMER
+    CUSTOMER,
+    EMPLOYEE
 }
