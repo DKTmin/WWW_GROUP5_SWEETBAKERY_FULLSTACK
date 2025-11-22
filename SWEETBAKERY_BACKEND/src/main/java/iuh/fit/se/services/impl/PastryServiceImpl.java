@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class PastryServiceImpl implements PastryService {
     PastryRepository pastryRepository;
     PastryMapper pastryMapper;
-    ModelMapper modelMapper;
 //    private BanhNgotDTO convertToDTO(Pastry entity) {
 //        return modelMapper.map(entity, BanhNgotDTO.class);
 //    }

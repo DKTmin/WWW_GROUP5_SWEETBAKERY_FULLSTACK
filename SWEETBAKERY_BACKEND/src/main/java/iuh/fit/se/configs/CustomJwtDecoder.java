@@ -1,10 +1,12 @@
 package iuh.fit.se.configs;
 
+import com.nimbusds.jwt.SignedJWT;
 import iuh.fit.se.dtos.request.IntrospectRequest;
 import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.services.AuthenticationService;
+import iuh.fit.se.services.RedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,12 +35,14 @@ public class CustomJwtDecoder implements JwtDecoder {
     String SECRET_KEY;
 
     AuthenticationService authenticationService;
-
+    RedisService redisService;
     @NonFinal
     NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {
+        if(redisService.isTokenInvalidated(token))
+            throw new JwtException("Token invalidated (logged out)!");
         IntrospectRequest introspectRequest = IntrospectRequest.builder()
                 .token(token)
                 .build();

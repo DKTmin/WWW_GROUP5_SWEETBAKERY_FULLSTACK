@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import iuh.fit.se.dtos.request.AuthenticationRequest;
 import iuh.fit.se.dtos.request.IntrospectRequest;
+import iuh.fit.se.dtos.request.LogoutRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.AccountCredentialResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
@@ -24,10 +25,12 @@ import iuh.fit.se.repositories.AccountCredentialRepository;
 import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.AuthenticationService;
+import iuh.fit.se.services.RedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,10 +39,8 @@ import org.springframework.util.CollectionUtils;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author : user664dntp
@@ -49,6 +50,7 @@ import java.util.StringJoiner;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     AccountMapper accountMapper;
     UserMapper userMapper;
@@ -56,6 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
+    RedisService redisService;
 
     @NonFinal
     @Value("${jwt.secret-key}")
@@ -116,20 +119,38 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public IntrospectResponse introspect(IntrospectRequest request) {
         var token = request.getToken();
-        JWSVerifier verifier = null;
+        boolean isValid = true;
         try {
-            verifier = new MACVerifier(SECRET_KEY.getBytes());
-            SignedJWT signedJWT = SignedJWT.parse(token);
+            verifyToken(token);
+        } catch (Exception e) {
+            isValid = false;
+        }
+        return IntrospectResponse.builder()
+                .valid(isValid)
+                .build();
+    }
 
-            Date expirationTokenTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-            var verified = signedJWT.verify(verifier);
+    @Override
+    public void logout(LogoutRequest request) {
+        String token = request.getToken();
+        if(token == null || token.isBlank())
+            throw new IllegalArgumentException("Token invalid!");
+        try {
+            SignedJWT signedJWT = verifyToken(token);
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            long now = System.currentTimeMillis();
+            long expirySeconds = (expiryTime.getTime() - now) / 1000;
 
-            return IntrospectResponse.builder()
-                    .valid(verified && expirationTokenTime.after(new Date()))
-                    .build();
-        } catch (JOSEException | ParseException e) {
+            if(expirySeconds > 0){
+                redisService.setToken(signedJWT.getJWTClaimsSet().getJWTID(), expirySeconds, TimeUnit.SECONDS);
+                log.info("Token đã được thêm vào Redis blacklist, TTL={} giây", expirySeconds);
+            }else{
+                log.info("Token đã hết hạn!");
+            }
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     private String generateToken(User user, AccountCredential accountCredential){
@@ -141,6 +162,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issueTime(new Date())
                 .expirationTime(Date.from(Instant.now().plus(500, ChronoUnit.SECONDS)))
                 .claim("scope", buildScope(user))
+                .jwtID(UUID.randomUUID().toString())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -155,6 +177,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    public SignedJWT verifyToken(String token){
+        try {
+            JWSVerifier verifier = new MACVerifier(SECRET_KEY.getBytes());
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            boolean verified = signedJWT.verify(verifier);
+
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            if(!(verified && expiryTime.after(new Date())))
+                throw new AppException(HttpCode.UNAUTHENTICATED);
+            if(redisService.isTokenInvalidated(signedJWT.getJWTClaimsSet().getJWTID()))
+                throw new AppException(HttpCode.UNAUTHENTICATED);
+            return signedJWT;
+        } catch (JOSEException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private String buildScope(User user){
         StringJoiner roles = new StringJoiner(" ");
         if(!CollectionUtils.isEmpty(user.getRoles()))

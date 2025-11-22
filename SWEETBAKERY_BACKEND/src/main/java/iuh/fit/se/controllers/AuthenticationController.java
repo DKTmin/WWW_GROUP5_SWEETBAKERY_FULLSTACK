@@ -2,6 +2,7 @@ package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.request.AuthenticationRequest;
 import iuh.fit.se.dtos.request.IntrospectRequest;
+import iuh.fit.se.dtos.request.LogoutRequest;
 import iuh.fit.se.dtos.request.RegistrationRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
@@ -48,6 +49,14 @@ public class AuthenticationController {
                 .build();
     }
 
+    @PostMapping("/log-out")
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request){
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .build();
+    }
     @PostMapping("/introspect")
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request){
         return ApiResponse.<IntrospectResponse>builder()
