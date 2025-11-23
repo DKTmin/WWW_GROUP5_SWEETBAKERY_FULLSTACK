@@ -1,5 +1,6 @@
 package iuh.fit.se.dtos.response;
 
+import iuh.fit.se.entities.enums.TokenType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,4 +19,5 @@ import lombok.experimental.FieldDefaults;
 public class AuthenticationResponse {
     boolean authenticated;
     String token;
+    String tokenType;
 }

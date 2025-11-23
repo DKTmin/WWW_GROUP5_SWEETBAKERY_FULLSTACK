@@ -17,6 +17,7 @@ import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.entities.enums.TokenType;
 import iuh.fit.se.entities.enums.UserRole;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.AccountMapper;
@@ -113,6 +114,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .authenticated(true)
                 .token(token)
+                .tokenType(TokenType.BEARER.getTokenType())
                 .build();
     }
 
