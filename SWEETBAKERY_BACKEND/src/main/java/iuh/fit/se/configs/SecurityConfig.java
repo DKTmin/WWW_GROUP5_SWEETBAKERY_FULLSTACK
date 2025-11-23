@@ -1,9 +1,7 @@
 package iuh.fit.se.configs;
 
 import iuh.fit.se.entities.enums.UserRole;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * @author : user664dntp
@@ -41,7 +40,14 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.cors(cors -> cors.configurationSource(request -> {
+            var corConfig = new CorsConfiguration();
+            corConfig.addAllowedOrigin("http://localhost:5173/");
+            corConfig.addAllowedHeader("*");
+            corConfig.addAllowedMethod("*");
+            corConfig.setAllowCredentials(true);
+            return corConfig;
+        })).csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity.authorizeHttpRequests(request -> {
             request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
