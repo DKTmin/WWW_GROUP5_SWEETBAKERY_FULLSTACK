@@ -12,7 +12,7 @@ export default function LoginForm() {
       const res = await authApi.login({ identifier, password });
       console.log(res.data);
       localStorage.setItem("access_token", res.data.data.token);
-      window.location.href = "/tasks";
+      window.location.href = "/pastries";
     } catch (err) {
       console.error(err);
       setError("Sai username hoặc mật khẩu");
