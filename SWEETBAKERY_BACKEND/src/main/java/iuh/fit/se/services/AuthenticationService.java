@@ -1,9 +1,6 @@
 package iuh.fit.se.services;
 
-import iuh.fit.se.dtos.request.AuthenticationRequest;
-import iuh.fit.se.dtos.request.IntrospectRequest;
-import iuh.fit.se.dtos.request.LogoutRequest;
-import iuh.fit.se.dtos.request.RegistrationRequest;
+import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.dtos.response.RegistrationResponse;
@@ -18,4 +15,5 @@ public interface AuthenticationService {
     AuthenticationResponse authenticate(AuthenticationRequest request);
     IntrospectResponse introspect(IntrospectRequest request);
     void logout(LogoutRequest request);
+    AuthenticationResponse refreshToken(RefreshTokenRequest request);
 }

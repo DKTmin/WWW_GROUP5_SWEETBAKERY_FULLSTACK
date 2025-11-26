@@ -5,10 +5,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import iuh.fit.se.dtos.request.AuthenticationRequest;
-import iuh.fit.se.dtos.request.IntrospectRequest;
-import iuh.fit.se.dtos.request.LogoutRequest;
-import iuh.fit.se.dtos.request.RegistrationRequest;
+import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AccountCredentialResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
@@ -109,11 +106,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findById(accountCredential.getUser().getId())
                 .orElseThrow(()-> new NullPointerException("User not found!"));
 
-        String token = generateToken(user, accountCredential);
+        String accessToken = generateAccessToken(user, accountCredential);
+        String refreshToken = generateRefreshToken(user, accountCredential);
 
         return AuthenticationResponse.builder()
                 .authenticated(true)
-                .token(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .tokenType(TokenType.BEARER.getTokenType())
                 .build();
     }
@@ -152,25 +151,60 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    private String generateToken(User user, AccountCredential accountCredential){
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+    @Override
+    public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+        SignedJWT signedJWT = verifyToken(refreshToken);
+        String username;
 
+        try {
+            username = signedJWT.getJWTClaimsSet().getSubject();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        AccountCredential accountCredential = accountCredentialRepository.findByCredential(username);
+        User user = accountCredential.getUser();
+
+        String newAccessToken = generateAccessToken(user, accountCredential);
+
+        return AuthenticationResponse.builder()
+                .authenticated(true)
+                .accessToken(newAccessToken)
+                .refreshToken(refreshToken)
+                .tokenType(TokenType.BEARER.getTokenType())
+                .build();
+    }
+
+    private String generateAccessToken(User user, AccountCredential accountCredential){
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(500, ChronoUnit.SECONDS)))
+                .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.MINUTES)))
                 .claim("scope", buildScope(user))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
+        return signToken(jwtClaimsSet);
+    }
 
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+    private String generateRefreshToken(User user, AccountCredential accountCredential){
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(accountCredential.getCredential())
+                .issuer("user664dntp.dev")
+                .issueTime(new Date())
+                .expirationTime(Date.from(Instant.now().plus(10, ChronoUnit.MINUTES)))
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+        return signToken(claimsSet);
+    }
 
+    private String signToken(JWTClaimsSet claimsSet){
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        Payload payload = new Payload(claimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
-
         try {
             jwsObject.sign(new MACSigner(SECRET_KEY.getBytes()));
             return jwsObject.serialize();

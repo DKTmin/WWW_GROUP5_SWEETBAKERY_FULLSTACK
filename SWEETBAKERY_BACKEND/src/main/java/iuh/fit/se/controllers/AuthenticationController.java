@@ -1,9 +1,6 @@
 package iuh.fit.se.controllers;
 
-import iuh.fit.se.dtos.request.AuthenticationRequest;
-import iuh.fit.se.dtos.request.IntrospectRequest;
-import iuh.fit.se.dtos.request.LogoutRequest;
-import iuh.fit.se.dtos.request.RegistrationRequest;
+import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
@@ -63,6 +60,15 @@ public class AuthenticationController {
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
                 .data(authenticationService.introspect(request))
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshTokenRequest request){
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(authenticationService.refreshToken(request))
                 .build();
     }
 }
