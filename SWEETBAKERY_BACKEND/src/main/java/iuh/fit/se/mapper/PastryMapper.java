@@ -18,8 +18,10 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface PastryMapper {
     @Mapping(target = "id", ignore = true)
-    Pastry toBanhNgot(PastryCreationRequest request);
+    Pastry toPastry(PastryCreationRequest request);
+
     void update(@MappingTarget Pastry pastry, PastryUpdateRequest request);
-    PastryCreationResponse toBanhNgotCreationResponse(Pastry pastry);
-    PastryUpdateResponse toBanhNgotUpdateResponse(Pastry pastry);
+
+    PastryCreationResponse toPastryCreationResponse(Pastry pastry);
+    PastryUpdateResponse toPastryUpdateResponse(Pastry pastry);
 }

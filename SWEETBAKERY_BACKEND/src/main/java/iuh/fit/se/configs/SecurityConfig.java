@@ -15,50 +15,68 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
-/**
- * @author : user664dntp
- * @mailto : phatdang19052004@gmail.com
- * @created : 19/11/2025, Wednesday
- **/
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     CustomJwtDecoder customJwtDecoder;
-    private final String[] PUBLIC_ENDPOINT = {
+
+    // ====== KHAI BÁO HẰNG Ở ĐÂY ======
+    // Các endpoint POST cho auth: public
+    private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
     };
 
-    private final String[] ADMIN_ENDPOINT = {
-            "/auth-management/api/v1/auth/*",
-            "/pastry-management/api/v1/pastries/*",
-            "/user-management/api/v1/users"
+    // Các endpoint GET bánh: public (homepage dùng)
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/pastry-management/api/v1/pastries",
+            "/pastry-management/api/v1/pastries/**",
+            "/pastry-management/api/v1/pastry-categories",
+            "/pastry-management/api/v1/pastry-categories/**"
     };
+
+
+    // Endpoint chỉ ADMIN được phép
+    private static final String[] ADMIN_ENDPOINT = {
+            "/auth-management/api/v1/auth/*",
+            "/user-management/api/v1/users/**"
+    };
+    // ================================
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        // CORS
         httpSecurity.cors(cors -> cors.configurationSource(request -> {
             var corConfig = new CorsConfiguration();
-            corConfig.addAllowedOrigin("http://localhost:5173/");
+            // KHÔNG có dấu "/" ở cuối
+            corConfig.addAllowedOrigin("http://localhost:5173");
             corConfig.addAllowedHeader("*");
             corConfig.addAllowedMethod("*");
             corConfig.setAllowCredentials(true);
             return corConfig;
         })).csrf(AbstractHttpConfigurer::disable);
 
-        httpSecurity.authorizeHttpRequests(request -> {
-            request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
-                    .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
-                    .anyRequest().authenticated();
-        }).oauth2ResourceServer(oauth2 -> {
-            oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
-                            .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                    .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
-                    .accessDeniedHandler(new CustomAccessDeniedHandler());
-        });
+        // PHÂN QUYỀN
+        httpSecurity.authorizeHttpRequests(req -> req
+                // 3 endpoint POST auth: ai cũng gọi được
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                // GET danh sách bánh: ai cũng xem được (homepage)
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                // Các endpoint admin
+                .requestMatchers(ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                // Còn lại thì phải có token
+                .anyRequest().authenticated()
+        ).oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt
+                        .decoder(customJwtDecoder)
+                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
+        );
+
         return httpSecurity.build();
     }
 
