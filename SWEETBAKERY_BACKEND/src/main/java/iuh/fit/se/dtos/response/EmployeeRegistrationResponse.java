@@ -1,6 +1,6 @@
 package iuh.fit.se.dtos.response;
 
-import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.Employee;
 import iuh.fit.se.entities.User;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,7 +19,7 @@ import java.util.Set;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RegistrationResponse {
-    User user;
+public class EmployeeRegistrationResponse {
+    Employee employee;
     Set<AccountCredentialResponse> accountCredentials;
 }
