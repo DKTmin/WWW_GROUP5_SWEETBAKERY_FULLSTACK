@@ -28,6 +28,7 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
+            "/category-management/api/v1/categories/**",
     };
 
     // Các endpoint GET bánh: public (homepage dùng)
@@ -59,6 +60,17 @@ public class SecurityConfig {
             return corConfig;
         })).csrf(AbstractHttpConfigurer::disable);
 
+        httpSecurity.authorizeHttpRequests(request -> {
+            request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
+            .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
+                    .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .anyRequest().authenticated();
+        }).oauth2ResourceServer(oauth2 -> {
+            oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
+                            .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                    .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler());
+        });
         // PHÂN QUYỀN
         httpSecurity.authorizeHttpRequests(req -> req
                 // 3 endpoint POST auth: ai cũng gọi được
