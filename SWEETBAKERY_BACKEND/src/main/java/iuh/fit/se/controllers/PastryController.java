@@ -56,11 +56,18 @@ public class PastryController {
     }
 
     @GetMapping
-    public ApiResponse<List<PastryCreationResponse>> getAll(@RequestParam(required = false) String keyword) {
+    public ApiResponse<List<PastryCreationResponse>> getAll(@RequestParam(name = "category", required = false) String category) {
+        List<PastryCreationResponse> data;
+        if (category == null || category.isBlank()) {
+            data = pastryService.findAll();
+        } else {
+            data = pastryService.findByCategory(category);
+        }
+
         return ApiResponse.<List<PastryCreationResponse>>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(pastryService.findAll())
+                .data(data)
                 .build();
     }
 

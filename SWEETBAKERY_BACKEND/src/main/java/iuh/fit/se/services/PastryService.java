@@ -10,6 +10,7 @@ import java.util.List;
 public interface PastryService {
     PastryCreationResponse findById(String id);
     List<PastryCreationResponse> findAll();
+    List<PastryCreationResponse> findByCategory(String categoryId);
 //    Page<BanhNgotDTO> findAllWithPaging(@ParameterObject Pageable pageable);
     PastryCreationResponse save(PastryCreationRequest request);
     PastryUpdateResponse update(String id, PastryUpdateRequest request);
