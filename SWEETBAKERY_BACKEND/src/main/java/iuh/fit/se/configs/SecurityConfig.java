@@ -29,7 +29,6 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/webjars/**"
     };
-
     private final String[] POST_PUBLIC_ENDPOINT = {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
@@ -41,7 +40,7 @@ public class SecurityConfig {
     private final String[] GET_PUBLIC_ENDPOINT = {
             "/user-management/api/v1/users/infor",
             "/pastry-management/api/v1/pastries/**",
-            "/pastry-management/api/v1/pastry-categories/**"
+            "/category-management/api/v1/categories/**",
     };
 
     private final String[] ADMIN_ENDPOINT = {

@@ -67,12 +67,11 @@ public class PastryCategoryController {
     }
 
     @GetMapping
-    public ApiResponse<List<PastryCategoryCreationResponse>> getAll() {
-        return ApiResponse.<List<PastryCategoryCreationResponse>>builder()
+    public ApiResponse<List<PastryCategory>> getAll() {
+        return ApiResponse.<List<PastryCategory>>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
                 .data(categoryService.findAll())
                 .build();
     }
-
 }
