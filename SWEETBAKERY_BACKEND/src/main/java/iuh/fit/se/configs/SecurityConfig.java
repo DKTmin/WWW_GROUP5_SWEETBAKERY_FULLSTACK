@@ -26,23 +26,39 @@ import org.springframework.web.cors.CorsConfiguration;
 @RequiredArgsConstructor
 public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
-    private final String[] PUBLIC_ENDPOINT = {
+
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/api-docs/**",
+            "/swagger-resources/**",
+            "/webjars/**"
+    };
+
+    private final String[] POST_PUBLIC_ENDPOINT = {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
+            "/customer-management/api/v1/customers/register"
+    };
+
+    private final String[] GET_PUBLIC_ENDPOINT = {
+            "/user-management/api/v1/users/infor"
     };
 
     private final String[] ADMIN_ENDPOINT = {
-            "/auth-management/api/v1/auth/*",
-            "/pastry-management/api/v1/pastries/*",
-            "/user-management/api/v1/users"
+            "/auth-management/api/v1/auth/**",
+            "/pastry-management/api/v1/pastries/**",
+            "/user-management/api/v1/users/**",
+            "/employee-management/api/v1/employees/**",
     };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors(cors -> cors.configurationSource(request -> {
             var corConfig = new CorsConfiguration();
-            corConfig.addAllowedOrigin("http://localhost:5173/");
+            corConfig.addAllowedOrigin("http://localhost:5173");
             corConfig.addAllowedHeader("*");
             corConfig.addAllowedMethod("*");
             corConfig.setAllowCredentials(true);
@@ -50,8 +66,10 @@ public class SecurityConfig {
         })).csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity.authorizeHttpRequests(request -> {
-            request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
+            request.requestMatchers(HttpMethod.POST, POST_PUBLIC_ENDPOINT).permitAll()
+                    .requestMatchers(HttpMethod.GET, GET_PUBLIC_ENDPOINT).permitAll()
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(SWAGGER_WHITELIST).permitAll()
                     .anyRequest().authenticated();
         }).oauth2ResourceServer(oauth2 -> {
             oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
