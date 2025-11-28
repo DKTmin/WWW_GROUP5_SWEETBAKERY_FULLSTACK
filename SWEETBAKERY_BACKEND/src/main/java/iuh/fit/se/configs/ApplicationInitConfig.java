@@ -1,11 +1,10 @@
 package iuh.fit.se.configs;
 
 import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.Employee;
 import iuh.fit.se.entities.Role;
-import iuh.fit.se.entities.User;
 import iuh.fit.se.entities.enums.AccountType;
 import iuh.fit.se.entities.enums.UserRole;
-import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.repositories.AccountCredentialRepository;
 import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.repositories.UserRepository;
@@ -47,24 +46,25 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository,
                                         AccountCredentialRepository accountCredentialRepository,
-                                        RoleRepository roleRepository){
+                                        RoleRepository roleRepository) {
         return args -> {
-            if(accountCredentialRepository.findByCredential(adminUserName) == null){
+            if (accountCredentialRepository.findByCredential(adminUserName) == null) {
                 Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
-                if(adminRole == null)
+                if (adminRole == null)
                     throw new NullPointerException("Admin role not found!");
                 Set<Role> roles = new HashSet<>();
                 roles.add(adminRole);
 
-                User user = User.builder()
+                Employee employee = Employee.builder()
                         .roles(roles)
                         .build();
-                userRepository.save(user);
+
+                userRepository.save(employee);
                 AccountCredential accountCredential = AccountCredential.builder()
                         .credential(adminUserName)
                         .password(passwordEncoder.encode(adminPassword))
                         .type(AccountType.USERNAME)
-                        .user(user)
+                        .user(employee)
                         .build();
                 accountCredentialRepository.save(accountCredential);
 
