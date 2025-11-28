@@ -8,13 +8,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PastryUpdateResponse {
-    String id;
-    String name;
-    Double price;
-    String description;
-    String imageUrl;
 
-    String categoryId;
-    String categoryName;
+
+public class PastryCategoryCreationResponse {
+    private  String id;
+    private String tenLoai;
 }

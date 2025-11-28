@@ -15,18 +15,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
-/**
- * @author : user664dntp
- * @mailto : phatdang19052004@gmail.com
- * @created : 19/11/2025, Wednesday
- **/
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    CustomJwtDecoder customJwtDecoder;
 
+    CustomJwtDecoder customJwtDecoder;
     private static final String[] SWAGGER_WHITELIST = {
             "/swagger-ui.html",
             "/swagger-ui/**",
@@ -40,22 +34,26 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
-            "/customer-management/api/v1/customers/register"
+            "/customer-management/api/v1/customers/register",
+            "/category-management/api/v1/categories/**",
     };
 
     private final String[] GET_PUBLIC_ENDPOINT = {
-            "/user-management/api/v1/users/infor"
+            "/user-management/api/v1/users/infor",
+            "/pastry-management/api/v1/pastries/**",
+            "/pastry-management/api/v1/pastry-categories/**"
     };
 
     private final String[] ADMIN_ENDPOINT = {
             "/auth-management/api/v1/auth/**",
             "/pastry-management/api/v1/pastries/**",
             "/user-management/api/v1/users/**",
-            "/employee-management/api/v1/employees/**",
+            "/employee-management/api/v1/employees/**"
     };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        // CORS
         httpSecurity.cors(cors -> cors.configurationSource(request -> {
             var corConfig = new CorsConfiguration();
             corConfig.addAllowedOrigin("http://localhost:5173");
@@ -77,6 +75,7 @@ public class SecurityConfig {
                     .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
                     .accessDeniedHandler(new CustomAccessDeniedHandler());
         });
+
         return httpSecurity.build();
     }
 
