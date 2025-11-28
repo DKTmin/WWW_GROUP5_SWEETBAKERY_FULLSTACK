@@ -13,4 +13,5 @@ import java.util.List;
 public interface UserService {
     List<UserResponse> findAll();
     UserResponse getInfor();
+    boolean delete(String id);
 }
