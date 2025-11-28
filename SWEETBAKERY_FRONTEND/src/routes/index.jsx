@@ -1,17 +1,18 @@
-// routes/index.jsx hoặc AppRoutes.jsx
-
 import { Routes, Route } from "react-router-dom";
-import ProtectedRoute from "../components/common/ProtectedRoute";
 import HomePage from "../features/home/pages/HomePage";
+import CategoryPage from "../features/home/pages/CategoryPage";
 import LoginPage from "../features/auth/pages/LoginPage";
+import ProtectedRoute from "../components/common/ProtectedRoute";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Trang home cho mọi người xem (không cần login) */}
+      {/* Trang home mặc định */}
       <Route path="/" element={<HomePage />} />
 
-      {/* Login không bọc ProtectedRoute */}
+      {/* Trang category riêng */}
+      <Route path="/category/:id" element={<CategoryPage />} />
+
       <Route path="/login" element={<LoginPage />} />
 
       {/* Ví dụ route cần login */}

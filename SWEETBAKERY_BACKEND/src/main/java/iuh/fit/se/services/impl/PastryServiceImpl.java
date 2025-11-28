@@ -83,6 +83,16 @@ public class PastryServiceImpl implements PastryService {
             return false;
         }
     }
+    @Override
+    public List<PastryCreationResponse> findByCategory(String categoryId) {
+        if (categoryId == null || categoryId.isBlank()) {
+            return findAll();
+        }
+        return pastryRepository.findAllByCategory_Id(categoryId)
+                .stream()
+                .map(pastryMapper::toPastryCreationResponse)
+                .collect(Collectors.toList());
+    }
 
 //    @Override
 //    public List<BanhNgotDTO> search(String keyword) {

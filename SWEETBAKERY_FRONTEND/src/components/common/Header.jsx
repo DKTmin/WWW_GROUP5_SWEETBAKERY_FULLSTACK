@@ -73,9 +73,7 @@ export default function Header() {
           >
             <button
               type="button"
-              className={`${navBase} ${
-                openDropdown ? navActive : navInactive
-              } flex items-center gap-1`}
+              className={`${navBase} ${openDropdown ? navActive : navInactive} flex items-center gap-1`}
             >
               <span>Bánh mì &amp; Bánh ngọt</span>
               <span className="text-[10px]">{openDropdown ? "▲" : "▼"}</span>
@@ -85,7 +83,7 @@ export default function Header() {
               )}
             </button>
 
-            {/* Dropdown categories - always rendered but hidden */}
+            {/* Dropdown categories */}
             <div className={`absolute left-1/2 z-40 w-64 -translate-x-1/2 rounded-2xl bg-white py-1 shadow-[0_18px_40px_rgba(0,0,0,0.15)] transition-all duration-200 ${
               openDropdown 
                 ? "pointer-events-auto visible top-full mt-0 opacity-100" 
@@ -101,7 +99,7 @@ export default function Header() {
                 <button
                   key={c.id}
                   onClick={() => {
-                    navigate(`/?category=${c.id}`);
+                    navigate(`/category/${c.id}`);
                     setOpenDropdown(false);
                   }}
                   className="block w-full px-4 py-2 text-left text-sm text-stone-700 transition hover:bg-amber-50"
