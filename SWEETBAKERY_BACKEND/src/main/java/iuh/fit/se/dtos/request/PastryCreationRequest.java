@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
 public class PastryCreationRequest {
-    String tenBanh;
-    Double gia;
-    String moTa;
+    String name;
+    Double price;
+    String description;
 }
