@@ -3,7 +3,6 @@ package iuh.fit.se.services;
 import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
-import iuh.fit.se.dtos.response.RegistrationResponse;
 
 /**
  * @author : user664dntp
@@ -11,7 +10,6 @@ import iuh.fit.se.dtos.response.RegistrationResponse;
  * @created : 19/11/2025, Wednesday
  **/
 public interface AuthenticationService {
-    RegistrationResponse register(RegistrationRequest request);
     AuthenticationResponse authenticate(AuthenticationRequest request);
     IntrospectResponse introspect(IntrospectRequest request);
     void logout(LogoutRequest request);

@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
-public class RegistrationRequest {
+public class EmployeeRegistrationRequest {
     String firstName;
     String lastName;
     String username;

@@ -6,16 +6,12 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import iuh.fit.se.dtos.request.*;
-import iuh.fit.se.dtos.response.AccountCredentialResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
-import iuh.fit.se.dtos.response.RegistrationResponse;
 import iuh.fit.se.entities.AccountCredential;
-import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.entities.enums.TokenType;
-import iuh.fit.se.entities.enums.UserRole;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.AccountMapper;
 import iuh.fit.se.mapper.UserMapper;
@@ -61,41 +57,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @NonFinal
     @Value("${jwt.secret-key}")
     String SECRET_KEY;
-    @Override
-    public RegistrationResponse register(RegistrationRequest request) {
-        if(userRepository.findUserByEmail(request.getEmail()) != null)
-            throw new AppException(HttpCode.EMAIL_EXISTED);
-        if(accountCredentialRepository.findByCredential(request.getUsername()) != null)
-            throw new AppException(HttpCode.USERNAME_EXISTED);
-
-        User user = userMapper.toUser(request);
-        Set<Role> roles = new HashSet<>();
-        Role customerRole = roleRepository.findById(UserRole.CUSTOMER.name())
-                .orElseThrow(()-> new NullPointerException("Customer role not found!"));
-        roles.add(customerRole);
-        user.setRoles(roles);
-        userRepository.save(user);
-
-        AccountCredential accountCredentialUsedUsername= accountMapper.toAccountUsedUsername(request);
-        accountCredentialUsedUsername.setUser(user);
-        accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
-        accountCredentialRepository.save(accountCredentialUsedUsername);
-
-        AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
-        accountCredentialUsedEmail.setUser(user);
-        accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
-        accountCredentialRepository.save(accountCredentialUsedEmail);
-
-        Set<AccountCredentialResponse> accountCredentialResponses = new HashSet<>();
-        accountCredentialResponses.add(accountMapper.toAccountCredentialResponse(accountCredentialUsedUsername));
-        accountCredentialResponses.add(accountMapper.toAccountCredentialResponse(accountCredentialUsedEmail));
-
-        return RegistrationResponse.builder()
-                .user(user)
-                .accountCredentials(accountCredentialResponses)
-                .build();
-    }
-
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(request.getIdentifier());

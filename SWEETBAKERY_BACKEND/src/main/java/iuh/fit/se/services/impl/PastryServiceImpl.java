@@ -34,14 +34,14 @@ public class PastryServiceImpl implements PastryService {
         Pastry pastry = pastryRepository.findById(id).orElse(null);
         if(pastry == null)
             throw new NullPointerException("Banh ngot not found!");
-        return pastryMapper.toBanhNgotCreationResponse(pastry);
+        return pastryMapper.toPastryCreationResponse(pastry);
     }
 
     @Override
     public List<PastryCreationResponse> findAll() {
         return pastryRepository.findAll()
                 .stream()
-                .map(pastryMapper::toBanhNgotCreationResponse)
+                .map(pastryMapper::toPastryCreationResponse)
                 .collect(Collectors.toList());
     }
 
@@ -58,8 +58,8 @@ public class PastryServiceImpl implements PastryService {
     @Transactional
     @Override
     public PastryCreationResponse save(PastryCreationRequest request) {
-        Pastry pastry = pastryMapper.toBanhNgot(request);
-        return pastryMapper.toBanhNgotCreationResponse(pastryRepository.save(pastry));
+        Pastry pastry = pastryMapper.toPastry(request);
+        return pastryMapper.toPastryCreationResponse(pastryRepository.save(pastry));
     }
     @Transactional
     @Override
@@ -68,7 +68,7 @@ public class PastryServiceImpl implements PastryService {
         if(pastry == null)
             throw new NullPointerException("Banh ngot not found!");
         pastryMapper.update(pastry, request);
-        return pastryMapper.toBanhNgotUpdateResponse(pastryRepository.save(pastry));
+        return pastryMapper.toPastryUpdateResponse(pastryRepository.save(pastry));
     }
 
     @Override
@@ -82,6 +82,16 @@ public class PastryServiceImpl implements PastryService {
         }catch (Exception e){
             return false;
         }
+    }
+    @Override
+    public List<PastryCreationResponse> findByCategory(String categoryId) {
+        if (categoryId == null || categoryId.isBlank()) {
+            return findAll();
+        }
+        return pastryRepository.findAllByCategory_Id(categoryId)
+                .stream()
+                .map(pastryMapper::toPastryCreationResponse)
+                .collect(Collectors.toList());
     }
 
 //    @Override

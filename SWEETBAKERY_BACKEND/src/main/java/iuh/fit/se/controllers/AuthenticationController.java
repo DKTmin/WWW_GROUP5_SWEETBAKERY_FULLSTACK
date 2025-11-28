@@ -4,7 +4,7 @@ import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
-import iuh.fit.se.dtos.response.RegistrationResponse;
+import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.AuthenticationService;
 import jakarta.validation.Valid;
@@ -27,15 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     AuthenticationService authenticationService;
-
-    @PostMapping("/register")
-    ApiResponse<RegistrationResponse> register(@Valid @RequestBody RegistrationRequest request){
-        return ApiResponse.<RegistrationResponse>builder()
-                .code(HttpCode.CREATED.getCODE())
-                .message(HttpCode.CREATED.getMESSAGE())
-                .data(authenticationService.register(request))
-                .build();
-    }
 
     @PostMapping("/log-in")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
