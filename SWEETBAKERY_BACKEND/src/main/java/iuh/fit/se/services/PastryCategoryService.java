@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface PastryCategoryService {
     PastryCategoryCreationResponse findById(String id);
-    List<PastryCategoryCreationResponse> findAll();
+    List<PastryCategory> findAll();
     PastryCategoryCreationResponse save(PastryCategoryCreationRequest request);
     PastryCategoryUpdateResponse update(String id, PastryCategoryUpdateRequest request);
     boolean delete(String id);

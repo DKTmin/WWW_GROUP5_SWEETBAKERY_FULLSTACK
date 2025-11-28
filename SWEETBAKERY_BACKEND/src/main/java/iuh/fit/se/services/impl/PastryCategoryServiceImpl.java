@@ -35,11 +35,8 @@ public class PastryCategoryServiceImpl implements PastryCategoryService {
     }
 
     @Override
-    public List<PastryCategoryCreationResponse> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toCategoryCreationResponse)
-                .toList();
+    public List<PastryCategory> findAll() {
+        return repository.findAll();
     }
 
     @Override

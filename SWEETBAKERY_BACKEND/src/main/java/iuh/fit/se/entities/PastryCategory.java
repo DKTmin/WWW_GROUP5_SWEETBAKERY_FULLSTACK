@@ -13,18 +13,14 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "categories")
+@Table(name = "pastry_category")
 public class PastryCategory {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
-    private String id;
-
-    @Column(name = "name")
-    private String name;
+    String id;
+    String name;
 
     @OneToMany(mappedBy = "category")
     @JsonIgnore
-    private List<Pastry> pastries;
+    List<Pastry> pastries;
 }
