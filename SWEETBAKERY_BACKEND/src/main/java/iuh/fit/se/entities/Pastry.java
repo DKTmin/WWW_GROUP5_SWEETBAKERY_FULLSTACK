@@ -14,19 +14,28 @@ import java.util.List;
 @Entity
 @Table(name = "pastries")
 public class Pastry {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
     String id;
-    String tenBanh;
-    Double gia;
-    String moTa;
-    String hinhAnh;
+
+    @Column(name = "name")
+    String name;
+
+    @Column(name = "price")
+    Double price;
+
+    @Column(name = "description")
+    String description;
+
+    @Column(name = "image_url")
+    String imageUrl;
 
     @ManyToOne
-    @JoinColumn(name = "loai_banh_id")
-    private PastryCategory pastryCategory;
+    @JoinColumn(name = "category_id")
+    private PastryCategory category;
 
-    @Column(nullable = true)
     @OneToMany(mappedBy = "pastry")
     private List<OrderDetail> orderDetails;
 }

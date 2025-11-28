@@ -6,6 +6,10 @@ import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.PastryCategoryCreationResponse;
 import iuh.fit.se.dtos.response.PastryCategoryUpdateResponse;
 import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.dtos.response.ApiResponse;
+import iuh.fit.se.entities.PastryCategory;
+import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.repositories.PastryCategoryRepository;
 import iuh.fit.se.services.PastryCategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -70,5 +74,3 @@ public class PastryCategoryController {
                 .data(categoryService.findAll())
                 .build();
     }
-
-}
