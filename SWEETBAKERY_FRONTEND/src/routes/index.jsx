@@ -3,6 +3,8 @@ import HomePage from "../features/home/pages/HomePage";
 import CategoryPage from "../features/home/pages/CategoryPage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+import ProductPage from "../features/home/pages/ProductPage";
+ 
 
 export default function AppRoutes() {
   return (
@@ -14,6 +16,8 @@ export default function AppRoutes() {
       <Route path="/category/:id" element={<CategoryPage />} />
 
       <Route path="/login" element={<LoginPage />} />
+
+      <Route path="/product/:id" element={<ProductPage />} />
 
       {/* Ví dụ route cần login */}
       <Route
