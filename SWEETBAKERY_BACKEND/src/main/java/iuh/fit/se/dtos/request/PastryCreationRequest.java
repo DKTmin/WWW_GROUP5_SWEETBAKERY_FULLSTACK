@@ -20,4 +20,8 @@ public class PastryCreationRequest {
     String name;
     Double price;
     String description;
+
+    //
+    String imageUrl;
+    String categoryId;
 }
