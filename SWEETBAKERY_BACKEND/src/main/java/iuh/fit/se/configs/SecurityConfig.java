@@ -30,6 +30,7 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
+            "/category-management/api/v1/categories/**",
     };
 
     private final String[] ADMIN_ENDPOINT = {
@@ -51,6 +52,7 @@ public class SecurityConfig {
 
         httpSecurity.authorizeHttpRequests(request -> {
             request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
+            .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .anyRequest().authenticated();
         }).oauth2ResourceServer(oauth2 -> {
