@@ -48,7 +48,9 @@ public class UserServiceImpl implements UserService {
             throw new AppException(HttpCode.NOT_FOUND);
         String userId = accountCredential.getUser().getId();
         User user = userRepository.findById(userId).orElse(null);
-        return userMapper.toUserResponse(user);
+        UserResponse userResponse = userMapper.toUserResponse(user);
+        userResponse.setUsername(username);
+        return userResponse;
     }
 
     @Override

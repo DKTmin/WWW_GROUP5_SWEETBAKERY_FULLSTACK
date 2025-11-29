@@ -57,6 +57,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @NonFinal
     @Value("${jwt.secret-key}")
     String SECRET_KEY;
+
+    @NonFinal
+    @Value("${jwt.access-token-time}")
+    long ACCESS_TOKEN_TIME;
+
+    @NonFinal
+    @Value("${jwt.refresh-token-time}")
+    long REFRESH_TOKEN_TIME;
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(request.getIdentifier());
@@ -144,7 +152,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.MINUTES)))
+                .expirationTime(Date.from(Instant.now().plus(ACCESS_TOKEN_TIME, ChronoUnit.MINUTES)))
                 .claim("scope", buildScope(user))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
@@ -156,7 +164,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(10, ChronoUnit.MINUTES)))
+                .expirationTime(Date.from(Instant.now().plus(REFRESH_TOKEN_TIME, ChronoUnit.MINUTES)))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
         return signToken(claimsSet);
