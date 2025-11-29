@@ -3,7 +3,7 @@
 // src/components/common/Header.jsx
 import { useEffect, useState } from "react"
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom"
-import categoryApi from "../../features/home/api/categoryApi"
+import categoryApi from "../../features/home/apis/categoryApi"
 import logoImg from "../../assets/logo/logo.jpg"
 
 // --- ICONS ---

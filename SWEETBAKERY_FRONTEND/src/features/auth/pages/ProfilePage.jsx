@@ -3,7 +3,7 @@
 // src/features/auth/pages/ProfilePage.jsx
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import authApi from "../api/authApi"
+import authApi from "../apis/authApi"
 
 // --- ICONS ---
 const UserCircleIcon = ({ className }) => (
@@ -283,12 +283,14 @@ export default function ProfilePage() {
             {/* Tab: Thông tin tài khoản */}
             {activeTab === "info" && (
               <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+                
                 <div className="border-b border-stone-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4">
                   <h3 className="text-lg font-bold text-stone-800">Thông tin tài khoản</h3>
                   <p className="text-sm text-stone-500">Thông tin cá nhân của bạn</p>
                 </div>
 
                 <div className="p-6">
+                    
                   <div className="grid gap-6 md:grid-cols-2">
                     {/* Full Name */}
                     <div className="rounded-xl bg-stone-50 p-4">

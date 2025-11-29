@@ -59,6 +59,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(()-> new NullPointerException("Customer role not found!"));
         roles.add(customerRole);
         customer.setRoles(roles);
+        customer.setLoyaltyPoints(0);
         customerRepository.save(customer);
 
         AccountCredential accountCredentialUsedUsername= accountMapper.toAccountUsedUsername(request);

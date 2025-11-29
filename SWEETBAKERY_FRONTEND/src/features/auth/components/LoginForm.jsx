@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import authApi from "../api/authApi"
+import authApi from "../apis/authApi"
 import logoImg from "../../../assets/logo/logo.jpg"
 
 // --- ICONS ---
