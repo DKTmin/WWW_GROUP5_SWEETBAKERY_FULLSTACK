@@ -1,8 +1,3 @@
-import { Routes, Route } from "react-router-dom";
-import HomePage from "../features/home/pages/HomePage";
-import CategoryPage from "../features/home/pages/CategoryPage";
-import LoginPage from "../features/auth/pages/LoginPage";
-import ProtectedRoute from "../components/common/ProtectedRoute";
 import ContactPage from "../features/home/pages/ContactPage"
 import { Routes, Route } from "react-router-dom"
 import HomePage from "../features/home/pages/HomePage"
