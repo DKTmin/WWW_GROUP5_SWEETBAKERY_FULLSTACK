@@ -55,6 +55,12 @@ const CartIcon = ({ className }) => (
     />
   </svg>
 )
+const OrdersIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18l-1.5 11.25a2.25 2.25 0 0 1-2.246 1.995H6.746A2.25 2.25 0 0 1 4.5 18.25L3 7z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16 3.5a4 4 0 0 0-8 0" />
+  </svg>
+)
 const PhoneIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
     <path
@@ -77,6 +83,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [cartCount, setCartCount] = useState(0)
+  const [showCartToast, setShowCartToast] = useState(false)
 
   useEffect(() => {
     const checkAuth = () => {
@@ -100,10 +107,22 @@ export default function Header() {
     }
     updateCartCount()
     window.addEventListener("storage", updateCartCount)
+    // also listen to custom same-tab events when we directly mutate localStorage
+    window.addEventListener("cart_update", updateCartCount)
+    // show toast when an item is added to cart (global)
+    const onCartAdded = () => {
+      try {
+        setShowCartToast(true)
+        setTimeout(() => setShowCartToast(false), 3000)
+      } catch (e) { }
+    }
+    window.addEventListener('cart_item_added', onCartAdded)
 
     return () => {
       window.removeEventListener("storage", checkAuth)
       window.removeEventListener("storage", updateCartCount)
+      window.removeEventListener("cart_update", updateCartCount)
+      window.removeEventListener('cart_item_added', onCartAdded)
     }
   }, [])
 
@@ -171,6 +190,15 @@ export default function Header() {
               <div className="text-[10px] tracking-[0.3em] font-bold text-amber-700 uppercase">Premium Taste</div>
             </div>
           </Link>
+
+          {/* Global Toast for cart add (same style as ProductPage) */}
+          <div className={`fixed right-5 top-24 z-50 flex items-center gap-3 rounded-lg bg-green-50 px-4 py-3 text-green-800 shadow-xl transition-all duration-300 ${showCartToast ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0 invisible"}`}>
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-200">✓</div>
+            <div>
+              <p className="text-sm font-bold">Thêm thành công!</p>
+              <p className="text-xs">Sản phẩm đã vào giỏ hàng.</p>
+            </div>
+          </div>
 
           {/* NAVIGATION */}
           <nav className="hidden md:flex items-center gap-1">
@@ -250,6 +278,15 @@ export default function Header() {
                 <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white" />
               )}
             </Link>
+
+            {/* Orders Button */}
+            <button
+              onClick={() => navigate('/orders')}
+              className="group relative rounded-full p-2 text-stone-600 hover:bg-amber-100 hover:text-amber-800 transition-colors"
+              title="Đơn hàng"
+            >
+              <OrdersIcon className="h-6 w-6" />
+            </button>
 
             {/* Cart Button */}
             <button

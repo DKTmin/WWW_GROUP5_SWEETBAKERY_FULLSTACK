@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import authApi from "../apis/authApi"
+import cartApi from "../../cart/apis/cartApi"
 import logoImg from "../../../assets/logo/logo.jpg"
 
 // --- ICONS ---
@@ -91,8 +92,74 @@ export default function LoginForm() {
       const res = await authApi.login({ identifier, password })
       console.log(res.data)
       localStorage.setItem("access_token", res.data.data.accessToken)
+
+      // After login, merge server-side cart and localStorage cart (sum quantities)
+      try {
+        // fetch server cart (may be empty)
+        let serverItems = []
+        try {
+          const cartRes = await cartApi.get()
+          serverItems = cartRes?.data?.items || []
+        } catch (e) {
+          console.warn("Could not fetch server cart after login", e)
+          serverItems = []
+        }
+
+        // map server items to local shape
+        const serverMapped = (serverItems || []).map((it) => ({
+          id: it.pastryId,
+          name: it.name,
+          price: it.price || 0,
+          qty: it.qty || 0,
+          size: it.size || "",
+          image: it.imageUrl || "/placeholder.png",
+        }))
+
+        // read local cart
+        let localItems = []
+        try {
+          const localJson = localStorage.getItem("cart") || "[]"
+          const parsed = JSON.parse(localJson)
+          localItems = Array.isArray(parsed) ? parsed : []
+        } catch (e) {
+          localItems = []
+        }
+
+        // merge by pastryId + size, summing quantities
+        const keyOf = (it) => `${it.id}::${it.size || ""}`
+        const map = new Map()
+        serverMapped.forEach((it) => map.set(keyOf(it), { ...it }))
+        localItems.forEach((it) => {
+          const safe = { id: it.id, name: it.name, price: it.price || 0, qty: Number(it.qty) || 0, size: it.size || "", image: it.image || "/placeholder.png" }
+          const k = keyOf(safe)
+          if (map.has(k)) {
+            const ex = map.get(k)
+            ex.qty = (Number(ex.qty) || 0) + (Number(safe.qty) || 0)
+            map.set(k, ex)
+          } else {
+            map.set(k, safe)
+          }
+        })
+
+        const merged = Array.from(map.values())
+
+        // persist merged cart locally and notify UI
+        localStorage.setItem("cart", JSON.stringify(merged))
+        window.dispatchEvent(new CustomEvent("cart_update"))
+
+        // persist merged cart to server
+        try {
+          // replace server cart with merged list so we don't double-add
+          await cartApi.sync(merged, true)
+        } catch (e) {
+          console.warn("Failed to sync merged cart to server", e)
+        }
+      } catch (e) {
+        console.warn("Cart merge failed after login", e)
+      }
+
+      setIsLoggedIn(!!res.data.data.accessToken)
       window.location.href = "/pastries"
-      setIsLoggedIn(!!res.data.data.accessToken);
     } catch (err) {
       console.error(err)
       setError("Sai username hoặc mật khẩu")
