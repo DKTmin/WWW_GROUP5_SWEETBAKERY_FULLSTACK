@@ -76,6 +76,7 @@ export default function Header() {
   const [openDropdown, setOpenDropdown] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
 
   useEffect(() => {
     const checkAuth = () => {
@@ -85,7 +86,25 @@ export default function Header() {
     checkAuth()
     // Listen for storage changes (e.g., login/logout in another tab)
     window.addEventListener("storage", checkAuth)
-    return () => window.removeEventListener("storage", checkAuth)
+
+    // keep cart badge in sync with localStorage changes from other tabs
+    const updateCartCount = () => {
+      try {
+        const cartJson = localStorage.getItem("cart") || "[]"
+        const cart = JSON.parse(cartJson)
+        const total = Array.isArray(cart) ? cart.reduce((s, it) => s + (Number(it.qty) || 0), 0) : 0
+        setCartCount(total)
+      } catch (e) {
+        setCartCount(0)
+      }
+    }
+    updateCartCount()
+    window.addEventListener("storage", updateCartCount)
+
+    return () => {
+      window.removeEventListener("storage", checkAuth)
+      window.removeEventListener("storage", updateCartCount)
+    }
   }, [])
 
   useEffect(() => {
@@ -136,9 +155,8 @@ export default function Header() {
 
       {/* 2. MAIN HEADER */}
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-          isScrolled ? "bg-white/90 backdrop-blur-md shadow-md py-2" : "bg-[#FFF4E0] py-4"
-        }`}
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "bg-white/90 backdrop-blur-md shadow-md py-2" : "bg-[#FFF4E0] py-4"
+          }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6">
           {/* LOGO */}
@@ -176,9 +194,8 @@ export default function Header() {
               </button>
 
               <div
-                className={`absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/5 transition-all duration-200 origin-top ${
-                  openDropdown ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
-                }`}
+                className={`absolute left-1/2 top-full mt-2 w-64 -translate-x-1/2 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/5 transition-all duration-200 origin-top ${openDropdown ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
+                  }`}
               >
                 <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-white"></div>
                 <div className="max-h-64 overflow-y-auto">
@@ -236,12 +253,13 @@ export default function Header() {
 
             {/* Cart Button */}
             <button
+              onClick={() => navigate("/cart")}
               className="group relative rounded-full p-2 text-stone-600 hover:bg-amber-100 hover:text-amber-800 transition-colors"
               title="Giỏ hàng"
             >
               <CartIcon className="h-6 w-6" />
               <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
-                0
+                {cartCount}
               </span>
             </button>
           </div>
