@@ -1,0 +1,554 @@
+INSERT INTO pastry_category (id, name) VALUES
+('cat001', 'Bánh sinh nhật'),
+('cat002', 'Bánh mì'),
+('cat003', 'Bánh tươi'),
+('cat004', 'Bánh ngọt'),
+('cat005', 'Bánh quy khô'),
+('cat006', 'Chocolate'),
+('cat007', 'Bánh miếng nhỏ'),
+('cat008', 'Bánh truyền thống'),
+('cat009', 'Bánh đông lạnh');
+
+-- =========================
+-- CATEGORY cat001 - BÁNH SINH NHẬT
+-- =========================Q
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p001', 'Hawaii mousse', 335000,
+ 'Bánh mousse vị nhiệt đới với lớp kem mịn, vị xoài và dứa hòa quyện, trang trí lát trái cây tươi mang cảm giác ngày hè trên bãi biển.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240218/hawaii_mousse_0b7634f35012441cacaf833c24b4a793_master_vmnczf.png',
+ 'cat001'),
+
+('p002', 'Tiramisu cake', 335000,
+ 'Bánh tiramisu phong cách Ý với lớp kem mascarpone béo ngậy, xen kẽ bánh ladyfinger thấm đẫm cà phê, phủ bột cacao thơm nồng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240276/tiramisu_cake_16a01603c84a4217826a59da6c6f6cfd_master_kztodj.jpg',
+ 'cat001'),
+
+('p003', 'Passion fruit & chocolate cake', 335000,
+ 'Mousse chanh dây chua ngọt nhẹ nhàng kết hợp chocolate đắng dịu, tạo nên hương vị cân bằng, lạ miệng và rất tinh tế.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240297/passion_fruit___chocolate_cake_81a17ce02408407b8ac29d61cd7abd9b_master_hv1vc0.png',
+ 'cat001'),
+
+('p004', 'Black Forest cake', 325000,
+ 'Bánh Black Forest với lớp bông lan chocolate ẩm mềm, xen giữa là kem tươi và cherry, phủ chocolate vụn sang trọng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240310/060b4193-9b9c-45db-9d42-aaca342699ad_eaebe617eb7e4039992a2fccc3457d76_master_jmlop9.jpg',
+ 'cat001'),
+
+('p005', 'Mango mousse', 325000,
+ 'Lớp mousse xoài thơm dịu, ngọt thanh, kết hợp đế bánh mềm nhẹ và sốt xoài tươi phía trên, phù hợp cho những ai thích vị trái cây.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240323/mango_mousse_2025_7f665dc999544e8ab9c7c20d3635b75b_master_itfkng.jpg',
+ 'cat001'),
+
+('p006', 'Seasonal Fruit cake', 325000,
+ 'Bánh kem trái cây theo mùa với nhiều loại quả tươi đầy màu sắc, lớp kem tươi béo nhẹ giúp cân bằng vị ngọt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240375/seasonal_fruit_cake_2e127af76a234fe9b261d154309456ed_master_kgywin.png',
+ 'cat001'),
+
+('p007', 'White cheese and caramel cake', 335000,
+ 'Bánh phô mai trắng mềm mượt, phủ sốt caramel vàng óng, hương thơm bơ sữa quyện cùng vị ngọt béo đầy hấp dẫn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240384/white_cheese_and_caramel_cake_2024_00779bd73b1e4e73b1f987fc1c3d148f_master_ae7ozg.jpg',
+ 'cat001'),
+
+('p008', 'Mango cheese cake', 345000,
+ 'Đế biscuit giòn nhẹ, kết hợp lớp cream cheese béo mịn và sốt xoài tươi, tạo nên một chiếc cheesecake mát lạnh và sang chảnh.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240391/mango_cheese_cake_1a48de49feea4aa79b53b9e992125e4c_master_rwuxxt.jpg',
+ 'cat001'),
+
+('p009', 'Passion fruit mousse', 315000,
+ 'Mousse chanh dây với vị chua thơm đặc trưng, nhẹ nhàng và không gây ngán, thích hợp cho những buổi tiệc trà chiều.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240364/mango_mousse_2025_7f665dc999544e8ab9c7c20d3635b75b_master_beyerk.jpg',
+ 'cat001'),
+
+('p010', 'Yogurt cheese cake', 345000,
+ 'Bánh lạnh kết hợp sữa chua và phô mai, vị chua nhẹ, béo vừa phải, bề mặt phủ sốt trái cây tươi mát.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764240334/banh_sua_chua_pho_mai_47fe700fae3d43e68f11307b48a5e8bf_master_ipb6us.jpg',
+ 'cat001');
+
+
+
+-- =========================
+-- CATEGORY cat002 - BÁNH MÌ
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p013', 'Bánh hamburger 3pcs', 16000,
+ 'Set ba chiếc bánh hamburger mini với vỏ mềm, thơm bơ, thích hợp dùng kèm thịt, rau và sốt tùy thích.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764247076/13_983f4abd084141b6afbaaa0567d88f75_master_g8jcsa.png',
+ 'cat002'),
+
+('p014', 'Bánh mì Hàn Quốc mè đen', 32000,
+ 'Bánh mì mềm xốp với hạt mè đen rang thơm, bên trong nhân ngọt nhẹ, phong cách đường phố Hàn Quốc.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764247102/banh-my-han-quoc-me-den_3055a3c4a8384158be57025db7d40169_master_fzkklj.png',
+ 'cat002'),
+
+('p015', 'Bánh mì baguette', 15000,
+ 'Ổ baguette kiểu Pháp với lớp vỏ giòn rụm, ruột mềm và thơm, rất hợp cho món sandwich hoặc ăn kèm súp.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764247112/baguette_8b1506303c57446cb46c6ad8fc5d9b5a_master_yddazw.jpg',
+ 'cat002'),
+
+('p016', 'Bánh mì Brioche', 20000,
+ 'Brioche bơ sữa với cấu trúc ruột tơi mềm, hương bơ đậm, dùng ăn sáng cùng mứt hoặc sữa là hoàn hảo.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764248371/brioche_1fe61245a8c94e0da7cd5ceb47c7c5a2_master_qegrpg.jpg',
+ 'cat002'),
+
+('p017', 'Bánh mì đen', 15000,
+ 'Bánh mì lúa mạch đen tốt cho sức khỏe, vị thơm nhẹ, ít ngọt, phù hợp với thực đơn eat clean.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764248533/banh-my-den_ac5853a1b23f4ad8814bc7327e26e11d_master_ahdgkl.png',
+ 'cat002'),
+
+('p018', 'Bánh mì gối trắng', 28000,
+ 'Bánh mì sandwich gối trắng mềm, lát vuông đẹp mắt, dễ dùng để làm sandwich, toast hoặc bánh mì nướng bơ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299292/gato-bass-mini__5__445f605e3ce444ffa38e02414ede4a9e_master_mep0sr.png',
+ 'cat002'),
+
+('p019', 'Bánh mì gối đen', 30000,
+ 'Phiên bản sandwich lúa mạch đen, bổ sung nhiều chất xơ, thích hợp cho bữa sáng lành mạnh.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299312/banh-mi-goi-den-1_e5f7881eac4240609dd0fbfe02ddaef9_master_sddzo6.png',
+ 'cat002'),
+
+('p020', 'Bánh mì hoa cúc đầu đỏ', 18000,
+ 'Bánh mì hoa cúc với thớ bánh xé sợi, mùi bơ sữa quyện mật ong, tạo hình bắt mắt cho những buổi tiệc nhẹ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299336/banh-my-hoa-cuc-dau-do_1ea03b557b504af59569d60527c8d5e3_master_kpqtu0.png',
+ 'cat002'),
+
+('p021', 'Bánh mì hoa cúc lá dứa', 18000,
+ 'Phiên bản hoa cúc lá dứa với mùi thơm đặc trưng của lá dứa, vị ngọt nhẹ, màu sắc xanh vàng hấp dẫn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299346/banh-mi-hoa-cuc-la-dua_a99d7ec505e44021ba71e7d2d2179d04_master_pp4bfr.png',
+ 'cat002'),
+
+('p022', 'Bánh mì ngũ cốc', 32000,
+ 'Bánh mì tổng hợp nhiều loại hạt và ngũ cốc, giàu dinh dưỡng, thích hợp cho người ăn kiêng hoặc luyện tập thể thao.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299363/banh-my-ngu-coc_078fd032747947438459fdf6fb073276_master_asbavw.png',
+ 'cat002'),
+
+('p023', 'Bánh mì nhỏ', 3000,
+ 'Những ổ bánh mì mini xinh xắn, tiện mang theo, phù hợp cho tiệc buffet hoặc ăn kèm món chính.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299390/banh-my-nho_6e37f27463984d64b07733cf7c31c1ed_master_h8y17m.jpg',
+ 'cat002'),
+
+('p024', 'Bánh mì Sandwich dài', 6000,
+ 'Ổ bánh mì sandwich thuôn dài, ruột mềm, dễ kết hợp với các loại nhân mặn hoặc ngọt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299400/banh-my-sandwich_3af059202a3e4a2fb31d28bb771fb5b0_master_sw5mcj.jpg',
+ 'cat002');
+
+
+
+-- =========================
+-- CATEGORY cat003 - BÁNH TƯƠI HÀNG NGÀY
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p025', 'Bánh Butter Raisins', 53000,
+ 'Bánh bơ nho mềm ẩm với bơ thơm ngậy, xen lẫn nho khô ngọt dịu, dùng kèm trà nóng rất hợp vị.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299475/b_nh_butter_raisins_f7a5bef06ead4fcdb2db45538c0634e5_master_qnmths.jpg',
+ 'cat003'),
+
+('p026', 'Bánh chuối cake', 26000,
+ 'Bánh chuối nướng thơm lừng, ruột ẩm, vị chuối chín ngọt tự nhiên, phù hợp cho bữa sáng nhanh gọn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299495/banh_cake_chuoi_b37a0d0006044a9ab384157a97d682b0_master_mc68wj.jpg',
+ 'cat003'),
+
+('p027', 'Bánh Croissant', 17000,
+ 'Croissant chuẩn vị Pháp với lớp vỏ nhiều tầng giòn rụm, bên trong mềm xốp, thơm bơ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299515/banh_croissant_48cb95788ca14f08bd311bb0caf5b2b7_master_ljp22c.jpg',
+ 'cat003'),
+
+('p028', 'Bánh Cuốn Ruốc', 22000,
+ 'Bánh cuộn mềm với phần nhân ruốc mặn mà, phủ thêm sốt mayonnaise nhẹ, ăn rất bắt miệng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299530/banh_cuon_1_be2c9ecae17b45989ad96f612527c869_master_gdjcxg.jpg',
+ 'cat003'),
+
+('p029', 'Bánh Delicacy Coconut cake', 52000,
+ 'Bánh dừa mềm xốp với sợi dừa thơm bùi, lớp kem nhẹ nhàng, thích hợp cho người mê hương dừa.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299544/banh-delicacy-coconut-cake_c9c87c108a5849bb916806476b8a940a_master_rwiuuv.png',
+ 'cat003'),
+
+('p030', 'Bánh dứa nho trứng muối', 18000,
+ 'Bánh vuông nhỏ với nhân dứa, nho khô và trứng muối, kết hợp vị chua ngọt mặn rất thú vị.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299555/banh-dua-nho-trung-muoi_07d2ebbe827646eda76a3cb79cc91c3e_master_hytwkk.png',
+ 'cat003'),
+
+('p031', 'Bánh Gateaux de basque', 19000,
+ 'Chiếc bánh gateaux nhỏ với lớp vỏ giòn nhẹ bên ngoài, ruột mềm ẩm, nhân kem trứng béo thơm bên trong.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299565/gateaux_de_basque_8f8849a22d9d4eb0aabd9f8be7cd4ea5_master_v9qhxl.jpg',
+ 'cat003'),
+
+('p032', 'Bánh mì nhân xúc xích', 18000,
+ 'Ổ bánh mì mềm bọc quanh cây xúc xích, phủ sốt cà chua và mayonnaise, phù hợp cho bữa sáng mang đi.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299570/52_ad9e6cc7eaca46179ed3d01f85265d3d_master_bqir8o.png',
+ 'cat003'),
+
+('p033', 'Bánh mì ruốc tươi', 15000,
+ 'Bánh mì mềm phủ đầy ruốc và sốt mayonnaise, vị mặn ngọt hòa quyện rất bắt miệng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299593/banh-my-ruoc_d06bdb081195415aba7bae74659b3038_master_qxzxp4.png',
+ 'cat003'),
+
+('p034', 'Bánh Pain aux chocolate tươi', 17000,
+ 'Bánh mì cuộn nhân chocolate, vỏ ngoài nướng vàng, ruột mềm, nhân chocolate tan chảy.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299602/banh_pain_aux_chocolate_cc4b191927e046acbf4f588077d1ee2e_master_yr55dy.jpg',
+ 'cat003'),
+
+('p035', 'Bánh Pain aux raisins tươi', 17000,
+ 'Bánh cuộn nho với sốt custard thơm béo, xen những hạt nho khô dẻo ngọt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299612/c91f7343936a3a34637b_2fa36cb39abc47bf8f19ee824231b58b_master_b3hlbb.jpg',
+ 'cat003'),
+
+('p036', 'Bánh Patê chaud tươi', 17000,
+ 'Bánh patê chaud nóng hổi với vỏ ngàn lớp giòn rụm, nhân thịt đậm đà.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299617/b_nh_pate_chaud_8c2bb7f269834fc382fa3f058f38393b_master_kuwxhp.jpg',
+ 'cat003');
+
+
+
+-- =========================
+-- CATEGORY cat004 - BÁNH NGỌT
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p037', 'Su kem khoai môn', 15000,
+ 'Vỏ su mềm, nhân kem khoai môn tím mịn, thơm nhẹ, ngọt vừa phải, rất được các bạn nhỏ yêu thích.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299710/su_kem_khoai_m_n_8bf17f841e364a8a8b0ae2b636c74380_master_cdupjl.jpg',
+ 'cat004'),
+
+('p038', 'Bánh Gato cuốn Anh Đào', 16000,
+ 'Bánh cuộn gato mềm với lớp kem trắng xen mứt anh đào chua ngọt, tạo màu hồng đẹp mắt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299723/b_nh_gato_cu_n_anh_d_o_1eea569f5cc341c28b7ed2ad748d4c0c_master_zehcnk.jpg',
+ 'cat004'),
+
+('p039', 'Bánh Madeleine Chocolate', 10000,
+ 'Madeleine bơ nướng thơm, thêm chocolate cho vị ngọt đậm, dùng kèm cà phê là sự kết hợp hoàn hảo.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299733/banh-madeleine-chocolate_d6b8a4a4a1d142939338019774f182db_master_kbmgo2.png',
+ 'cat004'),
+
+('p040', 'Bánh Madeleine', 10000,
+ 'Phiên bản madeleine truyền thống, vỏ ngoài hơi giòn, ruột mềm, mùi bơ và vani lan tỏa.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299743/madeleine-vani_327175c128034aed885e376f621a3fc3_master_eqqw9r.png',
+ 'cat004'),
+
+('p041', 'Bánh cuốn trà xanh', 16000,
+ 'Bánh cuộn gato vị trà xanh với màu xanh nhạt, lớp kem nhẹ, hậu vị trà xanh thanh mát.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299754/banh-cuon-tra-xanh_5a9a2d86fd0f40fb9682f3cf9fb7c130_master_gizxdw.png',
+ 'cat004'),
+
+('p042', 'Bánh Gato cuốn', 14000,
+ 'Bánh cuộn đơn giản với lớp kem vani mềm mịn, phù hợp cho bữa xế nhẹ nhàng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299765/banh-gato-cuon_fddbb627daad431d85cb666bd3ab840c_master_uma5if.png',
+ 'cat004'),
+
+('p043', 'Coconut Mochi', 16000,
+ 'Mochi dẻo phủ dừa sợi, bên trong là nhân kem lạnh hoặc đậu mềm, ngọt dịu và thơm dừa.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299768/coconut_mochi_7ae13e9eb4cc4ff5b5370d5f02a33d9a_master_lgae3v.jpg',
+ 'cat004'),
+
+('p044', 'Su kem cốm', 32000,
+ 'Su kem nhân cốm dẻo thơm, hương vị Hà Nội, kết hợp cùng lớp vỏ su mềm nhẹ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299787/banh_su_kem_dai_vi_com_3_e5a91d7db2a2451f8770a348d6ebbd71_master_rwxxou.jpg',
+ 'cat004'),
+
+('p045', 'Choux Cream dài', 32000,
+ 'Chiếc choux dài với nhân kem tươi béo mịn, phủ đường mỏng bên ngoài cho cảm giác giòn nhẹ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299806/su-kem-dai_6b63bfb1711e450e9214ac1176cb096c_master_kz8r7y.png',
+ 'cat004'),
+
+('p046', 'Choux Cream tròn', 32000,
+ 'Choux tròn nhỏ xinh, nhân kem lạnh mịn mượt, rất phù hợp cho tiệc tea break.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299810/su_kem_tron1_222e84c81db048c5a7e833f3e718c744_master_uzgmxx.jpg',
+ 'cat004'),
+
+('p047', 'Pudding nho', 17000,
+ 'Pudding sữa mềm như tan trong miệng, bên dưới là lớp sốt nho tím ngọt nhẹ, thơm mùi trái cây.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299833/nho_6a176111dc3c458cae5beb0351e1c4b9_master_yrurqt.jpg',
+ 'cat004'),
+
+('p048', 'Pudding matcha', 17000,
+ 'Pudding trà xanh với màu xanh mát, vị trà hơi đắng nhẹ cân bằng với độ béo của sữa.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299845/matcha_f63dfb7a4d9843cbabfa40a5920f2d75_master_jgg77z.jpg',
+ 'cat004');
+
+
+
+-- =========================
+-- CATEGORY cat005 - BÁNH QUY KHÔ
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p049', 'Almond tuile cookies', 60000,
+ 'Bánh quy mỏng giòn với lát hạnh nhân rang vàng, khi ăn tạo tiếng giòn rụm rất thú vị.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299926/almond-tuile-cookies_6308001fc4ff4d85b4216b43c850b036_master_vr60xz.png',
+ 'cat005'),
+
+('p050', 'Langue de chat cookies', 55000,
+ 'Bánh quy lưỡi mèo kiểu Pháp, mỏng nhẹ, vị bơ vani dịu, thích hợp dùng kèm trà nóng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764299934/langdechat_1f129d045dee403aaae99014056081f5_master_tgdxqq.jpg',
+ 'cat005'),
+
+('p051', 'Red velvet cookies', 55000,
+ 'Bánh quy red velvet màu đỏ đặc trưng, bề mặt hơi nứt, bên trong mềm, có hương cacao nhẹ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300063/red-velvet-cookies_26d24ff84c2b4dd992eb034c1673ce7c_master_u0ix0n.png',
+ 'cat005'),
+
+('p052', 'Cigarette cookies', 55000,
+ 'Bánh quy ống mỏng, giòn tan, thường được dùng kèm kem lạnh hoặc cà phê.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300077/cigarette-cookies_ae07d0bc375443cd8dcf01d0aed1fa3f_master_bfrxum.png',
+ 'cat005'),
+
+('p053', 'Coconut Rocher cookies', 35000,
+ 'Những viên bánh quy dừa nướng vàng, bên ngoài giòn, bên trong vẫn giữ được độ ẩm và thơm béo của dừa.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300097/coconut-rocher-cookies_6416d3e261dd4f14852a586ad50c976d_master_eqz8by.png',
+ 'cat005'),
+
+('p054', 'Rainbow cookies', 55000,
+ 'Bánh quy nhiều màu sắc dành cho trẻ em, vị bơ ngọt nhẹ, trang trí đường màu vui mắt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300102/rainbow_cookies11_fc6577b00b0d447a95fccc7ef371e376_master_wpyckl.jpg',
+ 'cat005'),
+
+('p055', 'Sablé raisin cookies', 35000,
+ 'Bánh quy sablé kiểu Pháp với bơ thơm và nho khô, kết cấu giòn nhưng vẫn hơi vụn mềm khi cắn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300114/gato-bass-mini__4__227b19d8a061468ebb34a8df47981d48_master_iicr72.png',
+ 'cat005'),
+
+('p056', 'Dark chocolate cookies', 55000,
+ 'Bánh quy chocolate đen với vị cacao đậm, ít ngọt, phù hợp cho người mê vị đắng nhẹ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300136/dark-chocolate-cookies_9f80d28d7a82493e9d7009ea7283730e_master_xqulzx.png',
+ 'cat005'),
+
+('p057', 'Delicacy coconut cookies', 35000,
+ 'Bánh quy dừa size nhỏ, thơm mùi dừa sấy và bơ, rất hợp để nhâm nhi cùng tách trà.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300151/delicacy-coconut-cookies-2_10bdd87646b34941bcb03177a791602f_master_seopi6.png',
+ 'cat005'),
+
+('p058', 'Palette raisins cookies', 45000,
+ 'Bánh quy tròn dày, xen những hạt nho khô mềm dẻo, tăng độ ngọt tự nhiên.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300174/61_c7fb9d7ead6b48648b2e474df58cf871_master_g4mesb.png',
+ 'cat005'),
+
+('p059', 'Palmier cookies', 45000,
+ 'Bánh tai heo Palmier với lớp bột ngàn lớp cán cùng đường, khi nướng lên giòn xốp và thơm bơ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300229/gato-bass-mini__6__e268079dd4204d5f8c608b2e98d14556_master_p31ssm.png',
+ 'cat005'),
+
+('p060', 'Almond salt cookies', 45000,
+ 'Bánh quy hạnh nhân vị mặn nhẹ, xen chút bùi của hạt, rất thích hợp làm snack buổi chiều.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300240/almond-salt-cookies_50731ce4b3d7444290b1c71a1669a205_master_b8cjnn.png',
+ 'cat005');
+
+
+
+-- =========================
+-- CATEGORY cat006 - CHOCOLATE
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p061', 'Chocolate 1', 16000,
+ 'Viên chocolate sữa cơ bản, vị ngọt béo hài hòa, phù hợp với mọi lứa tuổi.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300297/8_f0bbef2b9218436089507fc03eb619c9_master_ravdqd.png',
+ 'cat006'),
+
+('p062', 'Chocolate 2', 16000,
+ 'Chocolate nhân hạnh nhân giòn bùi, tạo cảm giác thú vị khi nhai.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300309/2_f67bbb1be6b94313ac7f4e9ff5d2ddfe_master_ruloyz.png',
+ 'cat006'),
+
+('p063', 'Chocolate 3', 16000,
+ 'Chocolate đen với hàm lượng cacao cao hơn, ít ngọt, hương thơm đậm.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300328/14_49ffdc18584c4f28b69ebc03899d1b8c_master_rexmet.png',
+ 'cat006'),
+
+('p064', 'Chocolate 4', 16000,
+ 'Chocolate nhân caramel mềm, tan chảy khi cắn vào, rất thích hợp cho người thích vị ngọt đậm.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300342/15_70cc4ab92f274706921319f7dc37fb40_master_q4x5ip.png',
+ 'cat006'),
+
+('p065', 'Chocolate 5', 16000,
+ 'Viên chocolate nhân nho khô, kết hợp vị chua nhẹ và vị ngọt của sô cô la.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300359/3_a49d39f6cbc54486bc312dd94045d0a8_master_qamoxs.png',
+ 'cat006'),
+
+('p066', 'Chocolate 6', 16000,
+ 'Chocolate nhân matcha, hậu vị trà xanh thanh nhẹ cân bằng độ béo của sữa.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300372/12_36f5fc674c7942648239495f74f0fa05_master_ohkmzr.png',
+ 'cat006'),
+
+('p067', 'Chocolate 7', 16000,
+ 'Viên chocolate viên tròn, phủ lớp bột cacao mỏng bên ngoài cho cảm giác sang trọng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300393/1_fee20a50a4e74582a6dba8de3f766b6b_master_rpdhly.png',
+ 'cat006');
+
+
+
+-- =========================
+-- CATEGORY cat007 - BÁNH MIẾNG NHỎ
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p071', 'Green Tea Cake', 37000,
+ 'Miếng bánh trà xanh nhỏ xinh, bông lan mềm kết hợp kem trà xanh béo nhẹ, hậu vị thơm matcha.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300467/green_tea_cake_356be96801694596b8146e5bd24a756c_master_errvyy.jpg',
+ 'cat007'),
+
+('p072', 'Passion Cake', 37000,
+ 'Bánh miếng nhỏ vị chanh dây, lớp mousse chua ngọt, bề mặt phủ thạch passion fruit vàng óng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300487/passion_cake_f385fc57f57046f68a29a8b92c9cfa4a_master_smsfvh.jpg',
+ 'cat007'),
+
+('p073', 'Red Velvet Cake', 42000,
+ 'Red velvet miếng với màu đỏ đặc trưng, xen giữa lớp kem phô mai, thích hợp cho những bữa tiệc sang trọng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300509/6e599c44-f5b7-4974-a5a3-98b5b6ea1f91_7598867cf0724c929bc236c3e68e50ea_master_ueoljo.png',
+ 'cat007'),
+
+('p074', 'Blueberry Cake', 42000,
+ 'Bánh phô mai hoặc bông lan phủ sốt việt quất tím, vị chua nhẹ, màu sắc bắt mắt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300526/f1bc1448-fd23-4603-920f-b5f01788c1d5_9c972190e19d4b198a04e3f7d06da358_master_j8mazr.png',
+ 'cat007'),
+
+('p075', 'Banana Cheese Cake', 37000,
+ 'Bánh phô mai kết hợp chuối chín, hương chuối thơm ngọt hòa cùng vị béo của cream cheese.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300537/banana_cheese_cake_0c963127abab4017a9c145b4d6476055_master_kfpqpi.jpg',
+ 'cat007'),
+
+('p076', 'Petit fours set fruit 10pcs', 62000,
+ 'Set bánh petit fours mini nhân trái cây, mỗi miếng một hương vị khác nhau, thích hợp cho tiệc trà.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300564/18_b78758b15bf24d45a00d51ef2e02c727_master_ofz9ad.png',
+ 'cat007'),
+
+('p077', 'Petit fours set dark chocolate', 62000,
+ 'Set petit fours phủ chocolate đen, kích thước nhỏ gọn, dùng một miếng là đã tràn ngập vị cacao.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300587/9_3da4d6eed35a4fceab86ce61907f0479_master_wkua9b.png',
+ 'cat007'),
+
+('p078', 'Petit fours set green tea', 62000,
+ 'Set bánh miếng nhỏ vị trà xanh, trang trí tinh tế, phù hợp cho những ai yêu thích matcha.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300604/8_b897388f153049d1baeab9c457a682c3_master_ku4anb.png',
+ 'cat007'),
+
+('p079', 'Petit Fours Set Moka', 62000,
+ 'Set bánh mini vị cà phê moka, thơm nồng mùi cà phê, dùng kèm espresso rất hợp.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300619/peptit-moka_80be1b783e0b40e39625797edfc6c4b9_master_pexvxh.png',
+ 'cat007'),
+
+('p080', 'Petit Fours Set Mix', 62000,
+ 'Hộp mix nhiều vị petit fours: trái cây, chocolate, trà xanh và cà phê, phù hợp làm quà tặng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300633/petit-fours-set-mix_ac5b2207b652499f974faaeae1072135_master_c4waoa.png',
+ 'cat007'),
+
+('p081', 'Mango Cake Piece', 37000,
+ 'Miếng bánh xoài với lớp kem vàng tươi, vị xoài ngọt dịu, trang trí gọn gàng dễ dùng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300647/mango_cake_piece_dd6a8950568246888d288524df4055e7_master_n04xxx.jpg',
+ 'cat007'),
+
+('p082', 'Tiramisu Cake Piece', 37000,
+ 'Miếng tiramisu nhỏ, đầy đủ các lớp bánh thấm cà phê và kem mascarpone, rắc thêm bột cacao.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300655/tiramisu_cake_8265d99db2f74e528f5656dd81d9cab3_master_xeq5ix.jpg',
+ 'cat007');
+
+
+
+-- =========================
+-- CATEGORY cat008 - BÁNH TRUYỀN THỐNG
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p083', 'Bánh chả thập cẩm', 25000,
+ 'Bánh chả truyền thống với nhân mỡ đường, vỏ bột nướng vàng giòn, hương thơm đặc trưng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300746/banh-cha-truyen-thong_fe8fcd3ca5704b68a085f111663d4875_master_alpti0.png',
+ 'cat008'),
+
+('p084', 'Bánh khảo đậu xanh', 24000,
+ 'Bánh khảo nhân đậu xanh, kết cấu bột khô nhưng tan nhanh trong miệng, vị ngọt thanh.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300762/banh-khao-truyen-thong_143522068c434ad591319dcd6f26de6f_master_qq3t6t.png',
+ 'cat008'),
+
+('p085', 'Bánh khảo Pandan', 24000,
+ 'Phiên bản bánh khảo vị lá dứa với màu xanh nhạt, hương thơm nhẹ nhàng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300784/banh_khao_pandan_8e68a83940df4735b8219eb316301897_master_sbu4fo.jpg',
+ 'cat008'),
+
+('p086', 'Bánh khảo thập cẩm', 24000,
+ 'Bánh khảo nhân thập cẩm gồm lạc, vừng và mứt nhỏ, thích hợp dùng trong dịp lễ tết.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300898/dscf0231_fae94abed49d447caab63e890837d8b7_large_c4171edd85bf40ae9ae6e4b0445e0c47_master_mfzng4.jpg',
+ 'cat008'),
+
+('p087', 'Bánh sủ dừa', 20000,
+ 'Bánh sủn dừa với lớp vỏ bột bọc quanh nhân dừa sên, khi nướng lên thơm béo và giòn nhẹ.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300924/banh_su_dua_b3f0b0e7c6964d3491f71c690db3d240_master_ikkmip.jpg',
+ 'cat008'),
+
+('p088', 'Bánh trứng nhân', 35000,
+ 'Bánh trứng nướng vàng, nhân mềm, dùng nóng rất thơm và béo.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300940/banh-trung-nhen-2_a5ef230a1e5f4752a32769f7a0553103_master_obxibh.png',
+ 'cat008'),
+
+('p089', 'Bánh vừng vòng truyền thống', 22000,
+ 'Bánh vừng dạng vòng, phủ đầy mè trắng rang, giòn rụm, thích hợp nhâm nhi cùng trà nóng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300951/banh-vung-vong_a38539f57ccf41bb9ff6aee883243699_master_l7clik.png',
+ 'cat008'),
+
+('p090', 'Kẹo lạc', 32000,
+ 'Thanh kẹo lạc truyền thống với đậu phộng rang và đường mạch nha, giòn ngọt, rất quen thuộc với người Việt.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300974/keo-lac_425ca7420fca4a17bc06dede1384a762_master_ja6bst.png',
+ 'cat008'),
+
+('p091', 'Mứt bí lạc', 32000,
+ 'Miếng mứt bí trắng truyền thống, vị ngọt dịu, thường xuất hiện trong khay mứt ngày tết.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764300992/mut-bi-lac_a969225d19e24a4cb8f23b6addc14198_master_dv1fxq.png',
+ 'cat008');
+
+
+
+-- =========================
+-- CATEGORY cat009 - BÁNH ĐÔNG LẠNH
+-- =========================
+INSERT INTO pastries (id, name, price, description, image_url, category_id) VALUES
+('p093', 'Bánh mì que sốt bơ trứng đông lạnh', 14000,
+ 'Bánh mì que đã nướng sơ, phủ sốt bơ trứng, chỉ cần làm nóng lại trong lò là có thể dùng ngay.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301100/banh_my_que_sot_bo_trung_ga_xe_d48dcc49160d405c80d31cd221e40b7a_master_fhkozr.jpg',
+ 'cat009'),
+
+('p094', 'Bánh mì nhỏ đông lạnh', 15000,
+ 'Set bánh mì mini đông lạnh, tiện bảo quản, phù hợp cho các bữa sáng nhanh.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301117/36_6e32768812b249c4ba4fb8e6f02fbbbd_master_nhmhs5.png',
+ 'cat009'),
+
+('p095', 'Bánh croissant đông lạnh', 51000,
+ 'Croissant đông lạnh dạng sống, chỉ cần nướng theo hướng dẫn là có bánh nóng giòn như ngoài tiệm.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301153/banh_croissant_20eabb3ad9b545f9a8eda47a71ab85cb_master_jzureo.jpg',
+ 'cat009'),
+
+('p096', 'Bánh mì Sandwich đông lạnh', 18000,
+ 'Ổ bánh sandwich đã cắt lát, bảo quản đông lạnh, dễ rã đông và sử dụng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301187/banh-my-sandwich_fd17ea4a09284d66870c90708e453134_master_f63uli.png',
+ 'cat009'),
+
+('p097', 'Bánh ốc quế kem đông lạnh', 25000,
+ 'Vỏ ốc quế giòn kết hợp kem lạnh mịn, phù hợp cho những ngày nắng nóng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301209/banh_oc_que_kem_80404fd5a8ca49a0b0a1d8cd652492a5_master_uibmlo.jpg',
+ 'cat009'),
+
+('p098', 'Bánh Paté Chaud đông lạnh', 17000,
+ 'Bánh patê chaud nướng sơ, nhân thịt đã chín, chỉ cần nướng lại để thưởng thức nóng hổi.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301227/b_nh_pate_chaud_859c3ca922a94579ac82f1081914b8c1_master_nyixlq.jpg',
+ 'cat009'),
+
+('p099', 'Bánh Pain aux chocolate đông lạnh', 17000,
+ 'Bánh pain au chocolat dạng đông lạnh, tiện nướng tại nhà, nhân chocolate thơm béo.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301248/banh_pain_aux_chocolate_0c7eaa1a53ad462bacff5ffcff7a2165_master_oegahd.jpg',
+ 'cat009'),
+
+('p100', 'Bánh Pain aux raisins đông lạnh', 17000,
+ 'Bánh cuộn nho đông lạnh, dễ bảo quản, khi nướng lên tỏa mùi bơ và nho rất hấp dẫn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301288/c91f7343936a3a34637b_ebd783175a244c14a024eb88a7e14ad3_master_qtpz90.jpg',
+ 'cat009'),
+
+('p101', 'Croffle Chocolate Đen', 23000,
+ 'Croffle – waffle làm từ bột croissant, nướng giòn, phủ thêm chocolate đen, ăn nóng cực kỳ cuốn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301307/croffle_chocolate_den_0fc695e6cb0a4124b6d68d4470b32ba5_master_hhnlr2.jpg',
+ 'cat009'),
+
+('p102', 'Bánh mì que nấm đông lạnh', 14000,
+ 'Bánh mì que nhân nấm, đã sơ chế, chỉ cần nướng lại là có bữa snack ấm nóng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301328/bmq_nam_e0315fdd2b8b4b508e4c2b9d21d16ba1_master_wstrwu.jpg',
+ 'cat009'),
+
+('p103', 'Bánh mì chuột pate đông lạnh', 11000,
+ 'Ổ bánh mì chuột nhỏ nhân pate, cấp đông để giữ độ tươi, dùng lại nhanh chóng bằng lò nướng.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301355/banh_my_chuot_pate_0bb3a1f8144e40718e500ea2a25e6490_master_scuuv4.jpg',
+ 'cat009'),
+
+('p104', 'Bánh mì que pate đông lạnh', 14000,
+ 'Bánh mì que nhân pate béo thơm, định lượng vừa một phần ăn, tiện lợi cho gia đình bận rộn.',
+ 'https://res.cloudinary.com/dektqvylq/image/upload/v1764301408/banh_my_pate_phomai_cbcb579d3bca45f8a2c2b17b5fd6822d_master_ja9e87.jpg',
+ 'cat009');
+
+
