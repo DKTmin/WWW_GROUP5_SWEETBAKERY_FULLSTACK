@@ -1,10 +1,11 @@
-import { Routes, Route } from "react-router-dom";
-import HomePage from "../features/home/pages/HomePage";
-import CategoryPage from "../features/home/pages/CategoryPage";
-import LoginPage from "../features/auth/pages/LoginPage";
-import ProtectedRoute from "../components/common/ProtectedRoute";
-import ProductPage from "../features/home/pages/ProductPage";
- 
+import { Routes, Route } from "react-router-dom"
+import HomePage from "../features/home/pages/HomePage"
+import CategoryPage from "../features/home/pages/CategoryPage"
+import LoginPage from "../features/auth/pages/LoginPage"
+import RegisterPage from "../features/auth/pages/RegisterPage"
+import ProfilePage from "../features/auth/pages/ProfilePage"
+import ProtectedRoute from "../components/common/ProtectedRoute"
+import ProductPage from "../features/home/pages/ProductPage"
 
 export default function AppRoutes() {
   return (
@@ -17,7 +18,18 @@ export default function AppRoutes() {
 
       <Route path="/login" element={<LoginPage />} />
 
+      <Route path="/register" element={<RegisterPage />} />
+
       <Route path="/product/:id" element={<ProductPage />} />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Ví dụ route cần login */}
       <Route
@@ -29,5 +41,5 @@ export default function AppRoutes() {
         }
       />
     </Routes>
-  );
+  )
 }
