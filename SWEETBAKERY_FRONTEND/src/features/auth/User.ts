@@ -1,4 +1,9 @@
 export default interface User {
-  userId: string;
-  username: string;
+  id:string,
+  firstName:string,
+  lastName:string,
+  confirmPassword:string,
+  email:string,
+  phoneNumber:string,
+  address:string
 }
