@@ -6,6 +6,9 @@ import RegisterPage from "../features/auth/pages/RegisterPage"
 import ProfilePage from "../features/auth/pages/ProfilePage"
 import ProtectedRoute from "../components/common/ProtectedRoute"
 import ProductPage from "../features/home/pages/ProductPage"
+import AdminLoginPage from "../features/admin/pages/AdminLoginPage"
+import AdminOTPPage from "../features/admin/pages/AdminOTPPage"
+import AdminDashboard from "../features/admin/pages/AdminDashboard"
 
 export default function AppRoutes() {
   return (
@@ -40,6 +43,10 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route path="/admin/verify-otp" element={<AdminOTPPage />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
   )
 }
