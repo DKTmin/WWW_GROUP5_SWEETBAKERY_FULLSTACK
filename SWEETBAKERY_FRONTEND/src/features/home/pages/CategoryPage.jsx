@@ -1,8 +1,8 @@
 // src/features/home/pages/CategoryPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import pastryApi from "../api/pastryApi";
-import categoryApi from "../api/categoryApi";
+import pastryApi from "../apis/pastryApi";
+import categoryApi from "../apis/categoryApi";
 import PastryCard from "../components/PastryCard";
 import SidebarFilters from "../components/SidebarFilters";
 import Pagination from "../../../components/common/Pagination";

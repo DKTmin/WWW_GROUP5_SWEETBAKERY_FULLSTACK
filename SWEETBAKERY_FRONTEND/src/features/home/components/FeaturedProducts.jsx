@@ -1,6 +1,6 @@
 // src/features/home/components/FeaturedProducts.jsx
 import { useEffect, useState } from "react";
-import pastryApi from "../api/pastryApi";
+import pastryApi from "../apis/pastryApi";
 import PastryCard from "../components/PastryCard";
 
 export default function FeaturedProducts({ size = 8, categoryId = null }) {

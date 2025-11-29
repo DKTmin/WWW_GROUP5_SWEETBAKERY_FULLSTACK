@@ -1,7 +1,7 @@
 // src/features/home/pages/ProductPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import pastryApi from "../api/pastryApi";
+import pastryApi from "../apis/pastryApi";
 import PastryCard from "../components/PastryCard";
 
 // --- ICONS ---
