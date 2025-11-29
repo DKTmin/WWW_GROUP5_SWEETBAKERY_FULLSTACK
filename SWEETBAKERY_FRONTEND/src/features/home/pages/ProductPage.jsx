@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import pastryApi from "../apis/pastryApi";
 import PastryCard from "../components/PastryCard";
+import cartApi from "../../cart/apis/cartApi"
 
 // --- ICONS ---
 const StarIcon = ({ className }) => (
@@ -36,8 +37,6 @@ export default function ProductPage() {
   // Gallery & Form state
   const [mainImage, setMainImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState(null);
-  const fallbackSizes = ["20 cm", "28 cm"];
 
   useEffect(() => {
     if (!id) return;
@@ -45,8 +44,8 @@ export default function ProductPage() {
       setLoading(true);
       setError("");
       // Reset state khi đổi sản phẩm
-      setQuantity(1); 
-      
+      setQuantity(1);
+
       try {
         const res = await pastryApi.getById(id);
         const data = res.data?.data;
@@ -58,11 +57,7 @@ export default function ProductPage() {
         setPastry(data);
         setMainImage(data.imageUrl || data.image || "/placeholder.png");
 
-        if (data.sizeOptions && data.sizeOptions.length > 0) {
-          setSelectedSize(data.sizeOptions[0]);
-        } else {
-          setSelectedSize(fallbackSizes[0]);
-        }
+        // size selection removed: do not set selectedSize
 
         const categoryId = data.categoryId || (data.category && data.category.id);
         if (categoryId) {
@@ -103,11 +98,11 @@ export default function ProductPage() {
         name: pastry.name || pastry.title,
         price: Number(pastry.price || 0),
         qty: quantity,
-        size: selectedSize,
+        size: "",
         image: pastry.imageUrl || pastry.image || "/placeholder.png",
       };
 
-      const idx = cart.findIndex((c) => c.id === item.id && c.size === item.size);
+      const idx = cart.findIndex((c) => c.id === item.id);
       if (idx >= 0) {
         cart[idx].qty = Number(cart[idx].qty) + Number(item.qty);
       } else {
@@ -115,11 +110,19 @@ export default function ProductPage() {
       }
 
       localStorage.setItem("cart", JSON.stringify(cart));
-      
+      // notify header and other same-tab listeners
+      window.dispatchEvent(new CustomEvent("cart_update"))
+      // if logged in, attempt to sync to backend
+      try {
+        const token = localStorage.getItem("access_token")
+        if (token) cartApi.sync(cart).catch((e) => console.warn("cart sync failed", e))
+      } catch (e) {
+        console.warn("cart sync error", e)
+      }
       // Show toast visual feedback
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-      
+
     } catch (e) {
       console.error("Add to cart failed", e);
       alert("Lỗi khi thêm vào giỏ hàng.");
@@ -141,20 +144,20 @@ export default function ProductPage() {
 
   return (
     <main className="min-h-screen bg-[#FFFBF0] pb-20 pt-8 font-sans text-stone-700">
-      
+
       {/* Toast Notification */}
       <div className={`fixed right-5 top-24 z-50 flex items-center gap-3 rounded-lg bg-green-50 px-4 py-3 text-green-800 shadow-xl transition-all duration-300 ${showToast ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0 invisible"}`}>
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-200"><ShieldCheckIcon className="h-4 w-4"/></div>
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-200"><ShieldCheckIcon className="h-4 w-4" /></div>
         <div>
-           <p className="text-sm font-bold">Thêm thành công!</p>
-           <p className="text-xs">Sản phẩm đã vào giỏ hàng.</p>
+          <p className="text-sm font-bold">Thêm thành công!</p>
+          <p className="text-xs">Sản phẩm đã vào giỏ hàng.</p>
         </div>
       </div>
 
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-sm text-stone-500">
-          <Link to="/" className="hover:text-amber-700">Trang chủ</Link> 
+          <Link to="/" className="hover:text-amber-700">Trang chủ</Link>
           <span>/</span>
           <Link to={`/category/${pastry.categoryId || "all"}`} className="hover:text-amber-700">Sản phẩm</Link>
           <span>/</span>
@@ -163,13 +166,13 @@ export default function ProductPage() {
 
         {/* PRODUCT MAIN SECTION */}
         <div className="grid gap-10 lg:grid-cols-2">
-          
+
           {/* LEFT: GALLERY */}
           <div className="flex flex-col gap-4">
             <div className="group relative aspect-square w-full overflow-hidden rounded-3xl bg-white shadow-sm border border-stone-100">
               <img src={mainImage} alt={pastry.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             </div>
-            
+
             {/* Thumbnails */}
             {images.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2">
@@ -189,10 +192,10 @@ export default function ProductPage() {
           {/* RIGHT: INFO & ACTIONS */}
           <div className="flex flex-col">
             <h1 className="text-3xl font-bold font-serif text-amber-900 md:text-4xl">{pastry.name}</h1>
-            
+
             {/* Rating giả lập */}
             <div className="mt-2 flex items-center gap-1">
-              {[1,2,3,4,5].map(i => <StarIcon key={i} className="h-4 w-4 text-amber-400" />)}
+              {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="h-4 w-4 text-amber-400" />)}
               <span className="ml-2 text-xs text-stone-400">(50 đánh giá)</span>
             </div>
 
@@ -200,63 +203,49 @@ export default function ProductPage() {
 
             {/* Description */}
             <div className="mt-6 border-t border-stone-200 pt-6">
-               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Mô tả sản phẩm</h3>
-               <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                 {pastry.description || "Bánh được làm từ nguyên liệu tự nhiên, không chất bảo quản, mang lại hương vị thơm ngon khó cưỡng."}
-               </p>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Mô tả sản phẩm</h3>
+              <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                {pastry.description || "Bánh được làm từ nguyên liệu tự nhiên, không chất bảo quản, mang lại hương vị thơm ngon khó cưỡng."}
+              </p>
             </div>
 
-            {/* Options */}
-            <div className="mt-6">
-              <div className="mb-2 text-sm font-semibold text-stone-800">Kích thước:</div>
-              <div className="flex flex-wrap gap-3">
-                {(pastry.sizeOptions?.length ? pastry.sizeOptions : fallbackSizes).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${selectedSize === s ? "border-amber-700 bg-amber-700 text-white shadow-md" : "border-stone-200 bg-white text-stone-600 hover:border-amber-700 hover:text-amber-700"}`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Size selection removed per request */}
 
             {/* Action Bar */}
             <div className="mt-8 flex flex-col sm:flex-row gap-4 border-t border-stone-200 pt-8">
-               {/* Quantity */}
-               <div className="flex items-center rounded-full border border-stone-300 bg-white px-1">
-                  <button onClick={() => changeQuantity(-1)} className="h-10 w-10 text-xl font-medium text-stone-500 hover:text-amber-800">-</button>
-                  <span className="w-8 text-center text-sm font-bold">{quantity}</span>
-                  <button onClick={() => changeQuantity(1)} className="h-10 w-10 text-xl font-medium text-stone-500 hover:text-amber-800">+</button>
-               </div>
+              {/* Quantity */}
+              <div className="flex items-center rounded-full border border-stone-300 bg-white px-1">
+                <button onClick={() => changeQuantity(-1)} className="h-10 w-10 text-xl font-medium text-stone-500 hover:text-amber-800">-</button>
+                <span className="w-8 text-center text-sm font-bold">{quantity}</span>
+                <button onClick={() => changeQuantity(1)} className="h-10 w-10 text-xl font-medium text-stone-500 hover:text-amber-800">+</button>
+              </div>
 
-               {/* Add Button */}
-               <button 
+              {/* Add Button */}
+              <button
                 onClick={handleAddToCart}
                 className="flex flex-1 items-center justify-center gap-2 rounded-full bg-amber-800 px-8 py-3 font-bold text-white shadow-lg transition-transform hover:bg-amber-900 hover:shadow-xl active:scale-95"
-               >
-                 <ShoppingBagIcon className="h-5 w-5" />
-                 THÊM VÀO GIỎ
-               </button>
+              >
+                <ShoppingBagIcon className="h-5 w-5" />
+                THÊM VÀO GIỎ
+              </button>
             </div>
 
             {/* Trust Badges (Chính sách) */}
             <div className="mt-8 grid grid-cols-2 gap-4 rounded-xl bg-white p-4 shadow-sm border border-stone-100">
-               <div className="flex items-start gap-3">
-                  <TruckIcon className="h-6 w-6 text-amber-600 mt-1" />
-                  <div>
-                    <h4 className="text-sm font-bold text-stone-800">Giao hàng nhanh</h4>
-                    <p className="text-xs text-stone-500">Trong 2h nội thành HCM</p>
-                  </div>
-               </div>
-               <div className="flex items-start gap-3">
-                  <ShieldCheckIcon className="h-6 w-6 text-amber-600 mt-1" />
-                  <div>
-                    <h4 className="text-sm font-bold text-stone-800">Đảm bảo chất lượng</h4>
-                    <p className="text-xs text-stone-500">Nguyên liệu tươi 100%</p>
-                  </div>
-               </div>
+              <div className="flex items-start gap-3">
+                <TruckIcon className="h-6 w-6 text-amber-600 mt-1" />
+                <div>
+                  <h4 className="text-sm font-bold text-stone-800">Giao hàng nhanh</h4>
+                  <p className="text-xs text-stone-500">Trong 2h nội thành HCM</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ShieldCheckIcon className="h-6 w-6 text-amber-600 mt-1" />
+                <div>
+                  <h4 className="text-sm font-bold text-stone-800">Đảm bảo chất lượng</h4>
+                  <p className="text-xs text-stone-500">Nguyên liệu tươi 100%</p>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -268,7 +257,7 @@ export default function ProductPage() {
             <h2 className="text-2xl font-bold font-serif text-amber-900">Có thể bạn sẽ thích</h2>
             <Link to="/category/all" className="text-sm font-semibold text-amber-700 hover:underline">Xem tất cả</Link>
           </div>
-          
+
           {related.length === 0 ? (
             <div className="py-10 text-center text-stone-500 italic">Đang cập nhật sản phẩm liên quan...</div>
           ) : (
@@ -279,7 +268,7 @@ export default function ProductPage() {
             </div>
           )}
         </div>
-        
+
       </div>
     </main>
   );

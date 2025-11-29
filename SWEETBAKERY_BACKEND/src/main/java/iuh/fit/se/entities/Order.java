@@ -23,10 +23,12 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private TrangThaiDH trangThai;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User customer;
 
-//    @ManyToOne
-//    @JoinColumn(name = "khach_hang_id")
-//    private Customer customer;
+    // payment method (e.g., CASH, MOMO)
+    private String paymentMethod;
 
 //    @ManyToOne
 //    @JoinColumn(name = "nhan_vien_id")
