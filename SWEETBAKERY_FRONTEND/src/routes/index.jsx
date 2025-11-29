@@ -7,6 +7,7 @@ import RegisterPage from "../features/auth/pages/RegisterPage"
 import ProfilePage from "../features/auth/pages/ProfilePage"
 import ProtectedRoute from "../components/common/ProtectedRoute"
 import ProductPage from "../features/home/pages/ProductPage"
+import CartPage from "../features/cart/CartPage"
 import AdminLoginPage from "../features/admin/pages/AdminLoginPage"
 import AdminOTPPage from "../features/admin/pages/AdminOTPPage"
 import AdminDashboard from "../features/admin/pages/AdminDashboard"
@@ -27,6 +28,8 @@ export default function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
 
       <Route path="/product/:id" element={<ProductPage />} />
+
+      <Route path="/cart" element={<CartPage />} />
 
       <Route
         path="/profile"
