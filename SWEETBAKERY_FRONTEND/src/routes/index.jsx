@@ -3,6 +3,7 @@ import HomePage from "../features/home/pages/HomePage";
 import CategoryPage from "../features/home/pages/CategoryPage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+import ContactPage from "../features/home/pages/ContactPage"
 
 export default function AppRoutes() {
   return (
@@ -12,6 +13,8 @@ export default function AppRoutes() {
 
       {/* Trang category riêng */}
       <Route path="/category/:id" element={<CategoryPage />} />
+
+      <Route path="/contact" element={<ContactPage />} />
 
       <Route path="/login" element={<LoginPage />} />
 
