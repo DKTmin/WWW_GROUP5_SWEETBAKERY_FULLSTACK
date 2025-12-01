@@ -10,6 +10,7 @@ import iuh.fit.se.services.OrderService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,15 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class OrderServiceImpl implements OrderService {
     OrderRepository orderRepository;
     PastryRepository pastryRepository;
     AccountCredentialRepository accountCredentialRepository;
     CartRepository cartRepository;
+    iuh.fit.se.services.VnPayService vnPayService;
+    iuh.fit.se.repositories.VnPayTransactionRepository vnPayTransactionRepository;
+    com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -44,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setId(UUID.randomUUID().toString());
         order.setNgayDatHang(LocalDateTime.now());
-        order.setTrangThai(TrangThaiDH.HOAN_THANH);
+        order.setTrangThai(TrangThaiDH.PENDING);
         // set customer (link order to user)
         order.setCustomer(account.getUser());
         // set payment method if provided
@@ -103,7 +108,128 @@ public class OrderServiceImpl implements OrderService {
         }
         resp.setItems(out);
         resp.setPaymentMethod(order.getPaymentMethod());
+        resp.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
+
+        // If payment method is VNPAY, generate a VNPay payment URL and return it to
+        // client
+        if (order.getPaymentMethod() != null && "VNPAY".equalsIgnoreCase(order.getPaymentMethod())) {
+            // amount as VND (no decimals)
+            long amount = Math.round(order.getTongTien());
+            String clientIp = null; // we don't have client IP here; VNPay allows omission
+            String orderInfo = "Thanh toan don hang " + order.getId();
+            try {
+                String url = vnPayService.createPaymentUrl(order.getId(), amount, clientIp, orderInfo);
+                resp.setPaymentUrl(url);
+                log.info("VNPay paymentUrl generated for order {}", order.getId());
+                log.debug("VNPay URL: {}", url);
+            } catch (Exception ex) {
+                // log full stacktrace for debugging
+                log.error("Failed to create VNPay url for order {}", order.getId(), ex);
+            }
+        }
         return resp;
+    }
+
+    @Override
+    public OrderResponse placeOrderFromTransaction(String txnRef) {
+        try {
+            VnPayTransaction tx = vnPayTransactionRepository.findById(txnRef).orElse(null);
+            if (tx == null)
+                return null;
+            // parse payload as OrderRequest
+            iuh.fit.se.dtos.request.OrderRequest req = objectMapper.readValue(tx.getPayload(),
+                    iuh.fit.se.dtos.request.OrderRequest.class);
+
+            // create order similarly to placeOrder but using tx.userId
+            // tx.getUserId stores the credential/username (set at transaction creation),
+            // so lookup by credential first
+            AccountCredential account = accountCredentialRepository.findByCredential(tx.getUserId());
+            // if account is null, try to find user
+            iuh.fit.se.entities.User user = null;
+            if (account != null)
+                user = account.getUser();
+            if (user == null) {
+                // try load user by id
+                // assume UserRepository exists via accountRepository's user mapping; skip if
+                // not available
+            }
+
+            Order order = new Order();
+            order.setId(tx.getId());
+            order.setNgayDatHang(java.time.LocalDateTime.now());
+            order.setTrangThai(TrangThaiDH.CONFIRMED);
+            order.setCustomer(user);
+            if (req.getPaymentMethod() != null)
+                order.setPaymentMethod(req.getPaymentMethod());
+
+            List<OrderDetail> details = new ArrayList<>();
+            double total = 0.0;
+            if (req.getItems() != null) {
+                for (iuh.fit.se.dtos.request.OrderItemRequest it : req.getItems()) {
+                    if (it == null || it.getPastryId() == null || it.getQty() == null || it.getQty() <= 0)
+                        continue;
+                    Optional<Pastry> pOpt = pastryRepository.findById(it.getPastryId());
+                    if (!pOpt.isPresent())
+                        continue;
+                    Pastry pastry = pOpt.get();
+                    OrderDetail od = new OrderDetail();
+                    od.setId(java.util.UUID.randomUUID().toString());
+                    od.setPastry(pastry);
+                    od.setSoLuong(it.getQty());
+                    od.setOrder(order);
+                    details.add(od);
+                    total += (pastry.getPrice() * it.getQty());
+                }
+            }
+
+            order.setTongTien(total);
+            order.setOrderDetails(details);
+            orderRepository.save(order);
+
+            // clear user's cart (same behavior as placeOrder)
+            try {
+                if (user != null) {
+                    com.fasterxml.jackson.databind.node.ObjectNode noop = null; // placeholder to keep style
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = objectMapper;
+                    // find and clear cart
+                    iuh.fit.se.entities.Cart cart = cartRepository.findByUser_Id(user.getId()).orElse(null);
+                    if (cart != null) {
+                        cart.getCartItems().clear();
+                        cartRepository.save(cart);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to clear cart after VNPay order: {}", e.getMessage());
+            }
+
+            // mark transaction as PAID
+            tx.setStatus("PAID");
+            vnPayTransactionRepository.save(tx);
+
+            // build response
+            OrderResponse resp = new OrderResponse();
+            resp.setId(order.getId());
+            resp.setNgayDatHang(order.getNgayDatHang());
+            resp.setTongTien(order.getTongTien());
+            resp.setTrangThai(order.getTrangThai().name());
+            List<iuh.fit.se.dtos.response.OrderDetailResponse> out = new ArrayList<>();
+            for (OrderDetail od : details) {
+                iuh.fit.se.dtos.response.OrderDetailResponse rdr = new iuh.fit.se.dtos.response.OrderDetailResponse();
+                rdr.setId(od.getId());
+                rdr.setPastryId(od.getPastry().getId());
+                rdr.setName(od.getPastry().getName());
+                rdr.setQty(od.getSoLuong());
+                rdr.setPrice(od.getPastry().getPrice());
+                rdr.setImage(od.getPastry().getImageUrl());
+                out.add(rdr);
+            }
+            resp.setItems(out);
+            resp.setPaymentMethod(order.getPaymentMethod());
+            resp.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
+            return resp;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -124,6 +250,7 @@ public class OrderServiceImpl implements OrderService {
             r.setTongTien(o.getTongTien());
             r.setPaymentMethod(o.getPaymentMethod());
             r.setTrangThai(o.getTrangThai() == null ? null : o.getTrangThai().name());
+            r.setCustomerAddress(o.getCustomer() != null ? o.getCustomer().getAddress() : null);
             List<OrderDetailResponse> items = new ArrayList<>();
             if (o.getOrderDetails() != null) {
                 for (OrderDetail od : o.getOrderDetails()) {
@@ -155,6 +282,7 @@ public class OrderServiceImpl implements OrderService {
         r.setTongTien(o.getTongTien());
         r.setPaymentMethod(o.getPaymentMethod());
         r.setTrangThai(o.getTrangThai() == null ? null : o.getTrangThai().name());
+        r.setCustomerAddress(o.getCustomer() != null ? o.getCustomer().getAddress() : null);
         List<OrderDetailResponse> items = new ArrayList<>();
         if (o.getOrderDetails() != null) {
             for (OrderDetail od : o.getOrderDetails()) {

@@ -9,6 +9,14 @@ const orderApi = {
             return Promise.reject(e)
         }
     },
+    createVnPayTransaction: (cart, address) => {
+        try {
+            const items = (cart || []).map((it) => ({ pastryId: it.id, qty: it.qty }))
+            return axiosClient.post('/payments/vnpay/create', { items, address, paymentMethod: 'VNPAY' })
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    },
     list: () => axiosClient.get("/orders"),
     get: (id) => axiosClient.get(`/orders/${id}`)
 }

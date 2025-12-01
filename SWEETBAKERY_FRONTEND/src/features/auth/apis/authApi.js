@@ -10,7 +10,10 @@ const authApi = {
       token,
     }),
   getInformation: () =>
-  axiosClient.get("/user-management/api/v1/users/infor")
+    axiosClient.get("/user-management/api/v1/users/infor")
+  ,
+  updateInformation: (data) =>
+    axiosClient.put("/user-management/api/v1/users/infor", data)
 
 };
 

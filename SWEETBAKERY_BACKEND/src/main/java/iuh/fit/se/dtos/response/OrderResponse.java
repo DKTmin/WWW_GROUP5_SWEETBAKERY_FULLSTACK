@@ -17,5 +17,7 @@ public class OrderResponse {
     Double tongTien;
     String paymentMethod;
     String trangThai;
+    String paymentUrl;
+    String customerAddress;
     List<OrderDetailResponse> items;
 }
