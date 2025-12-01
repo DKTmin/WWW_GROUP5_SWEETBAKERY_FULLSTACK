@@ -43,9 +43,10 @@ public class VnPayServiceImpl implements VnPayService {
             params.put("vnp_OrderInfo", orderInfo != null ? orderInfo : ("Payment for order " + orderId));
             params.put("vnp_Locale", "vn");
             params.put("vnp_ReturnUrl", returnUrl);
-            params.put("vnp_CreateDate", LocalDateTime.now().format(DATE_FORMAT));
-            if (clientIp != null)
-                params.put("vnp_IpAddr", clientIp);
+            LocalDateTime now = LocalDateTime.now();
+            params.put("vnp_CreateDate", now.format(DATE_FORMAT));
+            params.put("vnp_ExpireDate", now.plusMinutes(15).format(DATE_FORMAT));
+            params.put("vnp_IpAddr", clientIp != null && !clientIp.isBlank() ? clientIp : "127.0.0.1");
 
             // validate credentials
             if (tmnCode == null || tmnCode.isEmpty()) {
@@ -62,18 +63,19 @@ public class VnPayServiceImpl implements VnPayService {
             StringBuilder hashData = new StringBuilder();
             StringBuilder query = new StringBuilder();
             for (String fieldName : fieldNames) {
-                String value = params.get(fieldName);
-                if (value != null && value.length() > 0) {
-                    // build hash data (plain values, not encoded)
-                    if (hashData.length() > 0)
+                String fieldValue = params.get(fieldName);
+                if (fieldValue != null && fieldValue.length() > 0) {
+                    String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString());
+                    if (hashData.length() > 0) {
                         hashData.append('&');
-                    hashData.append(fieldName).append('=').append(value);
-                    // build query string (url encoded using UTF-8)
-                    if (query.length() > 0)
                         query.append('&');
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()))
+                    }
+                    // hashData: key = plain, value = encoded (giống demo ajaxServlet)
+                    hashData.append(fieldName).append('=').append(encodedValue);
+                    // query: cả key và value đều encoded
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()))
                             .append('=')
-                            .append(URLEncoder.encode(value, StandardCharsets.UTF_8.toString()));
+                            .append(encodedValue);
                 }
             }
 

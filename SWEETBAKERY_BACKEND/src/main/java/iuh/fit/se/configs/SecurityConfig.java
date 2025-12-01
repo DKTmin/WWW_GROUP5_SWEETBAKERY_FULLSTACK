@@ -48,6 +48,9 @@ public class SecurityConfig {
             "/user-management/api/v1/users/information",
             "/pastry-management/api/v1/pastries/**",
             "/category-management/api/v1/categories/**",
+            // Cho phép VNPay redirect về mà không cần JWT
+            "/payments/vnpay/return",
+            "/payments/vnpay/ipn",
     };
 
     private final String[] ADMIN_ENDPOINT = {

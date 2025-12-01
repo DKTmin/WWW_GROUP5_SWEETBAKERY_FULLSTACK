@@ -157,7 +157,8 @@ public class OrderServiceImpl implements OrderService {
             Order order = new Order();
             order.setId(tx.getId());
             order.setNgayDatHang(java.time.LocalDateTime.now());
-            order.setTrangThai(TrangThaiDH.CONFIRMED);
+            // Khi VNPay báo thành công, đơn hàng được tạo ở trạng thái PENDING để chờ xử lý
+            order.setTrangThai(TrangThaiDH.PENDING);
             order.setCustomer(user);
             if (req.getPaymentMethod() != null)
                 order.setPaymentMethod(req.getPaymentMethod());
