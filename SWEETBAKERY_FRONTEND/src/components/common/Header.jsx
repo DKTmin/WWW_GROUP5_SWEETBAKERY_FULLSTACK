@@ -1,10 +1,8 @@
-"use client"
-
 // src/components/common/Header.jsx
 import { useEffect, useState } from "react"
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom"
 import categoryApi from "../../features/home/apis/categoryApi"
-import pastryApi from "../../features/home/apis/pastryApi"   // NEW
+import pastryApi from "../../features/home/apis/pastryApi"
 import logoImg from "../../assets/logo/logo.jpg"
 
 // --- ICONS ---
@@ -24,30 +22,33 @@ const SearchIcon = ({ className }) => (
     />
   </svg>
 )
-// ... UserIcon, CartIcon, OrdersIcon, PhoneIcon y như cũ (giữ nguyên)
 
 const UserIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
   </svg>
 )
+
 const CartIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 5.407c.49 2.1-.924 4.086-3.083 4.086H6.214c-2.16 0-3.573-1.986-3.083-4.086l1.263-5.407a2.25 2.25 0 0 1 2.192-1.738h9.872c.98 0 1.84.628 2.192 1.738ZM6.75 6a5.25 5.25 0 0 1 10.5 0" />
   </svg>
 )
+
 const OrdersIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18l-1.5 11.25a2.25 2.25 0 0 1-2.246 1.995H6.746A2.25 2.25 0 0 1 4.5 18.25L3 7z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M16 3.5a4 4 0 0 0-8 0" />
   </svg>
 )
+
 const PhoneIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
     <path fillRule="evenodd" d="M2 3.5A1.5 1.5 0 0 1 3.5 2h1.148a1.5 1.5 0 0 1 1.465 1.175l.716 3.223a1.5 1.5 0 0 1-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 0 0 6.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 0 1 1.767-1.052l3.223.716A1.5 1.5 0 0 1 18 15.352V16.5a1.5 1.5 0 0 1-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 0 1 2.43 8.326 13.019 13.019 0 0 1 2 5V3.5Z" clipRule="evenodd" />
   </svg>
 )
 
+// --- STYLES ---
 const navBase = "relative px-4 py-2 text-sm font-semibold transition-colors duration-200 rounded-full"
 const navActive = "text-amber-800 bg-amber-100/50"
 const navInactive = "text-stone-600 hover:text-amber-800 hover:bg-white/50"
@@ -74,6 +75,7 @@ export default function Header() {
   const [searchLoading, setSearchLoading] = useState(false)
   const [showSearchDropdown, setShowSearchDropdown] = useState(false)
 
+  // 1. Auth & Cart Listeners
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("access_token")
@@ -112,6 +114,7 @@ export default function Header() {
     }
   }, [])
 
+  // 2. Fetch Categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -124,6 +127,7 @@ export default function Header() {
     fetchCategories()
   }, [])
 
+  // 3. Scroll Handling
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
@@ -135,7 +139,7 @@ export default function Header() {
   const isHome = location.pathname === "/"
   const isContact = location.pathname === "/contact"
 
-  // --- SEARCH DROPDOWN: debounce gọi API ---
+  // 4. Search Logic
   useEffect(() => {
     const q = searchText.trim()
     if (!q) {
@@ -252,12 +256,18 @@ export default function Header() {
               Trang chủ
             </NavLink>
 
+            {/* PRODUCT DROPDOWN */}
             <div
               className="group relative"
               onMouseEnter={() => setOpenDropdown(true)}
               onMouseLeave={() => setOpenDropdown(false)}
             >
               <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate("/category/all")
+                  setOpenDropdown(false)
+                }}
                 className={`${navBase} ${openDropdown ? navActive : navInactive} flex items-center gap-1 cursor-pointer`}
               >
                 <span>Sản phẩm</span>
