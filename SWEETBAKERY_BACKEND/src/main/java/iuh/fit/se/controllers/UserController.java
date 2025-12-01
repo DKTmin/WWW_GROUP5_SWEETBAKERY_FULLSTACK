@@ -54,4 +54,14 @@ public class UserController {
                 .message(HttpCode.OK.getMESSAGE())
                 .build();
     }
+
+    @PutMapping("/infor")
+    ApiResponse<UserResponse> updateInfor(@RequestBody UpdateUserRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(userService.updateInfor(request)).data(userService.updateInfor(request))
+                .build();
+    }
+
 }
