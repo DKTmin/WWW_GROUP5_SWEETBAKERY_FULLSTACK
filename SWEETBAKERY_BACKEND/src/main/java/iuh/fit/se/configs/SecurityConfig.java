@@ -33,6 +33,8 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
+            "/payments/vnpay/create",
+            "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
             "/category-management/api/v1/categories/**",
     };
@@ -80,7 +82,7 @@ public class SecurityConfig {
                     .anyRequest().authenticated();
         }).oauth2ResourceServer(oauth2 -> {
             oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
-                            .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                     .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
                     .accessDeniedHandler(new CustomAccessDeniedHandler());
         });

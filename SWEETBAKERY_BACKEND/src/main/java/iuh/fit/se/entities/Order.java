@@ -22,15 +22,18 @@ public class Order {
     private double tongTien;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "trang_thai", columnDefinition = "ENUM('PENDING','CONFIRMED','COMPLETED','CANCELLED')")
     private TrangThaiDH trangThai;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User customer;
 
-//    @ManyToOne
-//    @JoinColumn(name = "khach_hang_id")
-//    private Customer customer;
+    // payment method (e.g., CASH, MOMO)
+    private String paymentMethod;
 
-//    @ManyToOne
-//    @JoinColumn(name = "nhan_vien_id")
-//    private Employee employee;
+    // @ManyToOne
+    // @JoinColumn(name = "nhan_vien_id")
+    // private Employee employee;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;

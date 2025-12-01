@@ -8,9 +8,13 @@ import ProfilePage from "../features/auth/pages/ProfilePage"
 import ProtectedRoute from "../components/common/ProtectedRoute"
 import ProductPage from "../features/home/pages/ProductPage"
 import CartPage from "../features/cart/CartPage"
+import OrdersPage from "../features/orders/OrdersPage"
+import CheckoutPage from "../features/orders/CheckoutPage"
+import OrderDetailPage from "../features/orders/OrderDetailPage"
 import AdminLoginPage from "../features/admin/pages/AdminLoginPage"
 import AdminOTPPage from "../features/admin/pages/AdminOTPPage"
 import AdminDashboard from "../features/admin/pages/AdminDashboard"
+import SearchResultPage from "../features/home/pages/SearchResultPage"
 
 export default function AppRoutes() {
   return (
@@ -29,7 +33,12 @@ export default function AppRoutes() {
 
       <Route path="/product/:id" element={<ProductPage />} />
 
+      <Route path="/search" element={<SearchResultPage />} />
+
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/orders/:id" element={<OrderDetailPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
 
       <Route
         path="/profile"

@@ -7,6 +7,7 @@ const authApi = {
     axiosClient.post("/authentication-management/api/v2/auth/refresh", {
       token,
     }),
+  updateInformation: (data) => axiosClient.put("/user-management/api/v1/users/infor", data),
   getInformation: () => axiosClient.get("/user-management/api/v1/users/information"),
 };
 

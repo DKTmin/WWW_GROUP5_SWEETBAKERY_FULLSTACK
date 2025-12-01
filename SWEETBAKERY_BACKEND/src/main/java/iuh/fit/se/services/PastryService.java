@@ -12,8 +12,12 @@ public interface PastryService {
     List<PastryCreationResponse> findAll();
     List<PastryCreationResponse> findByCategory(String categoryId);
 //    Page<BanhNgotDTO> findAllWithPaging(@ParameterObject Pageable pageable);
+    List<PastryCreationResponse> search(String keyword);
     PastryCreationResponse save(PastryCreationRequest request);
     PastryUpdateResponse update(String id, PastryUpdateRequest request);
     boolean delete(String id);
 //    List<BanhNgotDTO> search(String keyword);
+
+
+
 }

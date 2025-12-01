@@ -182,6 +182,13 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("access_token")
+    // remove cart data on logout
+    try {
+      localStorage.removeItem("cart")
+      window.dispatchEvent(new CustomEvent("cart_update"))
+    } catch (e) {
+      console.warn("Failed to clear cart on logout", e)
+    }
     navigate("/")
     // Force reload to update Header state
     window.location.reload()
@@ -211,7 +218,6 @@ export default function ProfilePage() {
 
   const menuItems = [
     { id: "info", label: "Thông tin tài khoản", icon: UserCircleIcon },
-    { id: "orders", label: "Đơn hàng của tôi", icon: ShoppingBagIcon },
     { id: "favorites", label: "Sản phẩm yêu thích", icon: HeartIcon },
     { id: "edit", label: "Chỉnh sửa thông tin", icon: PencilSquareIcon },
   ]
@@ -253,11 +259,10 @@ export default function ProfilePage() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex w-full items-center gap-3 px-5 py-4 text-left text-sm font-medium transition-colors ${
-                    activeTab === item.id
-                      ? "bg-amber-50 text-amber-800 border-l-4 border-amber-600"
-                      : "text-stone-600 hover:bg-stone-50 border-l-4 border-transparent"
-                  }`}
+                  className={`flex w-full items-center gap-3 px-5 py-4 text-left text-sm font-medium transition-colors ${activeTab === item.id
+                    ? "bg-amber-50 text-amber-800 border-l-4 border-amber-600"
+                    : "text-stone-600 hover:bg-stone-50 border-l-4 border-transparent"
+                    }`}
                 >
                   <item.icon className="h-5 w-5" />
                   <span className="flex-1">{item.label}</span>
@@ -283,14 +288,14 @@ export default function ProfilePage() {
             {/* Tab: Thông tin tài khoản */}
             {activeTab === "info" && (
               <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-                
+
                 <div className="border-b border-stone-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4">
                   <h3 className="text-lg font-bold text-stone-800">Thông tin tài khoản</h3>
                   <p className="text-sm text-stone-500">Thông tin cá nhân của bạn</p>
                 </div>
 
                 <div className="p-6">
-                    
+
                   <div className="grid gap-6 md:grid-cols-2">
                     {/* Full Name */}
                     <div className="rounded-xl bg-stone-50 p-4">
@@ -348,26 +353,7 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Tab: Đơn hàng */}
-            {activeTab === "orders" && (
-              <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-                <div className="border-b border-stone-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4">
-                  <h3 className="text-lg font-bold text-stone-800">Đơn hàng của tôi</h3>
-                  <p className="text-sm text-stone-500">Lịch sử đơn hàng và trạng thái giao hàng</p>
-                </div>
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <ShoppingBagIcon className="mb-4 h-16 w-16 text-stone-300" />
-                  <h4 className="text-lg font-semibold text-stone-700">Chưa có đơn hàng nào</h4>
-                  <p className="mt-1 text-sm text-stone-500">Hãy bắt đầu mua sắm để có đơn hàng đầu tiên!</p>
-                  <Link
-                    to="/category/all"
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-700 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-amber-800"
-                  >
-                    Khám phá sản phẩm
-                  </Link>
-                </div>
-              </div>
-            )}
+            {/* Orders tab removed - orders accessible via /orders page */}
 
             {/* Tab: Yêu thích */}
             {activeTab === "favorites" && (
