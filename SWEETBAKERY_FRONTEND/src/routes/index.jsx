@@ -13,6 +13,7 @@ import CheckoutPage from "../features/orders/CheckoutPage"
 import AdminLoginPage from "../features/admin/pages/AdminLoginPage"
 import AdminOTPPage from "../features/admin/pages/AdminOTPPage"
 import AdminDashboard from "../features/admin/pages/AdminDashboard"
+import SearchResultPage from "../features/home/pages/SearchResultPage"
 
 export default function AppRoutes() {
   return (
@@ -30,6 +31,8 @@ export default function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
 
       <Route path="/product/:id" element={<ProductPage />} />
+
+      <Route path="/search" element={<SearchResultPage />} />
 
       <Route path="/cart" element={<CartPage />} />
       <Route path="/orders" element={<OrdersPage />} />

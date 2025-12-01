@@ -75,7 +75,7 @@ export default function CartPage() {
 
     if (items.length === 0) {
         return (
-            <main className="min-h-screen bg-gradient-to-b from-[#FFF7ED] to-[#FFFBF0] py-20">
+            <main className="min-h-screen bg-linear-to-b from-[#FFF7ED] to-[#FFFBF0] py-20">
                 <div className="mx-auto max-w-4xl px-6 text-center">
                     <h2 className="mb-4 text-3xl font-extrabold text-amber-800">Giỏ hàng của bạn</h2>
                     <p className="mb-6 text-stone-600">Hiện chưa có sản phẩm trong giỏ hàng.</p>
@@ -92,7 +92,7 @@ export default function CartPage() {
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-[#FFF7ED] to-[#FFFBF0] py-12">
+        <main className="min-h-screen bg-linear-to-b from-[#FFF7ED] to-[#FFFBF0] py-12">
             <div className="mx-auto max-w-6xl px-6">
                 <h2 className="mb-6 text-3xl font-extrabold text-amber-800">Giỏ hàng của bạn</h2>
 
@@ -100,7 +100,7 @@ export default function CartPage() {
                     <div className="md:col-span-2 space-y-4">
                         {items.map((it, idx) => (
                             <div key={idx} className="flex items-start gap-4 rounded-xl bg-white p-4 shadow-md transition transform duration-200 hover:scale-[1.01]">
-                                <img src={it.image} alt={it.name} className="h-28 w-28 flex-shrink-0 rounded-lg object-cover" />
+                                <img src={it.image} alt={it.name} className="h-28 w-28 shrink-0 rounded-lg object-cover" />
                                 <div className="flex-1">
                                     <div className="flex items-start justify-between">
                                         <div>

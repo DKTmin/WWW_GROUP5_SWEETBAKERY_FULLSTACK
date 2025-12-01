@@ -11,4 +11,7 @@ import java.util.List;
 public interface PastryRepository extends JpaRepository<Pastry, String> {
     List<Pastry> findAllByCategory_Id(String categoryId);
     List<Pastry> findAllByCategory_Id(String categoryId, Pageable pageable);
+
+    // Search theo tên hoặc theo mô tả (không phân biệt hoa thường)
+    List<Pastry> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name, String description);
 }
