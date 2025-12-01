@@ -37,8 +37,13 @@ public class SecurityConfig {
             "/category-management/api/v1/categories/**",
     };
 
+    private final String[] POST_CUSTOMER_ENDPOINT = {
+            "/customer-management/api/v1/customers/update/**",
+    };
+
+
     private final String[] GET_PUBLIC_ENDPOINT = {
-            "/user-management/api/v1/users/infor",
+            "/user-management/api/v1/users/information",
             "/pastry-management/api/v1/pastries/**",
             "/category-management/api/v1/categories/**",
     };
@@ -47,7 +52,8 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/**",
             "/pastry-management/api/v1/pastries/**",
             "/user-management/api/v1/users/**",
-            "/employee-management/api/v1/employees/**"
+            "/employee-management/api/v1/employees/**",
+            "/gmail-management/api/v1/gmail/**"
     };
 
     @Bean
@@ -65,6 +71,10 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request -> {
             request.requestMatchers(HttpMethod.POST, POST_PUBLIC_ENDPOINT).permitAll()
                     .requestMatchers(HttpMethod.GET, GET_PUBLIC_ENDPOINT).permitAll()
+                    .requestMatchers(HttpMethod.POST, POST_CUSTOMER_ENDPOINT).hasAnyRole(
+                            UserRole.CUSTOMER.name(),
+                            UserRole.ADMIN.name()
+                    )
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .requestMatchers(SWAGGER_WHITELIST).permitAll()
                     .anyRequest().authenticated();
