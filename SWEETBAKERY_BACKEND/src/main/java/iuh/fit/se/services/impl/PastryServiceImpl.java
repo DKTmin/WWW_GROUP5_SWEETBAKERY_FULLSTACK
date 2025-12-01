@@ -133,4 +133,17 @@ public class PastryServiceImpl implements PastryService {
                 .map(pastryMapper::toPastryCreationResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<PastryCreationResponse> search(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return findAll();
+        }
+        String q = keyword.trim();
+        return pastryRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(q, q)
+                .stream()
+                .map(pastryMapper::toPastryCreationResponse)
+                .collect(Collectors.toList());
+    }
 }
