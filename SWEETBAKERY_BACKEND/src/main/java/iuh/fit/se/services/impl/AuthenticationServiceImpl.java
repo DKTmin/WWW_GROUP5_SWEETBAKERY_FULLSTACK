@@ -71,7 +71,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(accountCredential == null)
              throw new NullPointerException("Account not found!");
         if(!passwordEncoder.matches(request.getPassword(), accountCredential.getPassword()))
-            throw new AppException(HttpCode.UNAUTHENTICATED);
+            throw new AppException(HttpCode.PASSWORD_INCORRECT);
         User user = userRepository.findById(accountCredential.getUser().getId())
                 .orElseThrow(()-> new NullPointerException("User not found!"));
 

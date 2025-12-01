@@ -127,7 +127,16 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <version>3.5.7</version>
         </dependency>
-
+        <!--gui mail-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <!-- thymeleaf để tạo form cho email gửi otp-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
