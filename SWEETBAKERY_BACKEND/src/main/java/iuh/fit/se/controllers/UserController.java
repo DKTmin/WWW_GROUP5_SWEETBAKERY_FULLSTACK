@@ -2,16 +2,12 @@ package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.UserResponse;
-import iuh.fit.se.entities.User;
 import iuh.fit.se.entities.enums.HttpCode;
-import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,12 +30,21 @@ public class UserController {
                 .data(userService.findAll())
                 .build();
     }
-    @GetMapping("/infor")
+    @GetMapping("/information")
     ApiResponse<UserResponse> infor(){
         return ApiResponse.<UserResponse>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(userService.getInfor())
+                .data(userService.getUserInformation())
+                .build();
+    }
+
+    @PostMapping("/delete/{userId}")
+    ApiResponse<?> delete(@PathVariable String userId){
+        userService.delete(userId);
+        return ApiResponse.builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
                 .build();
     }
 }

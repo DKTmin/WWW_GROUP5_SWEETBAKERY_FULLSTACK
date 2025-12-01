@@ -1,6 +1,8 @@
 package iuh.fit.se.entities.enums;
 
+import lombok.AccessLevel;
 import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 
 /**
  * @author : user664dntp
@@ -8,7 +10,14 @@ import lombok.ToString;
  * @created : 19/11/2025, Wednesday
  **/
 @ToString
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum AccountType {
-    USERNAME,
-    EMAIL
+    USERNAME("Username"),
+    EMAIL("Email");
+
+    String enumType;
+
+    AccountType(String enumType) {
+        this.enumType = enumType;
+    }
 }

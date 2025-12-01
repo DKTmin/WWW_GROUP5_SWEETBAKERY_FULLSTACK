@@ -24,6 +24,7 @@ public class AccountCredential {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+    @Enumerated(EnumType.STRING)
     AccountType type;
     String credential;
     String password;
@@ -32,7 +33,7 @@ public class AccountCredential {
     LocalDateTime lastLogin;
 
     @ManyToOne
-            @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id")
     User user;
 
     @PrePersist

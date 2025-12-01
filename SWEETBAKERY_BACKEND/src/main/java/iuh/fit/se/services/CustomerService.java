@@ -1,7 +1,9 @@
 package iuh.fit.se.services;
 
 import iuh.fit.se.dtos.request.CustomerRegistrationRequest;
+import iuh.fit.se.dtos.request.CustomerSeftUpdateRequest;
 import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
+import iuh.fit.se.dtos.response.CustomerSeftUpdateResponse;
 
 /**
  * @author : user664dntp
@@ -10,4 +12,5 @@ import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
  **/
 public interface CustomerService {
     CustomerRegistrationResponse create(CustomerRegistrationRequest request);
+    CustomerSeftUpdateResponse update(String userId, CustomerSeftUpdateRequest request);
 }

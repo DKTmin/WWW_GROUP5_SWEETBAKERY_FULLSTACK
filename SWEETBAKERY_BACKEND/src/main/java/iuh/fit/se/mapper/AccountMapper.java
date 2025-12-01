@@ -19,7 +19,7 @@ public interface AccountMapper {
             @Mapping(target = "createdAt", ignore = true),
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
-            @Mapping(target = "type", constant = "USERNAME"),
+            @Mapping(target = "type", ignore = true),
             @Mapping(target = "credential", source = "username"),
             @Mapping(target = "password", ignore = true)
     })
@@ -31,7 +31,7 @@ public interface AccountMapper {
             @Mapping(target = "createdAt", ignore = true),
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
-            @Mapping(target = "type", constant = "EMAIL"),
+            @Mapping(target = "type", ignore = true),
             @Mapping(target = "credential", source = "email"),
             @Mapping(target = "password", ignore = true)
     })
@@ -42,7 +42,7 @@ public interface AccountMapper {
             @Mapping(target = "createdAt", ignore = true),
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
-            @Mapping(target = "type", constant = "USERNAME"),
+            @Mapping(target = "type", ignore = true),
             @Mapping(target = "credential", source = "username"),
             @Mapping(target = "password", ignore = true)
     })
@@ -54,7 +54,7 @@ public interface AccountMapper {
             @Mapping(target = "createdAt", ignore = true),
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
-            @Mapping(target = "type", constant = "EMAIL"),
+            @Mapping(target = "type", ignore = true),
             @Mapping(target = "credential", source = "email"),
             @Mapping(target = "password", ignore = true)
     })

@@ -41,4 +41,6 @@ public abstract class User {
     )
     Set<Role> roles = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<AccountCredential> accounts = new HashSet<>();
 }
