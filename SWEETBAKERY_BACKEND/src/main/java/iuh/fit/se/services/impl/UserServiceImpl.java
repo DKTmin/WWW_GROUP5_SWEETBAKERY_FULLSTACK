@@ -3,8 +3,10 @@ package iuh.fit.se.services.impl;
 import iuh.fit.se.dtos.response.UserResponse;
 import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.User;
+import iuh.fit.se.entities.enums.AccountType;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.exceptions.AppException;
+import iuh.fit.se.mapper.AccountMapper;
 import iuh.fit.se.mapper.UserMapper;
 import iuh.fit.se.repositories.AccountCredentialRepository;
 import iuh.fit.se.repositories.UserRepository;
@@ -15,8 +17,10 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -28,20 +32,33 @@ import java.util.stream.Collectors;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     AccountCredentialRepository accountCredentialRepository;
     UserMapper userMapper;
+    AccountMapper accountMapper;
 
     @Override
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toUserResponse)
+                .map(userResponse -> {
+                    Set<AccountCredential> accountCredential = accountCredentialRepository.findAllByUserId(userResponse.getId());
+                    userResponse.setAccounts(
+                            accountCredential.stream()
+                                    .map(accountMapper::toAccountCredentialResponse).collect(Collectors.toSet())
+                    );
+                    accountCredential.stream()
+                            .filter(acc -> acc.getType().name().equalsIgnoreCase(AccountType.USERNAME.name()))
+                            .findFirst().ifPresent(usernameAccount -> userResponse.setUsername(usernameAccount.getCredential()));
+                    return userResponse;
+                })
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserResponse getInfor() {
+    public UserResponse getUserInformation() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(username);
@@ -74,7 +91,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean delete(String id) {
-        return false;
+        try {
+            userRepository.deleteById(id);
+            return true;
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
     }
-
 }

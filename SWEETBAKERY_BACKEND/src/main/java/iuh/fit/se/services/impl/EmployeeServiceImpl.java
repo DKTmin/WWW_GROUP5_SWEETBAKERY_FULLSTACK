@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +38,7 @@ import java.util.Set;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
     AccountMapper accountMapper;
     EmployeeMapper employeeMapper;
@@ -70,6 +72,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         accountCredentialUsedEmail.setUser(employee);
         accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialRepository.save(accountCredentialUsedEmail);
+
+        Set<AccountCredential> accountCredentialSet = new HashSet<>();
+        accountCredentialSet.add(accountCredentialUsedUsername);
+        accountCredentialSet.add(accountCredentialUsedEmail);
+        employee.setAccounts(accountCredentialSet);
+        employeeRepository.save(employee);
 
         Set<AccountCredentialResponse> accountCredentialResponses = new HashSet<>();
         accountCredentialResponses.add(accountMapper.toAccountCredentialResponse(accountCredentialUsedUsername));

@@ -8,6 +8,7 @@ import iuh.fit.se.services.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,22 +37,21 @@ public class UserController {
                 .data(userService.findAll())
                 .build();
     }
-
-    @GetMapping("/infor")
-    ApiResponse<UserResponse> infor() {
+    @GetMapping("/information")
+    ApiResponse<UserResponse> infor(){
         return ApiResponse.<UserResponse>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(userService.getInfor())
+                .data(userService.getUserInformation())
                 .build();
     }
 
-    @PutMapping("/infor")
-    ApiResponse<UserResponse> updateInfor(@RequestBody UpdateUserRequest request) {
-        return ApiResponse.<UserResponse>builder()
+    @PostMapping("/delete/{userId}")
+    ApiResponse<?> delete(@PathVariable String userId){
+        userService.delete(userId);
+        return ApiResponse.builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(userService.updateInfor(request))
                 .build();
     }
 }

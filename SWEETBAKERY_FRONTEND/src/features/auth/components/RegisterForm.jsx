@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 // --- ICONS ---
 const UserIcon = ({ className }) => (
@@ -18,7 +18,7 @@ const UserIcon = ({ className }) => (
       d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
     />
   </svg>
-)
+);
 
 const EnvelopeIcon = ({ className }) => (
   <svg
@@ -35,7 +35,7 @@ const EnvelopeIcon = ({ className }) => (
       d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
     />
   </svg>
-)
+);
 
 const LockIcon = ({ className }) => (
   <svg
@@ -52,7 +52,7 @@ const LockIcon = ({ className }) => (
       d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
     />
   </svg>
-)
+);
 
 const PhoneIcon = ({ className }) => (
   <svg
@@ -69,7 +69,7 @@ const PhoneIcon = ({ className }) => (
       d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
     />
   </svg>
-)
+);
 
 const MapPinIcon = ({ className }) => (
   <svg
@@ -87,7 +87,7 @@ const MapPinIcon = ({ className }) => (
       d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
     />
   </svg>
-)
+);
 
 const EyeIcon = ({ className }) => (
   <svg
@@ -105,7 +105,7 @@ const EyeIcon = ({ className }) => (
     />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </svg>
-)
+);
 
 const EyeSlashIcon = ({ className }) => (
   <svg
@@ -122,7 +122,7 @@ const EyeSlashIcon = ({ className }) => (
       d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
     />
   </svg>
-)
+);
 
 const CheckIcon = ({ className }) => (
   <svg
@@ -135,7 +135,7 @@ const CheckIcon = ({ className }) => (
   >
     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
   </svg>
-)
+);
 
 const ArrowLeftIcon = ({ className }) => (
   <svg
@@ -148,7 +148,7 @@ const ArrowLeftIcon = ({ className }) => (
   >
     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
   </svg>
-)
+);
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -160,58 +160,61 @@ export default function RegisterForm() {
     address: "",
     password: "",
     confirmPassword: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [agreeTerms, setAgreeTerms] = useState(false)
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp")
-      return
+      setError("Mật khẩu xác nhận không khớp");
+      return;
     }
 
     if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự")
-      return
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
     }
 
     if (!agreeTerms) {
-      setError("Vui lòng đồng ý với điều khoản sử dụng")
-      return
+      setError("Vui lòng đồng ý với điều khoản sử dụng");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch("http://localhost:8082/customer-management/api/v1/customers/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
+      const response = await fetch(
+        "http://localhost:8082/customer-management/api/v1/customers/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || "Đăng ký thất bại")
+        const data = await response.json();
+        throw new Error(data.message || "Đăng ký thất bại");
       }
 
-      window.location.href = "/login"
+      window.location.href = "/login";
     } catch (err) {
-      console.error(err)
-      setError(err.message || "Đăng ký thất bại. Vui lòng thử lại.")
+      console.error(err);
+      setError(err.message || "Đăng ký thất bại. Vui lòng thử lại.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="w-full max-w-lg">
@@ -267,7 +270,9 @@ export default function RegisterForm() {
 
           {/* Username */}
           <div className="mb-4">
-            <label className="mb-1.5 block text-xs font-semibold text-stone-600">Tên đăng nhập</label>
+            <label className="mb-1.5 block text-xs font-semibold text-stone-600">
+              Tên đăng nhập
+            </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <UserIcon className="h-5 w-5 text-stone-400" />
@@ -305,7 +310,9 @@ export default function RegisterForm() {
 
           {/* Phone */}
           <div className="mb-4">
-            <label className="mb-1.5 block text-xs font-semibold text-stone-600">Số điện thoại</label>
+            <label className="mb-1.5 block text-xs font-semibold text-stone-600">
+              Số điện thoại
+            </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <PhoneIcon className="h-5 w-5 text-stone-400" />
@@ -361,14 +368,20 @@ export default function RegisterForm() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400 hover:text-stone-600"
               >
-                {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
 
           {/* Confirm Password */}
           <div className="mb-5">
-            <label className="mb-1.5 block text-xs font-semibold text-stone-600">Xác nhận mật khẩu</label>
+            <label className="mb-1.5 block text-xs font-semibold text-stone-600">
+              Xác nhận mật khẩu
+            </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <LockIcon className="h-5 w-5 text-stone-400" />
@@ -387,7 +400,11 @@ export default function RegisterForm() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400 hover:text-stone-600"
               >
-                {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                {showConfirmPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
@@ -464,11 +481,14 @@ export default function RegisterForm() {
 
       {/* Back to Home */}
       <p className="mt-6 text-center text-sm text-stone-500">
-        <a href="/" className="inline-flex items-center gap-1 hover:text-amber-700 transition-colors">
+        <a
+          href="/"
+          className="inline-flex items-center gap-1 hover:text-amber-700 transition-colors"
+        >
           <ArrowLeftIcon className="h-4 w-4" />
           Quay về trang chủ
         </a>
       </p>
     </div>
-  )
+  );
 }

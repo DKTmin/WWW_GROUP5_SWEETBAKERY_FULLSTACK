@@ -10,4 +10,8 @@ import java.util.concurrent.TimeUnit;
 public interface RedisService {
     void setToken(String token, long duration, TimeUnit timeUnit);
     boolean isTokenInvalidated(String token);
+
+    void setOtpAdmin(String otp, long duration, TimeUnit timeUnit);
+
+    String getByKey(String key);
 }
