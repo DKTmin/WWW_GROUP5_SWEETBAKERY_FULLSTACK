@@ -1,7 +1,6 @@
 package iuh.fit.se.services;
 
 import iuh.fit.se.dtos.response.UserResponse;
-import iuh.fit.se.entities.User;
 
 import java.util.List;
 
@@ -12,6 +11,6 @@ import java.util.List;
  **/
 public interface UserService {
     List<UserResponse> findAll();
-    UserResponse getInfor();
+    UserResponse getUserInformation();
     boolean delete(String id);
 }
