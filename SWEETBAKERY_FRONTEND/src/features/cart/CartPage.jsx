@@ -159,7 +159,7 @@ export default function CartPage() {
                                     return
                                 }
                                 navigate('/checkout')
-                            }} className="w-full rounded-full bg-amber-800 px-4 py-3 text-white shadow hover:shadow-lg transition">Thanh toán</button>
+                            }} className="w-full rounded-full bg-amber-800 px-4 py-3 text-white shadow hover:shadow-lg transition">Đặt Bánh</button>
                         </div>
                     </aside>
                 </div>

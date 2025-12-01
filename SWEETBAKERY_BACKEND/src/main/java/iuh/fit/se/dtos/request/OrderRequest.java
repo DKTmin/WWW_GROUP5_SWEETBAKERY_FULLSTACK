@@ -12,6 +12,7 @@ import java.util.List;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class OrderRequest {
     List<OrderItemRequest> items;
-    // future: shipping address, note, etc.
+    // shipping address or customer address
+    String address;
     String paymentMethod;
 }

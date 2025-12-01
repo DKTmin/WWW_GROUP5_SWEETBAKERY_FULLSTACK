@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     AccountCredentialRepository accountCredentialRepository;
     UserMapper userMapper;
+
     @Override
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream()
@@ -44,10 +45,28 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(username);
-        if(accountCredential == null)
+        if (accountCredential == null)
             throw new AppException(HttpCode.NOT_FOUND);
         String userId = accountCredential.getUser().getId();
         User user = userRepository.findById(userId).orElse(null);
+        UserResponse userResponse = userMapper.toUserResponse(user);
+        userResponse.setUsername(username);
+        return userResponse;
+    }
+
+    @Override
+    public UserResponse updateInfor(iuh.fit.se.dtos.request.UpdateUserRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        AccountCredential accountCredential = accountCredentialRepository.findByCredential(username);
+        if (accountCredential == null)
+            throw new AppException(HttpCode.NOT_FOUND);
+        String userId = accountCredential.getUser().getId();
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null)
+            throw new AppException(HttpCode.NOT_FOUND);
+        user.setAddress(request.getAddress());
+        user = userRepository.save(user);
         UserResponse userResponse = userMapper.toUserResponse(user);
         userResponse.setUsername(username);
         return userResponse;

@@ -1,6 +1,8 @@
 package iuh.fit.se.entities.enums;
 
 public enum TrangThaiDH {
-    HOAN_THANH,
-    DA_HUY
+    PENDING, // Pending / Đang chờ xử lý
+    CONFIRMED, // Confirmed / Đã xác nhận
+    COMPLETED, // Completed / Hoàn thành
+    CANCELLED // Cancelled / Đã hủy
 }

@@ -17,6 +17,31 @@ function getItemImage(it) {
     return it.image || it.pastryImage || (it.pastry && it.pastry.image) || placeholderImageDataUrl()
 }
 
+function statusLabel(status) {
+    if (!status) return ''
+    switch (status) {
+        case 'PENDING': return 'Đang chờ xử lý'
+        case 'CONFIRMED': return 'Đã xác nhận'
+        case 'COMPLETED': return 'Hoàn thành'
+        case 'CANCELLED': return 'Đã hủy'
+        case 'HOAN_THANH': return 'Hoàn thành'
+        case 'DA_HUY': return 'Đã hủy'
+        default: return status
+    }
+}
+
+function statusClass(status) {
+    switch (status) {
+        case 'PENDING': return 'bg-yellow-100 text-yellow-800'
+        case 'CONFIRMED': return 'bg-blue-100 text-blue-800'
+        case 'COMPLETED': return 'bg-green-100 text-green-800'
+        case 'CANCELLED': return 'bg-red-100 text-red-800'
+        case 'HOAN_THANH': return 'bg-green-100 text-green-800'
+        case 'DA_HUY': return 'bg-red-100 text-red-800'
+        default: return 'bg-gray-100 text-gray-800'
+    }
+}
+
 export default function OrdersPage() {
     const [orders, setOrders] = useState(null)
     const navigate = useNavigate()
@@ -25,13 +50,34 @@ export default function OrdersPage() {
         let mounted = true
         orderApi.list().then(res => {
             if (!mounted) return
-            // merge server orders with any locally saved orders
-            const serverOrders = res.data || []
-            const localJson = localStorage.getItem('local_orders') || '[]'
-            const localOrders = JSON.parse(localJson) || []
-            // mark local orders
-            const markedLocal = localOrders.map(o => ({ ...o, local: true }))
-            setOrders([...markedLocal, ...serverOrders])
+            try {
+                // merge server orders with any locally saved orders
+                // handle different response shapes: array or { data: [...] }
+                let serverOrders = []
+                if (Array.isArray(res.data)) {
+                    serverOrders = res.data
+                } else if (Array.isArray(res.data?.data)) {
+                    serverOrders = res.data.data
+                } else if (res.data && typeof res.data === 'object') {
+                    // sometimes backend may wrap result differently; try to find array value
+                    const possible = Object.values(res.data).find(v => Array.isArray(v))
+                    if (Array.isArray(possible)) serverOrders = possible
+                    else {
+                        // unexpected shape — log for debugging and fallback to empty
+                        console.warn('Unexpected orders response shape', res.data)
+                        serverOrders = []
+                    }
+                }
+
+                const localJson = localStorage.getItem('local_orders') || '[]'
+                const localOrders = JSON.parse(localJson) || []
+                // mark local orders
+                const markedLocal = localOrders.map(o => ({ ...o, local: true }))
+                setOrders([...markedLocal, ...serverOrders])
+            } catch (parseErr) {
+                console.error('Failed to parse orders response', parseErr, res)
+                setOrders(false)
+            }
         }).catch(e => {
             console.warn('orders fetch failed', e)
             // keep error info in state by setting to special value false
@@ -79,9 +125,14 @@ export default function OrdersPage() {
                                         <div className="text-sm text-stone-600">Mã đơn: <span className="font-semibold text-stone-800">{o.id}</span></div>
                                         <div className="mt-1 text-sm text-stone-500">Ngày: {new Date(o.createdAt).toLocaleString()}</div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-sm text-stone-600">Tổng</div>
-                                        <div className="mt-1 text-xl font-bold text-amber-800">{formatPrice(o.total || 0)}</div>
+                                    <div className="text-right space-y-1">
+                                        <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-800`}>
+                                            Cục bộ
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm text-stone-600">Tổng</div>
+                                            <div className="mt-1 text-xl font-bold text-amber-800">{formatPrice(o.total || 0)}</div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -134,9 +185,14 @@ export default function OrdersPage() {
                                     <div className="text-sm text-stone-600">Mã đơn: <span className="font-semibold text-stone-800">{o.id}</span></div>
                                     <div className="mt-1 text-sm text-stone-500">Ngày: {new Date(o.ngayDatHang || o.createdAt || o.createdDate || Date.now()).toLocaleString()}</div>
                                 </div>
-                                <div className="text-right">
-                                    <div className="text-sm text-stone-600">Tổng</div>
-                                    <div className="mt-1 text-xl font-bold text-amber-800">{formatPrice(o.tongTien || o.total || o.amount || 0)}</div>
+                                <div className="text-right space-y-1">
+                                    <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${statusClass(o.trangThai)}`}>
+                                        {statusLabel(o.trangThai)}
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm text-stone-600">Tổng</div>
+                                        <div className="mt-1 text-xl font-bold text-amber-800">{formatPrice(o.tongTien || o.total || o.amount || 0)}</div>
+                                    </div>
                                 </div>
                             </div>
 

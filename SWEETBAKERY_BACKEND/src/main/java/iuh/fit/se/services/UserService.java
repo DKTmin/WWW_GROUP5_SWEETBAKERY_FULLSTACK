@@ -12,6 +12,10 @@ import java.util.List;
  **/
 public interface UserService {
     List<UserResponse> findAll();
+
     UserResponse getInfor();
+
+    UserResponse updateInfor(iuh.fit.se.dtos.request.UpdateUserRequest request);
+
     boolean delete(String id);
 }
