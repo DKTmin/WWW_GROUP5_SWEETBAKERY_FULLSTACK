@@ -71,6 +71,16 @@ public class PastryController {
                 .build();
     }
 
+    @GetMapping("/search")
+    public ApiResponse<List<PastryCreationResponse>> search(
+            @RequestParam("keyword") String keyword) {
+        return ApiResponse.<List<PastryCreationResponse>>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(pastryService.search(keyword))
+                .build();
+    }
+
 //    @GetMapping("/paging")
 //    public ResponseEntity<Page<BanhNgotDTO>> getAllWithPaging(@ParameterObject Pageable pageable) {
 //        Page<BanhNgotDTO> response = pastryService.findAllWithPaging(pageable);

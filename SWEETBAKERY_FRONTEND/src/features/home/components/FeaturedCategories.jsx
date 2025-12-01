@@ -16,7 +16,7 @@ export default function FeaturedCategories() {
       {items.map((it) => (
         <div key={it.id} className="relative overflow-hidden rounded-xl shadow-md">
           {/* group để kích hoạt các group-hover:* trên con */}
-          <Link to={`/category/${it.id}`} className="group block h-[160px] md:h-40">
+          <Link to={`/category/${it.id}`} className="group block h-40 md:h-40">
             {/* Image: scale on hover */}
             <div className="absolute inset-0 overflow-hidden">
               <img
