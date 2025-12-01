@@ -9,6 +9,7 @@ import iuh.fit.se.entities.Pastry;
 import iuh.fit.se.services.VnPayService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +32,7 @@ public class PaymentTransactionController {
     private final ObjectMapper objectMapper;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createTransaction(@RequestBody OrderRequest request) {
+    public ResponseEntity<?> createTransaction(@RequestBody OrderRequest request, HttpServletRequest servletRequest) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth == null)
@@ -40,22 +41,31 @@ public class PaymentTransactionController {
             // assume AccountCredentialRepository can find account by credential; we'll
             // store username as userId for now
 
-            String txnRef = UUID.randomUUID().toString();
+            String txnRef = generateTxnRef();
             // compute amount server-side from item ids to avoid client tampering
             long amount = 0L;
             if (request.getItems() != null) {
                 for (var it : request.getItems()) {
-                    if (it == null || it.getPastryId() == null || it.getQty() == null)
+                    if (it == null)
                         continue;
-                    Pastry p = pastryRepository.findById(it.getPastryId()).orElse(null);
+                    String pastryId = it.getPastryId();
+                    Integer qty = it.getQty();
+                    if (pastryId == null || qty == null)
+                        continue;
+                    Pastry p = pastryRepository.findById(pastryId).orElse(null);
                     if (p == null) {
                         return ResponseEntity.status(400)
-                                .body(java.util.Map.of("error", "Invalid pastry id: " + it.getPastryId()));
+                                .body(java.util.Map.of("error", "Invalid pastry id: " + pastryId));
                     }
-                    amount += Math.round(p.getPrice() * it.getQty());
+                    amount += Math.round(p.getPrice() * qty);
                 }
             }
-            String clientIp = null;
+            if (amount <= 0) {
+                return ResponseEntity.status(400)
+                        .body(java.util.Map.of("error", "Invalid order amount"));
+            }
+
+            String clientIp = extractClientIp(servletRequest);
             String orderInfo = "Thanh toan txn " + txnRef;
             String url;
             try {
@@ -82,5 +92,28 @@ public class PaymentTransactionController {
             log.error("Failed to create VNPay transaction", ex);
             return ResponseEntity.status(500).body(ex.getMessage());
         }
+    }
+
+    private String generateTxnRef() {
+        // VNPay chỉ chấp nhận ký tự chữ/số, độ dài 8-20; dùng thời gian để tránh trùng
+        String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyMMddHHmmss"));
+        String suffix = String.valueOf(Math.abs(UUID.randomUUID().getMostSignificantBits()));
+        String raw = (timestamp + suffix);
+        if (raw.length() > 18) {
+            raw = raw.substring(0, 18);
+        }
+        return raw;
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        if (request == null) {
+            return "127.0.0.1";
+        }
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }
