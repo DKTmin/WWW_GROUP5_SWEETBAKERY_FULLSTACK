@@ -12,10 +12,9 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author : user664dntp
@@ -30,12 +29,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmployeeController {
     EmployeeService employeeService;
 
-    @PostMapping("/register")
-    ApiResponse<EmployeeRegistrationResponse> register(@Valid @RequestBody EmployeeRegistrationRequest request){
-        return ApiResponse.<EmployeeRegistrationResponse>builder()
-                .code(HttpCode.CREATED.getCODE())
-                .message(HttpCode.CREATED.getMESSAGE())
-                .data(employeeService.create(request))
+    @GetMapping
+    ApiResponse<List<EmployeeRegistrationResponse>> findALl(){
+        return ApiResponse.<List<EmployeeRegistrationResponse>>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(employeeService.getALl())
                 .build();
     }
 }

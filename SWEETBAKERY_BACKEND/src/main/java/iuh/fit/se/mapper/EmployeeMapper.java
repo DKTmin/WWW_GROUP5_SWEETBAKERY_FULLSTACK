@@ -1,14 +1,14 @@
 package iuh.fit.se.mapper;
 
-import iuh.fit.se.dtos.request.CustomerRegistrationRequest;
 import iuh.fit.se.dtos.request.EmployeeRegistrationRequest;
-import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
+import iuh.fit.se.dtos.request.EmployeeUpdateRequest;
 import iuh.fit.se.dtos.response.EmployeeRegistrationResponse;
-import iuh.fit.se.entities.Customer;
+import iuh.fit.se.dtos.response.EmployeeUpdateResponse;
 import iuh.fit.se.entities.Employee;
-import iuh.fit.se.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Mappings;
 
 /**
  * @author : user664dntp
@@ -19,5 +19,16 @@ import org.mapstruct.Mapping;
 public interface EmployeeMapper {
     Employee toEmployee(EmployeeRegistrationRequest request);
 
-    EmployeeRegistrationResponse toEmployeeRegistrationResponse(Employee user);
+    EmployeeRegistrationResponse toEmployeeRegistrationResponse(Employee employee);
+
+    @Mapping(target = "roles", ignore = true)
+    Employee toEmployee(EmployeeUpdateRequest request);
+
+    EmployeeUpdateResponse toEmployeeUpdateResponse(Employee employee);
+
+    @Mappings({
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "roles", ignore = true)
+    })
+    void update(@MappingTarget Employee employee, EmployeeUpdateRequest request);
 }

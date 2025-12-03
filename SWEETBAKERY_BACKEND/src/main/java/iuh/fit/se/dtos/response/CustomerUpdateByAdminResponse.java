@@ -23,5 +23,6 @@ public class CustomerUpdateByAdminResponse {
     String lastName;
     String phoneNumber;
     String address;
+    Set<AccountCredentialResponse> accounts;
     Set<Role> roles;
 }

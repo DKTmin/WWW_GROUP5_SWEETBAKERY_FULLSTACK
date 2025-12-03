@@ -5,6 +5,7 @@ import iuh.fit.se.dtos.request.CustomerSeftUpdateRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
 import iuh.fit.se.dtos.response.CustomerSeftUpdateResponse;
+import iuh.fit.se.dtos.response.EmployeeRegistrationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.CustomerService;
 import jakarta.validation.Valid;
@@ -12,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author : user664dntp
@@ -25,6 +28,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CustomerController {
     CustomerService customerService;
+
+    @GetMapping
+    ApiResponse<List<CustomerRegistrationResponse>> findALl(){
+        return ApiResponse.<List<CustomerRegistrationResponse>>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(customerService.getALl())
+                .build();
+    }
+
     @PostMapping("/register")
     ApiResponse<CustomerRegistrationResponse> register(@Valid @RequestBody CustomerRegistrationRequest request){
         return ApiResponse.<CustomerRegistrationResponse>builder()

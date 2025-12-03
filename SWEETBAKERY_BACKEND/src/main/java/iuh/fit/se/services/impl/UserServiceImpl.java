@@ -2,13 +2,16 @@ package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.response.UserResponse;
 import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.entities.enums.AccountType;
 import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.entities.enums.UserRole;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.AccountMapper;
 import iuh.fit.se.mapper.UserMapper;
 import iuh.fit.se.repositories.AccountCredentialRepository;
+import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.UserService;
 import lombok.AccessLevel;
@@ -38,10 +41,17 @@ public class UserServiceImpl implements UserService {
     AccountCredentialRepository accountCredentialRepository;
     UserMapper userMapper;
     AccountMapper accountMapper;
+    RoleRepository roleRepository;
 
     @Override
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream()
+                .filter(user -> {
+                    Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
+                    if(adminRole != null)
+                        return !user.getRoles().contains(adminRole);
+                    return false;
+                })
                 .map(userMapper::toUserResponse)
                 .map(userResponse -> {
                     Set<AccountCredential> accountCredential = accountCredentialRepository.findAllByUserId(userResponse.getId());

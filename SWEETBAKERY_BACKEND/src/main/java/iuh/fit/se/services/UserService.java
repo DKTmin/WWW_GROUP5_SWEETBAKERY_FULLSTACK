@@ -13,6 +13,5 @@ public interface UserService {
     List<UserResponse> findAll();
     UserResponse getUserInformation();
     UserResponse updateInfor(iuh.fit.se.dtos.request.UpdateUserRequest request);
-
     boolean delete(String id);
 }

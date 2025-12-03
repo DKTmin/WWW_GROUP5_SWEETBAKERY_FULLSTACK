@@ -20,7 +20,7 @@ public interface AccountMapper {
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "type", ignore = true),
-            @Mapping(target = "credential", source = "username"),
+            @Mapping(target = "credential", ignore = true),
             @Mapping(target = "password", ignore = true)
     })
     AccountCredential toAccountUsedUsername(CustomerRegistrationRequest request);
@@ -32,7 +32,7 @@ public interface AccountMapper {
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "type", ignore = true),
-            @Mapping(target = "credential", source = "email"),
+            @Mapping(target = "credential", ignore = true),
             @Mapping(target = "password", ignore = true)
     })
     AccountCredential toAccountUsedEmail(CustomerRegistrationRequest request);
@@ -43,7 +43,7 @@ public interface AccountMapper {
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "type", ignore = true),
-            @Mapping(target = "credential", source = "username"),
+            @Mapping(target = "credential", ignore = true),
             @Mapping(target = "password", ignore = true)
     })
     AccountCredential toAccountUsedUsername(EmployeeRegistrationRequest request);
@@ -55,7 +55,7 @@ public interface AccountMapper {
             @Mapping(target = "lastLogin", ignore = true),
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "type", ignore = true),
-            @Mapping(target = "credential", source = "email"),
+            @Mapping(target = "credential", ignore = true),
             @Mapping(target = "password", ignore = true)
     })
     AccountCredential toAccountUsedEmail(EmployeeRegistrationRequest request);

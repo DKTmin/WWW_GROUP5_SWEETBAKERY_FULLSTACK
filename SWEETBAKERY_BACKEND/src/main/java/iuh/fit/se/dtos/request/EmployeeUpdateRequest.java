@@ -4,6 +4,7 @@ import iuh.fit.se.entities.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,7 +25,10 @@ public class EmployeeUpdateRequest {
     String oldPassword;
     String newPassword;
     String confirmNewPassword;
+    String email;
     String phoneNumber;
     String address;
-    Set<Role> roles;
+    String identification;
+    Integer numOfExperience;
+    List<String> roles;
 }
