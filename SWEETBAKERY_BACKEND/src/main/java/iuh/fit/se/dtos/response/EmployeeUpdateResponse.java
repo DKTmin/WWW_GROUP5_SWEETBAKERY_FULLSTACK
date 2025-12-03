@@ -23,7 +23,11 @@ public class EmployeeUpdateResponse {
     String oldPassword;
     String newPassword;
     String confirmNewPassword;
+    String email;
     String phoneNumber;
     String address;
+    String identification;
+    Integer numOfExperience;
+    Set<AccountCredentialResponse> accounts;
     Set<Role> roles;
 }

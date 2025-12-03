@@ -27,4 +27,6 @@ public class EmployeeRegistrationRequest {
     String email;
     String phoneNumber;
     String address;
+    String identification;
+    Integer numOfExperience;
 }

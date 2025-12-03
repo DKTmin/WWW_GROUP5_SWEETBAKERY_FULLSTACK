@@ -1,6 +1,7 @@
 package iuh.fit.se.dtos.response;
 
 import iuh.fit.se.entities.Customer;
+import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,6 +21,14 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomerRegistrationResponse {
-    Customer customer;
-    Set<AccountCredentialResponse> accountCredentials;
+    String id;
+    String firstName;
+    String lastName;
+    String username;
+    String email;
+    String phoneNumber;
+    String address;
+    Integer loyaltyPoints;
+    Set<AccountCredentialResponse> accounts;
+    Set<Role> roles;
 }

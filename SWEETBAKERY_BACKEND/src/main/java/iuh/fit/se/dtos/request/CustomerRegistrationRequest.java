@@ -27,4 +27,5 @@ public class CustomerRegistrationRequest {
     String email;
     String phoneNumber;
     String address;
+    Integer loyaltyPoints;
 }

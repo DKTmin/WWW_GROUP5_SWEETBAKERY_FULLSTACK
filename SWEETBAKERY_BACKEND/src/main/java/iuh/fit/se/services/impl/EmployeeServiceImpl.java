@@ -8,6 +8,7 @@ import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.Employee;
 import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
+import iuh.fit.se.entities.enums.AccountType;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.entities.enums.UserRole;
 import iuh.fit.se.exceptions.AppException;
@@ -27,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author : user664dntp
@@ -49,43 +52,29 @@ public class EmployeeServiceImpl implements EmployeeService {
     RoleRepository roleRepository;
 
     @Override
-    public EmployeeRegistrationResponse create(EmployeeRegistrationRequest request) {
-        if(userRepository.findUserByEmail(request.getEmail()) != null)
-            throw new AppException(HttpCode.EMAIL_EXISTED);
-        if(accountCredentialRepository.findByCredential(request.getUsername()) != null)
-            throw new AppException(HttpCode.USERNAME_EXISTED);
-
-        Employee employee = employeeMapper.toEmployee(request);
-        Set<Role> roles = new HashSet<>();
-        Role employeeRole = roleRepository.findById(UserRole.EMPLOYEE.name())
-                .orElseThrow(()-> new NullPointerException("Employee role not found!"));
-        roles.add(employeeRole);
-        employee.setRoles(roles);
-        employeeRepository.save(employee);
-
-        AccountCredential accountCredentialUsedUsername= accountMapper.toAccountUsedUsername(request);
-        accountCredentialUsedUsername.setUser(employee);
-        accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
-        accountCredentialRepository.save(accountCredentialUsedUsername);
-
-        AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
-        accountCredentialUsedEmail.setUser(employee);
-        accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
-        accountCredentialRepository.save(accountCredentialUsedEmail);
-
-        Set<AccountCredential> accountCredentialSet = new HashSet<>();
-        accountCredentialSet.add(accountCredentialUsedUsername);
-        accountCredentialSet.add(accountCredentialUsedEmail);
-        employee.setAccounts(accountCredentialSet);
-        employeeRepository.save(employee);
-
-        Set<AccountCredentialResponse> accountCredentialResponses = new HashSet<>();
-        accountCredentialResponses.add(accountMapper.toAccountCredentialResponse(accountCredentialUsedUsername));
-        accountCredentialResponses.add(accountMapper.toAccountCredentialResponse(accountCredentialUsedEmail));
-
-        return EmployeeRegistrationResponse.builder()
-                .employee(employee)
-                .accountCredentials(accountCredentialResponses)
-                .build();
+    public List<EmployeeRegistrationResponse> getALl() {
+        return employeeRepository.findAll()
+                .stream()
+                .filter(user -> {
+                    Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
+                    if(adminRole != null)
+                        return !user.getRoles().contains(adminRole);
+                    return false;
+                })
+                .map(employeeMapper::toEmployeeRegistrationResponse)
+                .map(empResponse -> {
+                    empResponse.setUsername(getUserName(empResponse.getId()));
+                    return empResponse;
+                })
+                .collect(Collectors.toList());
     }
+
+    private String getUserName(String userId){
+        Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(userId);
+        AccountCredential userNameAccount = accountCredentialSet.stream()
+                .filter(acc -> acc.getType().name().equalsIgnoreCase(AccountType.USERNAME.name()))
+                .toList().getFirst();
+        return userNameAccount.getCredential();
+    }
+
 }
