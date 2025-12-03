@@ -1,4 +1,3 @@
-// utils/axiosClient.js
 import axios from "axios";
 
 const axiosClient = axios.create({
@@ -87,6 +86,20 @@ axiosClient.interceptors.response.use(
         processQueue(refreshError, null);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Khi token hết hạn hoặc không hợp lệ:
+      // dọn toàn bộ thông tin đăng nhập & dữ liệu cục bộ liên quan
+      try {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("cart");
+        localStorage.removeItem("local_orders");
+        // thông báo cho các component (Header, Cart, ...) cập nhật lại state
+        window.dispatchEvent(new CustomEvent("cart_update"));
+      } catch (e) {
+        console.warn("Failed to clear local storage on 401", e);
+      }
+      if (window.location.pathname !== "/login") {
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {
