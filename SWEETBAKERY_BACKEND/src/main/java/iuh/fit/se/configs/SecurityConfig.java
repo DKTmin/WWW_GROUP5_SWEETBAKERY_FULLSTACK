@@ -37,6 +37,7 @@ public class SecurityConfig {
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
             "/category-management/api/v1/categories/**",
+            "/api/chat"
     };
 
     private final String[] POST_CUSTOMER_ENDPOINT = {
