@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import authApi from "../apis/authApi"
-import cartApi from "../../cart/apis/cartApi"
-import logoImg from "../../../assets/logo/logo.jpg"
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import authApi from "../apis/authApi";
+import cartApi from "../../cart/apis/cartApi";
+import logoImg from "../../../assets/logo/logo.jpg";
 
 // --- ICONS ---
 const UserIcon = ({ className }) => (
@@ -22,7 +22,7 @@ const UserIcon = ({ className }) => (
       d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
     />
   </svg>
-)
+);
 
 const LockIcon = ({ className }) => (
   <svg
@@ -39,7 +39,7 @@ const LockIcon = ({ className }) => (
       d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
     />
   </svg>
-)
+);
 
 const EyeIcon = ({ className }) => (
   <svg
@@ -57,7 +57,7 @@ const EyeIcon = ({ className }) => (
     />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </svg>
-)
+);
 
 const EyeSlashIcon = ({ className }) => (
   <svg
@@ -74,35 +74,36 @@ const EyeSlashIcon = ({ className }) => (
       d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
     />
   </svg>
-)
+);
 
 export default function LoginForm() {
-  const [identifier, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [identifier, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      const res = await authApi.login({ identifier, password })
-      console.log(res.data)
-      localStorage.setItem("access_token", res.data.data.accessToken)
+      const res = await authApi.login({ identifier, password });
+      console.log(res.data);
+      localStorage.setItem("access_token", res.data.data.accessToken);
+      localStorage.setItem("refresh_token", res.data.data.refreshToken);
 
       // After login, merge server-side cart and localStorage cart (sum quantities)
       try {
         // fetch server cart (may be empty)
-        let serverItems = []
+        let serverItems = [];
         try {
-          const cartRes = await cartApi.get()
-          serverItems = cartRes?.data?.items || []
+          const cartRes = await cartApi.get();
+          serverItems = cartRes?.data?.items || [];
         } catch (e) {
-          console.warn("Could not fetch server cart after login", e)
-          serverItems = []
+          console.warn("Could not fetch server cart after login", e);
+          serverItems = [];
         }
 
         // map server items to local shape
@@ -113,60 +114,67 @@ export default function LoginForm() {
           qty: it.qty || 0,
           size: it.size || "",
           image: it.imageUrl || "/placeholder.png",
-        }))
+        }));
 
         // read local cart
-        let localItems = []
+        let localItems = [];
         try {
-          const localJson = localStorage.getItem("cart") || "[]"
-          const parsed = JSON.parse(localJson)
-          localItems = Array.isArray(parsed) ? parsed : []
+          const localJson = localStorage.getItem("cart") || "[]";
+          const parsed = JSON.parse(localJson);
+          localItems = Array.isArray(parsed) ? parsed : [];
         } catch (e) {
-          localItems = []
+          localItems = [];
         }
 
         // merge by pastryId + size, summing quantities
-        const keyOf = (it) => `${it.id}::${it.size || ""}`
-        const map = new Map()
-        serverMapped.forEach((it) => map.set(keyOf(it), { ...it }))
+        const keyOf = (it) => `${it.id}::${it.size || ""}`;
+        const map = new Map();
+        serverMapped.forEach((it) => map.set(keyOf(it), { ...it }));
         localItems.forEach((it) => {
-          const safe = { id: it.id, name: it.name, price: it.price || 0, qty: Number(it.qty) || 0, size: it.size || "", image: it.image || "/placeholder.png" }
-          const k = keyOf(safe)
+          const safe = {
+            id: it.id,
+            name: it.name,
+            price: it.price || 0,
+            qty: Number(it.qty) || 0,
+            size: it.size || "",
+            image: it.image || "/placeholder.png",
+          };
+          const k = keyOf(safe);
           if (map.has(k)) {
-            const ex = map.get(k)
-            ex.qty = (Number(ex.qty) || 0) + (Number(safe.qty) || 0)
-            map.set(k, ex)
+            const ex = map.get(k);
+            ex.qty = (Number(ex.qty) || 0) + (Number(safe.qty) || 0);
+            map.set(k, ex);
           } else {
-            map.set(k, safe)
+            map.set(k, safe);
           }
-        })
+        });
 
-        const merged = Array.from(map.values())
+        const merged = Array.from(map.values());
 
         // persist merged cart locally and notify UI
-        localStorage.setItem("cart", JSON.stringify(merged))
-        window.dispatchEvent(new CustomEvent("cart_update"))
+        localStorage.setItem("cart", JSON.stringify(merged));
+        window.dispatchEvent(new CustomEvent("cart_update"));
 
         // persist merged cart to server
         try {
           // replace server cart with merged list so we don't double-add
-          await cartApi.sync(merged, true)
+          await cartApi.sync(merged, true);
         } catch (e) {
-          console.warn("Failed to sync merged cart to server", e)
+          console.warn("Failed to sync merged cart to server", e);
         }
       } catch (e) {
-        console.warn("Cart merge failed after login", e)
+        console.warn("Cart merge failed after login", e);
       }
 
-      setIsLoggedIn(!!res.data.data.accessToken)
-      window.location.href = "/pastries"
+      setIsLoggedIn(!!res.data.data.accessToken);
+      window.location.href = "/pastries";
     } catch (err) {
-      console.error(err)
-      setError("Sai username hoặc mật khẩu")
+      console.error(err);
+      setError("Sai username hoặc mật khẩu");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="w-full max-w-md">
@@ -180,7 +188,11 @@ export default function LoginForm() {
 
           {/* Logo */}
           <div className="relative mx-auto mb-4 h-20 w-20 overflow-hidden rounded-full border-4 border-white/30 shadow-lg">
-            <img src={logoImg || "/placeholder.svg"} alt="Sweet Bakery Logo" className="h-full w-full object-cover" />
+            <img
+              src={logoImg || "/placeholder.svg"}
+              alt="Sweet Bakery Logo"
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <h2 className="relative text-2xl font-bold text-white">Chào mừng trở lại!</h2>
@@ -227,7 +239,11 @@ export default function LoginForm() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400 hover:text-stone-600"
               >
-                {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
               </button>
             </div>
           </div>
@@ -235,10 +251,16 @@ export default function LoginForm() {
           {/* Remember & Forgot */}
           <div className="mb-6 flex items-center justify-between text-sm">
             <label className="flex cursor-pointer items-center gap-2 text-stone-600">
-              <input type="checkbox" className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500" />
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+              />
               <span>Ghi nhớ đăng nhập</span>
             </label>
-            <Link to="/forgot-password" className="font-medium text-amber-700 hover:text-amber-800 hover:underline">
+            <Link
+              to="/forgot-password"
+              className="font-medium text-amber-700 hover:text-amber-800 hover:underline"
+            >
               Quên mật khẩu?
             </Link>
           </div>
@@ -315,7 +337,10 @@ export default function LoginForm() {
           {/* Register Link */}
           <p className="mt-6 text-center text-sm text-stone-600">
             Chưa có tài khoản?{" "}
-            <Link to="/register" className="font-bold text-amber-700 hover:text-amber-800 hover:underline">
+            <Link
+              to="/register"
+              className="font-bold text-amber-700 hover:text-amber-800 hover:underline"
+            >
               Đăng ký ngay
             </Link>
           </p>
@@ -324,7 +349,10 @@ export default function LoginForm() {
 
       {/* Back to Home Link */}
       <div className="mt-6 text-center">
-        <Link to="/" className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-amber-700">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-amber-700"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -333,11 +361,15 @@ export default function LoginForm() {
             stroke="currentColor"
             className="h-4 w-4"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+            />
           </svg>
           Quay về trang chủ
         </Link>
       </div>
     </div>
-  )
+  );
 }

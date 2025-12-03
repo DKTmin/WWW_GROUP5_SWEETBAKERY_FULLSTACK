@@ -1,17 +1,44 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import authApi from "../../features/auth/apis/authApi";
 
 export default function ProtectedRoute({ children }) {
-  const location = useLocation();
-  const isAuthenticated = !!localStorage.getItem("access_token");
+  const [checking, setChecking] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
 
-  // Nếu chưa đăng nhập và không phải đang ở /login → đá về /login
-  if (!isAuthenticated && location.pathname !== "/login") {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("access_token");
+      const refreshToken = localStorage.getItem("refresh_token");
+
+      // Không có token thì đá ra login
+      if (!token) {
+        setAuthorized(false);
+        setChecking(false);
+        return;
+      }
+
+      try {
+        // Gọi API getInformation (nếu access token hết hạn, axios sẽ tự refresh)
+        await authApi.getInformation();
+        setAuthorized(true);
+      } catch (error) {
+        // Refresh cũng fail luôn → logout
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setAuthorized(false);
+      }
+
+      setChecking(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  if (checking) return <div>Loading...</div>;
+
+  if (!authorized) {
     return <Navigate to="/login" replace />;
-  }
-
-  // Nếu đã đăng nhập mà cố vào /login → cho về trang chủ
-  if (isAuthenticated && location.pathname === "/login") {
-    return <Navigate to="/" replace />;
   }
 
   return children;

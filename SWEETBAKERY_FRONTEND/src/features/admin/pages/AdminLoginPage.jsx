@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import authApi from "../../auth/apis/authApi"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authApi from "../../auth/apis/authApi";
 
 // --- ICONS ---
 const ShieldIcon = ({ className }) => (
@@ -20,7 +20,7 @@ const ShieldIcon = ({ className }) => (
       d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
     />
   </svg>
-)
+);
 const UserIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +36,7 @@ const UserIcon = ({ className }) => (
       d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
     />
   </svg>
-)
+);
 const LockIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -52,7 +52,7 @@ const LockIcon = ({ className }) => (
       d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
     />
   </svg>
-)
+);
 const EyeIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +69,7 @@ const EyeIcon = ({ className }) => (
     />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </svg>
-)
+);
 const EyeSlashIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -85,79 +85,91 @@ const EyeSlashIcon = ({ className }) => (
       d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
     />
   </svg>
-)
+);
 const SpinnerIcon = ({ className }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    ></circle>
     <path
       className="opacity-75"
       fill="currentColor"
       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
     ></path>
   </svg>
-)
+);
 
 export default function AdminLoginPage() {
-  const navigate = useNavigate()
-  const [identifier, setIdentifier] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
       // Step 1: Login
-      const res = await authApi.login({ identifier, password })
-      const accessToken = res.data?.data?.accessToken
+      const res = await authApi.login({ identifier, password });
+      const accessToken = res.data?.data?.accessToken;
+      const refreshToken = res.data?.data?.refreshToken;
 
       if (!accessToken) {
-        setError("Đăng nhập thất bại. Vui lòng thử lại.")
-        setLoading(false)
-        return
+        setError("Đăng nhập thất bại. Vui lòng thử lại.");
+        setLoading(false);
+        return;
       }
 
-      localStorage.setItem("access_token", accessToken)
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("refresh_token", refreshToken);
 
       // Step 2: Get user info and check role
-      const userRes = await authApi.getInformation()
-      const userData = userRes.data?.data
+      const userRes = await authApi.getInformation();
+      const userData = userRes.data?.data;
 
       if (!userData) {
-        setError("Không thể lấy thông tin người dùng.")
-        localStorage.removeItem("access_token")
-        setLoading(false)
-        return
+        setError("Không thể lấy thông tin người dùng.");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setLoading(false);
+        return;
       }
 
       // Check if user has ADMIN role
-      const roles = userData.roles || []
-      const isAdmin = roles.some((role) => role.name === "ADMIN")
+      const roles = userData.roles || [];
+      const isAdmin = roles.some((role) => role.name === "ADMIN");
 
       if (!isAdmin) {
-        setError("Tài khoản không có quyền truy cập Admin.")
-        localStorage.removeItem("access_token")
-        setLoading(false)
-        return
+        setError("Tài khoản không có quyền truy cập Admin.");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setLoading(false);
+        return;
       }
 
       // Store admin info temporarily for OTP verification
-      localStorage.setItem("admin_pending", JSON.stringify(userData))
+      localStorage.setItem("admin_pending", JSON.stringify(userData));
 
       // Navigate to OTP page
-      navigate("/admin/verify-otp")
+      navigate("/admin/verify-otp");
     } catch (err) {
-      console.error(err)
-      setError("Sai tên đăng nhập hoặc mật khẩu.")
-      localStorage.removeItem("access_token")
+      console.error(err);
+      setError("Sai tên đăng nhập hoặc mật khẩu.");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-12">
@@ -222,7 +234,11 @@ export default function AdminLoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-300"
                 >
-                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -260,8 +276,10 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-slate-500">© 2025 Sweet Bakery. Admin Access Only.</p>
+        <p className="mt-6 text-center text-xs text-slate-500">
+          © 2025 Sweet Bakery. Admin Access Only.
+        </p>
       </div>
     </div>
-  )
+  );
 }
