@@ -28,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,15 +53,15 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
 
     @Override
     public EmployeeRegistrationResponse create(EmployeeRegistrationRequest request) {
-        if(userRepository.findUserByEmail(request.getEmail()) != null)
+        if (userRepository.findUserByEmail(request.getEmail()) != null)
             throw new AppException(HttpCode.EMAIL_EXISTED);
-        if(accountCredentialRepository.findByCredential(request.getUsername()) != null)
+        if (accountCredentialRepository.findByCredential(request.getUsername()) != null)
             throw new AppException(HttpCode.USERNAME_EXISTED);
 
         Employee employee = employeeMapper.toEmployee(request);
         Set<Role> roles = new HashSet<>();
         Role employeeRole = roleRepository.findById(UserRole.EMPLOYEE.name())
-                .orElseThrow(()-> new NullPointerException("Employee role not found!"));
+                .orElseThrow(() -> new NullPointerException("Employee role not found!"));
         roles.add(employeeRole);
         employee.setRoles(roles);
         employeeRepository.save(employee);
@@ -98,15 +99,41 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
     @Override
     public EmployeeUpdateResponse update(String employeeId, EmployeeUpdateRequest request) {
         Employee employee = (Employee) userRepository.findById(employeeId).orElse(null);
-        if(employee == null)
+        if (employee == null)
             throw new AppException(HttpCode.NOT_FOUND);
+
         employeeMapper.update(employee, request);
+
+        Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(employeeId);
+        if(accountCredentialSet.isEmpty())
+            throw new AppException(HttpCode.NOT_FOUND);
+
+        AccountCredential emailAccount = accountCredentialRepository.findByUserIdAndAccountType(employeeId, AccountType.EMAIL);
+        emailAccount.setCredential(request.getEmail());
+
+        boolean passwordIsChanging = request.getOldPassword() != null
+                && request.getNewPassword() != null
+                && request.getConfirmNewPassword() != null;
+
+        if (passwordIsChanging) {
+            if(!passwordEncoder.matches(request.getOldPassword(), emailAccount.getPassword()))
+                throw new AppException(HttpCode.PASSWORD_INCORRECT);
+            if (!request.getNewPassword().equalsIgnoreCase(request.getConfirmNewPassword()))
+                throw new AppException(HttpCode.PASSWORD_NOMATCH);
+            accountCredentialSet.forEach(accountCredential ->
+                    accountCredential.setPassword(passwordEncoder.encode(request.getNewPassword()))
+            );
+        }
+
         employeeRepository.save(employee);
+        accountCredentialRepository.saveAll(accountCredentialSet);
 
         Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
         employee.setRoles(roles);
 
         EmployeeUpdateResponse employeeUpdateResponse = employeeMapper.toEmployeeUpdateResponse(employee);
+        if(passwordIsChanging)
+            employeeUpdateResponse.setNewPassword(request.getNewPassword());
         return employeeUpdateResponse;
     }
 }

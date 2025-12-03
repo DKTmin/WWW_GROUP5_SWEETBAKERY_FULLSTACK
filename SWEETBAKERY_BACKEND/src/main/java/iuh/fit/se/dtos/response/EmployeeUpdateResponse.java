@@ -20,9 +20,7 @@ import java.util.Set;
 public class EmployeeUpdateResponse {
     String firstName;
     String lastName;
-    String oldPassword;
     String newPassword;
-    String confirmNewPassword;
     String email;
     String phoneNumber;
     String address;
