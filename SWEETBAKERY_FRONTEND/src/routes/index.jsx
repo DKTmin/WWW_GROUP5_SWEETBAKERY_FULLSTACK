@@ -15,6 +15,8 @@ import AdminLoginPage from "../features/admin/pages/AdminLoginPage"
 import AdminOTPPage from "../features/admin/pages/AdminOTPPage"
 import AdminDashboard from "../features/admin/pages/AdminDashboard"
 import SearchResultPage from "../features/home/pages/SearchResultPage"
+import ChatAIPage from "../features/home/pages/ChatAIPage";
+
 
 export default function AppRoutes() {
   return (
@@ -39,6 +41,8 @@ export default function AppRoutes() {
       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/orders/:id" element={<OrderDetailPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/chat-ai" element={<ChatAIPage />} />
+
 
       <Route
         path="/profile"

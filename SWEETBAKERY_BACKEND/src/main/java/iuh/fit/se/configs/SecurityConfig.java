@@ -37,6 +37,8 @@ public class SecurityConfig {
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
             "/category-management/api/v1/categories/**",
+            // Cho AI chat public, không cần login
+            "/ai-management/api/v1/ai/**"
     };
 
     private final String[] POST_CUSTOMER_ENDPOINT = {

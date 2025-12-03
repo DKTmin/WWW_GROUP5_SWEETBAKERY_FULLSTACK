@@ -21,6 +21,22 @@ const ChevronUpIcon = () => (
   </svg>
 );
 
+const GeminiIcon = () => (
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 48 48"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect width="48" height="48" rx="24" fill="#4285F4"/>
+    <path
+      d="M24 12C18 12 12 17 12 24C12 31 18 36 24 36C30 36 36 31 36 24C36 17 30 12 24 12ZM24 32C19.6 32 16 28.4 16 24C16 19.6 19.6 16 24 16C28.4 16 32 19.6 32 24C32 28.4 28.4 32 24 32Z"
+      fill="white"
+    />
+  </svg>
+);
+
 export default function FloatingContact() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -78,6 +94,15 @@ export default function FloatingContact() {
       >
         <MessengerIcon />
       </a>
+
+      <button
+        onClick={()=>window.location.href="/chat-ai"}
+        className={btnClass}
+        title="Trợ lý AI Sweet Bakery"
+      >
+        <GeminiIcon />
+      </button>
+
 
       {/* 4. Nút Scroll To Top (Chỉ hiện khi cuộn xuống) */}
       <button
