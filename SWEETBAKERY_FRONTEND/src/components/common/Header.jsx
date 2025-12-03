@@ -397,13 +397,15 @@ export default function Header() {
               )}
             </Link>
 
-            <button
-              onClick={() => navigate("/orders")}
-              className="group relative rounded-full p-2 text-stone-600 hover:bg-amber-100 hover:text-amber-800 transition-colors"
-              title="Đơn hàng"
-            >
-              <OrdersIcon className="h-6 w-6" />
-            </button>
+            {isLoggedIn && (
+              <button
+                onClick={() => navigate("/orders")}
+                className="group relative rounded-full p-2 text-stone-600 hover:bg-amber-100 hover:text-amber-800 transition-colors"
+                title="Đơn hàng"
+              >
+                <OrdersIcon className="h-6 w-6" />
+              </button>
+            )}
 
             <button
               onClick={() => navigate("/cart")}

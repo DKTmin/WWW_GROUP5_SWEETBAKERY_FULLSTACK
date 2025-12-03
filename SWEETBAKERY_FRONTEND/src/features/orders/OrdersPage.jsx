@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import orderApi from "../cart/apis/orderApi"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 function formatPrice(v) {
     if (v == null) return ""
@@ -44,9 +44,25 @@ function statusClass(status) {
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState(null)
+    const [searchText, setSearchText] = useState("")
     const navigate = useNavigate()
+    const location = useLocation()
 
     useEffect(() => {
+        // Nếu URL có fromPayment=1 (VNPay redirect sau khi thanh toán thành công)
+        // thì dọn giỏ hàng local và xóa query param khỏi URL.
+        try {
+            const params = new URLSearchParams(location.search)
+            if (params.get("fromPayment") === "1") {
+                localStorage.removeItem("cart")
+                window.dispatchEvent(new CustomEvent("cart_update"))
+                // Xóa query khỏi thanh địa chỉ để F5 không dọn giỏ nữa
+                navigate("/orders", { replace: true })
+            }
+        } catch (e) {
+            console.warn("Handle fromPayment flag failed", e)
+        }
+
         let mounted = true
         orderApi.list().then(res => {
             if (!mounted) return
@@ -160,25 +176,42 @@ export default function OrdersPage() {
         )
     }
 
-    if (orders.length === 0) {
-        return (
-            <main className="min-h-screen bg-[#FFFBF0] py-20">
-                <div className="mx-auto max-w-4xl px-6 text-center">
-                    <h2 className="mb-4 text-3xl font-extrabold text-amber-800">Đơn hàng của bạn</h2>
-                    <p className="mb-6 text-stone-600">Bạn chưa có đơn hàng nào.</p>
-                    <button onClick={() => navigate('/')} className="inline-flex items-center gap-2 rounded-full bg-amber-800 px-6 py-3 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition">Tiếp tục mua sắm</button>
-                </div>
-            </main>
+    // Lọc đơn theo tên sản phẩm nếu có nhập từ khóa
+    const normalizedSearch = (searchText || "").trim().toLowerCase()
+    const displayOrders = normalizedSearch
+        ? orders.filter(o =>
+            Array.isArray(o.items) &&
+            o.items.some(it => {
+                const name = (it.name || it.pastryName || "").toLowerCase()
+                return name.includes(normalizedSearch)
+            })
         )
-    }
+        : orders
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-[#FFF7ED] to-[#FFFBF0] py-12">
             <div className="mx-auto max-w-6xl px-6">
-                <h2 className="mb-6 text-3xl font-extrabold text-amber-800">Đơn hàng của bạn</h2>
+                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <h2 className="text-3xl font-extrabold text-amber-800">Đơn hàng của bạn</h2>
+                    <input
+                        type="text"
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        placeholder="Tìm đơn theo tên sản phẩm..."
+                        className="w-full rounded-full border border-stone-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 md:w-72"
+                    />
+                </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                    {orders.map((o) => (
+                    {displayOrders.length === 0 && (
+                        <div className="rounded-xl bg-white p-8 text-center text-stone-600 shadow-md">
+                            {orders.length === 0
+                                ? "Bạn chưa có đơn hàng nào."
+                                : "Không tìm thấy đơn hàng chứa sản phẩm phù hợp với từ khóa."}
+                        </div>
+                    )}
+
+                    {displayOrders.map((o) => (
                         <div key={o.id} className="rounded-xl bg-white p-5 shadow-md transition transform hover:scale-[1.01]">
                             <div className="flex items-start justify-between">
                                 <div>
