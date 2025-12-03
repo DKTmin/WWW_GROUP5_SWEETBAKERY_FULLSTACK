@@ -33,6 +33,7 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
+            "/auth-management/api/v1/auth/refresh",
             "/payments/vnpay/create",
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
@@ -42,7 +43,6 @@ public class SecurityConfig {
     private final String[] POST_CUSTOMER_ENDPOINT = {
             "/customer-management/api/v1/customers/update/**",
     };
-
 
     private final String[] GET_PUBLIC_ENDPOINT = {
             "/user-management/api/v1/users/information",
@@ -55,7 +55,10 @@ public class SecurityConfig {
             "/pastry-management/api/v1/pastries/**",
             "/user-management/api/v1/users/**",
             "/employee-management/api/v1/employees/**",
-            "/gmail-management/api/v1/gmail/**"
+            "/gmail-management/api/v1/gmail/**",
+            "/customer-management/api/v1/customers/**",
+            "/admin/api/v1/employees/**",
+            "/admin/api/v1/customers/**"
     };
 
     @Bean
