@@ -14,6 +14,11 @@ import org.mapstruct.*;
  **/
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mappings({
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "roles", ignore = true)
+    })
     Employee toEmployee(EmployeeRegistrationRequest request);
 
     EmployeeRegistrationResponse toEmployeeRegistrationResponse(Employee employee);
