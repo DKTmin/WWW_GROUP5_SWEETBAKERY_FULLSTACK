@@ -9,8 +9,10 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
-
 public class PastryCategoryCreationRequest {
-    private String tenLoai;
+
+    String name;
+
+    // Mặc định category mới là active
+    Boolean isActive = true;
 }

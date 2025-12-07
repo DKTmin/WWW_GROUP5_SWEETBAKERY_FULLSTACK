@@ -37,7 +37,7 @@ public class SecurityConfig {
             "/payments/vnpay/create",
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
-            "/category-management/api/v1/categories/**",
+//            "/category-management/api/v1/categories/**",
             "/api/chat"
     };
 
@@ -62,7 +62,9 @@ public class SecurityConfig {
             "/gmail-management/api/v1/gmail/**",
             "/customer-management/api/v1/customers/**",
             "/admin/api/v1/employees/**",
-            "/admin/api/v1/customers/**"
+            "/admin/api/v1/customers/**",
+            "/admin/api/v1/pastries/**",          // <-- THÊM
+            "/admin/api/v1/categories/**"
     };
 
     @Bean

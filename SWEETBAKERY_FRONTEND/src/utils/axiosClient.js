@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8082/",
+  baseURL: "http://localhost:8082",
   headers: {
     "Content-Type": "application/json",
   },
@@ -9,7 +9,7 @@ const axiosClient = axios.create({
 
 // --- NEW: axios riêng để gọi refresh (không có interceptor request) ---
 const refreshClient = axios.create({
-  baseURL: "http://localhost:8082/",
+  baseURL: "http://localhost:8082",
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,7 +21,11 @@ let failedQueue = [];
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
-    error ? prom.reject(error) : prom.resolve(token);
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
   });
   failedQueue = [];
 };
@@ -63,12 +67,12 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       const refreshToken = localStorage.getItem("refresh_token");
-      const oldAccessToken = localStorage.getItem("access_token");
 
       try {
-        const rs = await refreshClient.post("/auth-management/api/v1/auth/refresh", {
-          refreshToken,
-        });
+        const rs = await refreshClient.post(
+          "/auth-management/api/v1/auth/refresh",
+          { refreshToken }
+        );
 
         const { accessToken, refreshToken: newRefreshToken } = rs.data.data;
 
@@ -77,7 +81,9 @@ axiosClient.interceptors.response.use(
           localStorage.setItem("refresh_token", newRefreshToken);
         }
 
-        axiosClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        axiosClient.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${accessToken}`;
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
         processQueue(null, accessToken);
@@ -86,23 +92,27 @@ axiosClient.interceptors.response.use(
         processQueue(refreshError, null);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        // Khi token hết hạn hoặc không hợp lệ:
-        // dọn toàn bộ thông tin đăng nhập & dữ liệu cục bộ liên quan
+
         try {
           localStorage.removeItem("cart");
           localStorage.removeItem("local_orders");
-          // thông báo cho các component (Header, Cart, ...) cập nhật lại state
           window.dispatchEvent(new CustomEvent("cart_update"));
         } catch (e) {
           console.warn("Failed to clear local storage on 401", e);
         }
+
         if (window.location.pathname !== "/login") {
           window.location.href = "/login";
         }
-        isRefreshing = false;
+
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
+
+    // Các lỗi khác (400, 403, 500, ...) => trả về cho caller xử lý
+    return Promise.reject(error);
   }
 );
 
