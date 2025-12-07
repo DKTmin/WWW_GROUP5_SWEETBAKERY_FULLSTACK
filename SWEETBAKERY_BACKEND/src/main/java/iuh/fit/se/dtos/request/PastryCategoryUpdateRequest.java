@@ -9,8 +9,9 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
-
 public class PastryCategoryUpdateRequest {
-    private String tenLoai;
+
+    String name;
+
+    Boolean isActive;
 }

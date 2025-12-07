@@ -1,12 +1,14 @@
-package iuh.fit.se.controllers;
+package iuh.fit.se.controllers.admin;
 
 import iuh.fit.se.dtos.request.PastryCategoryCreationRequest;
 import iuh.fit.se.dtos.request.PastryCategoryUpdateRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.PastryCategoryCreationResponse;
 import iuh.fit.se.dtos.response.PastryCategoryUpdateResponse;
+import iuh.fit.se.entities.PastryCategory;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.PastryCategoryService;
+import iuh.fit.se.services.admin.PastryCategoryAdminService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,14 +18,14 @@ import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController
-@RequestMapping("category-management/api/v1/categories")
+@RequestMapping("/admin/api/v1/categories")
 @RequiredArgsConstructor
-public class PastryCategoryController {
+public class PastryCategoryAdminController {
 
-    PastryCategoryService categoryService;
+    PastryCategoryAdminService categoryService;
 
     @GetMapping("/{id}")
-    public ApiResponse<PastryCategoryCreationResponse> getById(@PathVariable String id){
+    public ApiResponse<PastryCategoryCreationResponse> getById(@PathVariable String id) {
         return ApiResponse.<PastryCategoryCreationResponse>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
@@ -33,8 +35,8 @@ public class PastryCategoryController {
 
     @PostMapping
     public ApiResponse<PastryCategoryCreationResponse> save(
-            @RequestBody PastryCategoryCreationRequest request) {
-
+            @RequestBody PastryCategoryCreationRequest request
+    ) {
         return ApiResponse.<PastryCategoryCreationResponse>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
@@ -45,8 +47,8 @@ public class PastryCategoryController {
     @PutMapping("/{id}")
     public ApiResponse<PastryCategoryUpdateResponse> update(
             @PathVariable String id,
-            @RequestBody PastryCategoryUpdateRequest request) {
-
+            @RequestBody PastryCategoryUpdateRequest request
+    ) {
         return ApiResponse.<PastryCategoryUpdateResponse>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
@@ -56,21 +58,29 @@ public class PastryCategoryController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<?> delete(@PathVariable String id) {
+        boolean deleted = categoryService.delete(id);
+
+        if (!deleted) {
+            return ApiResponse.builder()
+                    .code(HttpCode.BAD_REQUEST.getCODE())
+                    .message("Không thể ẩn danh mục vì đang có bánh trong danh mục này.")
+                    .data(false)
+                    .build();
+        }
+
         return ApiResponse.builder()
                 .code(HttpCode.OK.getCODE())
-                .message(HttpCode.OK.getMESSAGE())
-                .data(categoryService.delete(id))
+                .message("Ẩn danh mục thành công.")
+                .data(true)
                 .build();
     }
 
     @GetMapping
-    // --- ĐÃ SỬA LỖI TẠI ĐÂY ---
-    // Đổi từ PastryCategory sang PastryCategoryCreationResponse
-    public ApiResponse<List<PastryCategoryCreationResponse>> getAll() {
-        return ApiResponse.<List<PastryCategoryCreationResponse>>builder()
+    public ApiResponse<List<PastryCategory>> getAll() {
+        return ApiResponse.<List<PastryCategory>>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(categoryService.findAll()) // Bây giờ kiểu dữ liệu đã khớp
+                .data(categoryService.findAll())
                 .build();
     }
 }
