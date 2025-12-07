@@ -5,10 +5,7 @@ import iuh.fit.se.dtos.request.EmployeeUpdateRequest;
 import iuh.fit.se.dtos.response.EmployeeRegistrationResponse;
 import iuh.fit.se.dtos.response.EmployeeUpdateResponse;
 import iuh.fit.se.entities.Employee;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.Mappings;
+import org.mapstruct.*;
 
 /**
  * @author : user664dntp
@@ -26,6 +23,7 @@ public interface EmployeeMapper {
 
     EmployeeUpdateResponse toEmployeeUpdateResponse(Employee employee);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mappings({
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "roles", ignore = true)

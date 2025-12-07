@@ -59,10 +59,11 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
             throw new AppException(HttpCode.USERNAME_EXISTED);
 
         Employee employee = employeeMapper.toEmployee(request);
-        Set<Role> roles = new HashSet<>();
-        Role employeeRole = roleRepository.findById(UserRole.EMPLOYEE.name())
-                .orElseThrow(() -> new NullPointerException("Employee role not found!"));
-        roles.add(employeeRole);
+        Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
+
+        if(roles.isEmpty())
+            throw new AppException(HttpCode.NOT_FOUND);
+
         employee.setRoles(roles);
         employeeRepository.save(employee);
 
@@ -125,11 +126,11 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
             );
         }
 
-        employeeRepository.save(employee);
-        accountCredentialRepository.saveAll(accountCredentialSet);
-
         Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
         employee.setRoles(roles);
+
+        employeeRepository.save(employee);
+        accountCredentialRepository.saveAll(accountCredentialSet);
 
         EmployeeUpdateResponse employeeUpdateResponse = employeeMapper.toEmployeeUpdateResponse(employee);
         if(passwordIsChanging)

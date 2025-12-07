@@ -55,12 +55,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<EmployeeRegistrationResponse> getALl() {
         return employeeRepository.findAll()
                 .stream()
-                .filter(user -> {
-                    Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
-                    if(adminRole != null)
-                        return !user.getRoles().contains(adminRole);
-                    return false;
-                })
+//                .filter(user -> {
+//                    Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
+//                    if(adminRole != null)
+//                        return !user.getRoles().contains(adminRole);
+//                    return false;
+//                })
                 .map(employeeMapper::toEmployeeRegistrationResponse)
                 .map(empResponse -> {
                     empResponse.setUsername(getUserName(empResponse.getId()));
