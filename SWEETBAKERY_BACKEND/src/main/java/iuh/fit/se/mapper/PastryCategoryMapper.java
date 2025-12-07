@@ -13,8 +13,10 @@ import org.mapstruct.MappingTarget;
 public interface PastryCategoryMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "pastries", ignore = true)
     PastryCategory toCategory(PastryCategoryCreationRequest request);
 
+    @Mapping(target = "pastries", ignore = true)
     void update(@MappingTarget PastryCategory category, PastryCategoryUpdateRequest request);
 
     PastryCategoryCreationResponse toCategoryCreationResponse(PastryCategory category);

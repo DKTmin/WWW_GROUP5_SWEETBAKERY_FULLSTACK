@@ -1,5 +1,6 @@
 package iuh.fit.se.dtos.response;
 
+import iuh.fit.se.entities.enums.PastryStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,6 +15,9 @@ public class PastryUpdateResponse {
     Double price;
     String description;
     String imageUrl;
+
+    Integer stockQuantity;
+    PastryStatus status;
 
     String categoryId;
     String categoryName;
