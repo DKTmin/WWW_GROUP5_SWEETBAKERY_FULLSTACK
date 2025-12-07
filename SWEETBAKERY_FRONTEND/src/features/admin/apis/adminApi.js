@@ -51,6 +51,14 @@ const adminApi = {
   createCategory: (data) =>
     axiosClient.post("/admin/api/v1/categories", data),
 
+  // customers
+  getAllCustomers: () => axiosClient.get("/customer-management/api/v1/customers"),
+
+  // orders
+  getAllOrders: () => axiosClient.get("/admin/api/v1/orders"),
+  getOrderById: (orderId) => axiosClient.get(`/admin/api/v1/orders/${orderId}`),
+  updateOrderStatus: (orderId, status) =>
+    axiosClient.put(`/admin/api/v1/orders/${orderId}/status`, { trangThai: status }),
   updateCategory: (id, data) =>
     axiosClient.put(`/admin/api/v1/categories/${id}`, data),
 

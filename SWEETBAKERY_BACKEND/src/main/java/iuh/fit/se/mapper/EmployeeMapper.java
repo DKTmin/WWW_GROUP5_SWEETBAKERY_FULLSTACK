@@ -5,7 +5,11 @@ import iuh.fit.se.dtos.request.EmployeeUpdateRequest;
 import iuh.fit.se.dtos.response.EmployeeRegistrationResponse;
 import iuh.fit.se.dtos.response.EmployeeUpdateResponse;
 import iuh.fit.se.entities.Employee;
+import iuh.fit.se.entities.Role;
 import org.mapstruct.*;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author : user664dntp
@@ -27,6 +31,15 @@ public interface EmployeeMapper {
     Employee toEmployee(EmployeeUpdateRequest request);
 
     EmployeeUpdateResponse toEmployeeUpdateResponse(Employee employee);
+
+//    default Set<Role> map(List<String> roles) {
+//        if (roles == null)
+//            return null;
+//        return roles.stream()
+//                .filter(r -> r != null && !r.isBlank())
+//                .map(r -> Role.builder().name(r).build())
+//                .collect(Collectors.toSet());
+//    }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mappings({
