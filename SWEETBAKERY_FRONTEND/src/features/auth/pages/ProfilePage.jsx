@@ -4,6 +4,11 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import authApi from "../apis/authApi"
+import { getFavorites, removeFavorite } from "../../../utils/favoriteUtils";
+
+
+
+
 
 // --- ICONS ---
 const UserCircleIcon = ({ className }) => (
@@ -153,6 +158,17 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("info")
+  const [favoriteList, setFavoriteList] = useState([]);
+
+  useEffect(() => {
+  setFavoriteList(getFavorites());
+
+  // Cập nhật khi có thay đổi
+  const update = () => setFavoriteList(getFavorites());
+  window.addEventListener("favorites_update", update);
+
+  return () => window.removeEventListener("favorites_update", update);
+}, []);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token")
@@ -357,24 +373,45 @@ export default function ProfilePage() {
 
             {/* Tab: Yêu thích */}
             {activeTab === "favorites" && (
-              <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+              <div className="rounded-2xl bg-white shadow-sm overflow-hidden">
                 <div className="border-b border-stone-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4">
                   <h3 className="text-lg font-bold text-stone-800">Sản phẩm yêu thích</h3>
-                  <p className="text-sm text-stone-500">Danh sách các sản phẩm bạn đã lưu</p>
                 </div>
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <HeartIcon className="mb-4 h-16 w-16 text-stone-300" />
-                  <h4 className="text-lg font-semibold text-stone-700">Danh sách trống</h4>
-                  <p className="mt-1 text-sm text-stone-500">Bạn chưa thêm sản phẩm yêu thích nào.</p>
-                  <Link
-                    to="/category/all"
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-700 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-amber-800"
-                  >
+
+                {favoriteList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <HeartIcon className="mb-4 h-16 w-16 text-stone-300" />
+                    <h4 className="text-lg font-semibold text-stone-700">Danh sách trống</h4>
+                    <Link to="/category/all" className="mt-4 bg-amber-700 text-white px-5 py-2 rounded-full">
                     Khám phá sản phẩm
-                  </Link>
-                </div>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 p-6">
+                    {favoriteList.map((p) => (
+                      <div key={p.id} className="border rounded-xl p-4 shadow-sm bg-stone-50">
+                        <Link to={`/product/${p.id}`}>
+                          <img src={p.image} className="w-full h-32 object-cover rounded-lg" />
+                        </Link>
+
+                        <h4 className="mt-2 font-semibold">{p.name}</h4>
+                        <p className="text-amber-700 font-bold">{p.price} VND</p>
+
+                        <button 
+                          onClick={() => {
+                          removeFavorite(p.id);
+                          setFavoriteList(getFavorites());
+                        }}
+                        className="mt-3 text-sm text-red-600 hover:underline"
+                        >
+                          Xóa khỏi yêu thích
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+           )}
 
             {/* Tab: Chỉnh sửa */}
             {activeTab === "edit" && (

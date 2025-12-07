@@ -37,6 +37,19 @@ const EyeIcon = ({ className }) => (
   </svg>
 );
 
+// ❤️ Icon yêu thích
+const HeartIcon = ({ className, filled }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={filled ? "red" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    className={className}
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
 export default function PastryCard({ pastry }) {
   // Xử lý dữ liệu an toàn
   const image = pastry.imageUrl || pastry.image || "/placeholder.png";
@@ -45,6 +58,40 @@ export default function PastryCard({ pastry }) {
     ? (Number(pastry.price).toLocaleString("vi-VN") + "₫")
     : "Liên hệ";
   const description = pastry.description || "";
+
+   // -----------------------------
+  // ❤️ Thêm sản phẩm yêu thích
+  // -----------------------------
+  const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+  const isFavorite = favorites.some((item) => item.id === pastry.id);
+
+  const toggleFavorite = (e) => {
+    e.preventDefault(); // tránh việc click bị chuyển trang
+
+    let updated = [];
+
+    if (isFavorite) {
+      // Nếu đang yêu thích → Xóa khỏi danh sách
+      updated = favorites.filter((item) => item.id !== pastry.id);
+    } else {
+      // Nếu chưa yêu thích → Thêm vào danh sách
+      updated = [
+        ...favorites,
+        {
+          id: pastry.id,
+          name,
+          image,
+          price: pastry.price,
+        },
+      ];
+    }
+
+    localStorage.setItem("favorites", JSON.stringify(updated));
+    window.dispatchEvent(new Event("favorites_update")); // để cập nhật icon realtime
+
+    // Refresh component
+    window.location.reload();
+  };
 
   // Hàm xử lý khi bấm thêm vào giỏ
   const handleAddToCart = (e) => {
@@ -120,6 +167,14 @@ export default function PastryCard({ pastry }) {
             </p>
           )}
         </div>
+
+         {/* ❤️ ICON YÊU THÍCH */}
+        <button
+          onClick={toggleFavorite}
+          className="absolute right-3 top-3 p-2 rounded-full bg-white/80 backdrop-blur shadow hover:scale-110 transition"
+        >
+          <HeartIcon className="h-5 w-5 text-red-600" filled={isFavorite} />
+        </button>
 
         {/* Giá & Nút hành động */}
         <div className="flex items-center justify-between border-t border-stone-100 pt-3 mt-auto">

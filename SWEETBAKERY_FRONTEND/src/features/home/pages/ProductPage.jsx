@@ -4,6 +4,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import pastryApi from "../apis/pastryApi";
 import PastryCard from "../components/PastryCard";
 import cartApi from "../../cart/apis/cartApi"
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+
 
 // --- ICONS ---
 const StarIcon = ({ className }) => (
@@ -37,6 +39,29 @@ export default function ProductPage() {
   // Gallery & Form state
   const [mainImage, setMainImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
+
+  const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+const [isFavorite, setIsFavorite] = useState(
+  favorites.some((p) => p.id === Number(id))
+);
+
+const toggleFavorite = () => {
+  let updated;
+  if (isFavorite) {
+    updated = favorites.filter((p) => p.id !== Number(id));
+  } else {
+    updated = [...favorites, {
+      id: pastry.id,
+      name: pastry.name,
+      image: pastry.imageUrl || pastry.image,
+      price: pastry.price
+    }];
+  }
+
+  localStorage.setItem("favorites", JSON.stringify(updated));
+  setIsFavorite(!isFavorite);
+};
+
 
   useEffect(() => {
     if (!id) return;
@@ -170,7 +195,20 @@ export default function ProductPage() {
           {/* LEFT: GALLERY */}
           <div className="flex flex-col gap-4">
             <div className="group relative aspect-square w-full overflow-hidden rounded-3xl bg-white shadow-sm border border-stone-100">
+              {/* Icon yêu thích */}
+              <button
+              onClick={toggleFavorite}
+               className="absolute top-3 right-3 z-20 bg-white p-2 rounded-full shadow cursor-pointer"
+              >
+              {isFavorite ? (
+               <AiFillHeart size={26} className="text-red-500" />
+              ) : (
+              <AiOutlineHeart size={26} className="text-gray-600" />
+              )}
+              </button>
+
               <img src={mainImage} alt={pastry.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            
             </div>
 
             {/* Thumbnails */}
