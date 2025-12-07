@@ -15,25 +15,29 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface PastryMapper {
 
-    // Khi mapping từ Request -> Entity, ignore id (generated), ignore orderDetails, ignore category (set in service)
+    // Request -> Entity: bỏ id, orderDetails, category (category set trong service)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orderDetails", ignore = true)
     @Mapping(target = "category", ignore = true)
     Pastry toPastry(PastryCreationRequest request);
 
-    // update entity từ update request: ignore id, orderDetails, category
+    // Update: cũng bỏ id, orderDetails, category
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orderDetails", ignore = true)
     @Mapping(target = "category", ignore = true)
     void update(@MappingTarget Pastry pastry, PastryUpdateRequest request);
 
-    // Entity -> CreationResponse: map category fields
-    @Mapping(target = "categoryId", expression = "java(pastry.getCategory() != null ? pastry.getCategory().getId() : null)")
-    @Mapping(target = "categoryName", expression = "java(pastry.getCategory() != null ? pastry.getCategory().getName() : null)")
+    // Entity -> CreationResponse: map thêm categoryId, categoryName
+    @Mapping(target = "categoryId",
+            expression = "java(pastry.getCategory() != null ? pastry.getCategory().getId() : null)")
+    @Mapping(target = "categoryName",
+            expression = "java(pastry.getCategory() != null ? pastry.getCategory().getName() : null)")
     PastryCreationResponse toPastryCreationResponse(Pastry pastry);
 
-    // Entity -> UpdateResponse: map category fields
-    @Mapping(target = "categoryId", expression = "java(pastry.getCategory() != null ? pastry.getCategory().getId() : null)")
-    @Mapping(target = "categoryName", expression = "java(pastry.getCategory() != null ? pastry.getCategory().getName() : null)")
+    // Entity -> UpdateResponse: map thêm categoryId, categoryName
+    @Mapping(target = "categoryId",
+            expression = "java(pastry.getCategory() != null ? pastry.getCategory().getId() : null)")
+    @Mapping(target = "categoryName",
+            expression = "java(pastry.getCategory() != null ? pastry.getCategory().getName() : null)")
     PastryUpdateResponse toPastryUpdateResponse(Pastry pastry);
 }

@@ -21,6 +21,7 @@ public class CustomerUpdateByAdminRequest {
     String oldPassword;
     String newPassword;
     String confirmNewPassword;
+    String email;
     String phoneNumber;
     String address;
     Integer loyaltyPoints;

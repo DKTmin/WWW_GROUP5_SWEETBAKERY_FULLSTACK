@@ -21,8 +21,10 @@ import java.util.Set;
 public class CustomerUpdateByAdminResponse {
     String firstName;
     String lastName;
+    String newPassword;
+    String email;
     String phoneNumber;
     String address;
+    Integer loyaltyPoints;
     Set<AccountCredentialResponse> accounts;
-    Set<Role> roles;
 }

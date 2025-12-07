@@ -62,6 +62,7 @@ export default function AppRoutes() {
       <Route path="/admin" element={<AdminLoginPage />} />
       <Route path="/admin/verify-otp" element={<AdminOTPPage />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
   )
 }

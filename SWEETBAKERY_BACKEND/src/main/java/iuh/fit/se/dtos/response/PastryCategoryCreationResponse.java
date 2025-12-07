@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class PastryCategoryCreationResponse {
     String id;
     String name;
+    boolean isActive;   // true = đang dùng, false = ẩn
 }

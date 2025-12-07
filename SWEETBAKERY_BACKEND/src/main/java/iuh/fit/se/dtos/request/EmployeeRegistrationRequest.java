@@ -4,6 +4,8 @@ import iuh.fit.se.validator.constraint.PasswordConstraint;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 /**
  * @author : user664dntp
  * @mailto : phatdang19052004@gmail.com
@@ -29,4 +31,5 @@ public class EmployeeRegistrationRequest {
     String address;
     String identification;
     Integer numOfExperience;
+    List<String> roles;
 }

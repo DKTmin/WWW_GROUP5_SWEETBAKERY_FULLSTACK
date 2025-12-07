@@ -1,8 +1,10 @@
 package iuh.fit.se.services.admin.impl;
 
 import iuh.fit.se.dtos.request.CustomerRegistrationRequest;
+import iuh.fit.se.dtos.request.CustomerUpdateByAdminRequest;
 import iuh.fit.se.dtos.response.AccountCredentialResponse;
 import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
+import iuh.fit.se.dtos.response.CustomerUpdateByAdminResponse;
 import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.Customer;
 import iuh.fit.se.entities.Role;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author : user664dntp
@@ -90,5 +93,39 @@ public class CustomerAdminServiceImpl implements CustomerAdminService {
         customerRegistrationResponse.setAccounts(accountCredentialResponses);
         customerRegistrationResponse.setUsername(request.getUsername());
         return customerRegistrationResponse;
+    }
+
+    @Override
+    public CustomerUpdateByAdminResponse update(String customerId, CustomerUpdateByAdminRequest request) {
+        Customer customer = (Customer) userRepository.findById(customerId).orElse(null);
+        if(customer == null) throw new AppException(HttpCode.NOT_FOUND);
+        customerMapper.updateCustomerByAdmin(customer, request);
+
+        Set<AccountCredential> accounts = accountCredentialRepository.findAllByUserId(customerId);
+        if(accounts.isEmpty()) throw new AppException(HttpCode.NOT_FOUND);
+        AccountCredential emailAccount = accountCredentialRepository
+                .findByUserIdAndAccountType(customerId, AccountType.EMAIL);
+        if(emailAccount == null)throw new AppException(HttpCode.NOT_FOUND);
+        emailAccount.setCredential(request.getEmail());
+
+        boolean passwordIsChanging = request.getOldPassword() != null
+                && request.getNewPassword() != null
+                && request.getConfirmNewPassword() != null;
+        if(passwordIsChanging){
+            if(!passwordEncoder.matches(request.getOldPassword(), emailAccount.getPassword()))
+                throw new AppException(HttpCode.PASSWORD_INCORRECT);
+            if(!request.getNewPassword().equalsIgnoreCase(request.getConfirmNewPassword()))
+                throw new AppException(HttpCode.PASSWORD_NOMATCH);
+            accounts.forEach(acc -> acc.setPassword(passwordEncoder.encode(request.getNewPassword())));
+        }
+
+        customerRepository.save(customer);
+        accountCredentialRepository.saveAll(accounts);
+
+        CustomerUpdateByAdminResponse response =  customerMapper.toCustomerUpdateByAdminResponse(customer);
+        response.setLoyaltyPoints(request.getLoyaltyPoints());
+        response.setNewPassword(request.getNewPassword());
+
+        return response;
     }
 }
