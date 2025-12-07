@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import adminApi from "./../../apis/adminApi";
 
 export default function EmployeeManagement() {
@@ -19,53 +19,57 @@ export default function EmployeeManagement() {
     identification: "",
     address: "",
     numOfExperience: 0,
-
-    // Field cho Tạo mới
+    roles: ["EMPLOYEE"], // Mặc định chọn Employee
+    // Password fields
     password: "",
     confirmPassword: "",
-
-    // Field cho Cập nhật (Update DTO)
     oldPassword: "",
     newPassword: "",
     confirmNewPassword: "",
-
-    // Roles
-    roles: ["EMPLOYEE"], // Mặc định chọn Employee
   };
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // ... (Giữ nguyên phần fetchUsers, handleInputChange, handleRoleChange...)
-  // ----- 1. LẤY DANH SÁCH USER -----
-  const fetchUsers = async () => {
+  // ----- 1. LẤY DANH SÁCH USER (Dùng useCallback để tránh render vô hạn) -----
+  const fetchUsers = useCallback(async () => {
     try {
       const res = await adminApi.getAllEmployees();
-      const mappedUsers = res.data.data.map((u) => ({
-        id: u.id,
-        fullName: `${u.firstName} ${u.lastName}`,
-        email: u.email,
-        phone: u.phoneNumber,
-        roleName: u.roles?.[0]?.name || "N/A",
-        status: "Hoạt động",
-        // Data gốc
-        firstName: u.firstName,
-        lastName: u.lastName,
-        username: u.username,
-        identification: u.identification,
-        address: u.address,
-        numOfExperience: u.numOfExperience,
-        roles: u.roles ? u.roles.map((r) => r.name) : [],
-      }));
-      setUsers(mappedUsers);
+
+      // Kiểm tra data trả về có hợp lệ không
+      if (res && res.data && res.data.data) {
+        const mappedUsers = res.data.data.map((u) => ({
+          id: u.id,
+          fullName: `${u.firstName} ${u.lastName}`,
+          email: u.email,
+          phone: u.phoneNumber,
+          roleName: u.roles?.[0]?.name || "N/A",
+          status: "Hoạt động",
+          // Data gốc để fill vào form sửa
+          firstName: u.firstName,
+          lastName: u.lastName,
+          username: u.username,
+          identification: u.identification,
+          address: u.address,
+          numOfExperience: u.numOfExperience,
+          roles: u.roles ? u.roles.map((r) => r.name) : [],
+        }));
+        setUsers(mappedUsers);
+      }
     } catch (err) {
       console.error("Load users failed:", err);
+      // Nếu load danh sách mà bị 401 thì cũng báo lỗi luôn
+      if (err.response && err.response.status === 401) {
+        console.warn("Token hết hạn hoặc không có quyền!");
+      }
     }
-  };
-
-  useEffect(() => {
-    fetchUsers();
   }, []);
 
+  // Gọi hàm trong useEffect
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // ----- HANDLERS FORM -----
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -103,7 +107,7 @@ export default function EmployeeManagement() {
     setFormData(initialFormState);
   };
 
-  // ----- 5. SUBMIT (TẠO HOẶC SỬA) - ĐÃ SỬA LOGIC -----
+  // ----- 5. SUBMIT (QUAN TRỌNG: XỬ LÝ LỖI 401 TẠI ĐÂY) -----
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -111,6 +115,7 @@ export default function EmployeeManagement() {
     try {
       // Validate chung
       const experience = parseInt(formData.numOfExperience) || 0;
+      let res; // Biến hứng kết quả trả về
 
       if (editingId) {
         // === LOGIC SỬA (UPDATE) ===
@@ -129,16 +134,12 @@ export default function EmployeeManagement() {
           identification: formData.identification,
           numOfExperience: experience,
           roles: formData.roles,
-          // Password fields
           oldPassword: formData.oldPassword || null,
           newPassword: formData.newPassword || null,
           confirmNewPassword: formData.confirmNewPassword || null,
         };
 
-        await adminApi.updateEmployee(editingId, updatePayload);
-        alert("Cập nhật thành công!");
-        handleCancel();
-        fetchUsers();
+        res = await adminApi.updateEmployee(editingId, updatePayload);
       } else {
         // === LOGIC THÊM MỚI (CREATE) ===
         if (formData.password !== formData.confirmPassword) {
@@ -158,26 +159,49 @@ export default function EmployeeManagement() {
           numOfExperience: experience,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
-          roles: formData.roles, // QUAN TRỌNG: Thêm roles vào payload
+          roles: formData.roles,
         };
 
-        // Hứng response về để check status
-        const res = await adminApi.createEmployee(createPayload);
+        console.log("Đang gửi payload:", createPayload); // Debug: Xem dữ liệu gửi đi
+        res = await adminApi.createEmployee(createPayload);
+      }
 
-        // Check đúng status 201 Created
-        if (res.status === 201) {
-          alert("Thêm mới thành công!");
-          handleCancel();
-          fetchUsers();
-        } else {
-          // Trường hợp trả về 200 hoặc mã khác nhưng không phải 201
-          alert("Tạo thất bại. Mã phản hồi: " + res.status);
-        }
+      console.log("API Success Response:", res); // Debug: Xem kết quả thành công
+
+      // Kiểm tra status code (201 cho create, 200 cho update)
+      if (res && (res.status === 201 || res.status === 200)) {
+        alert(editingId ? "Cập nhật thành công!" : "Thêm mới thành công!");
+        handleCancel();
+        fetchUsers();
+      } else {
+        // Trường hợp API trả về 200 nhưng message lỗi (nếu có logic đó)
+        alert("Thao tác thành công (Status: " + res?.status + ")");
+        handleCancel();
+        fetchUsers();
       }
     } catch (error) {
-      console.error("Submit failed:", error);
-      const msg = error.response?.data?.message || "Có lỗi xảy ra!";
-      alert(msg);
+      console.error("API Error Response:", error); // Debug: Xem lỗi chi tiết
+
+      const status = error.response?.status;
+      const data = error.response?.data;
+
+      // --- XỬ LÝ LỖI CỤ THỂ ---
+      if (status === 401) {
+        alert(
+          `Lỗi 401: Phiên đăng nhập hết hạn hoặc Token không hợp lệ.\nChi tiết: ${data?.message || "Unauthenticated"}`
+        );
+        // Bạn có thể thêm lệnh chuyển hướng về trang login ở đây:
+        // window.location.href = '/admin';
+      } else if (status === 403) {
+        alert("Lỗi 403: Bạn không có quyền thực hiện hành động này!");
+      } else if (status === 400 || status === 422) {
+        // Lỗi validation từ backend
+        const msg = data?.message || "Dữ liệu không hợp lệ!";
+        alert(`Lỗi nhập liệu: ${msg}`);
+      } else {
+        const msg = data?.message || "Có lỗi không xác định xảy ra!";
+        alert(`Thất bại: ${msg}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -188,9 +212,15 @@ export default function EmployeeManagement() {
     if (!window.confirm("Bạn có chắc muốn xóa?")) return;
     try {
       await adminApi.deleteUser(userId);
+      alert("Xóa thành công!");
       fetchUsers();
     } catch (error) {
-      alert("Xóa thất bại!");
+      console.error("Delete error:", error);
+      if (error.response?.status === 401) {
+        alert("Lỗi 401: Hết phiên đăng nhập. Vui lòng login lại.");
+      } else {
+        alert("Xóa thất bại!");
+      }
     }
   };
 
