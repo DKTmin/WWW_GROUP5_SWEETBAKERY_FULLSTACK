@@ -19,5 +19,6 @@ public class OrderResponse {
     String trangThai;
     String paymentUrl;
     String customerAddress;
+    String customerName;
     List<OrderDetailResponse> items;
 }
