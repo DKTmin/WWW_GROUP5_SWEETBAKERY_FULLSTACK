@@ -62,7 +62,8 @@ public class SecurityConfig {
             "/gmail-management/api/v1/gmail/**",
             "/customer-management/api/v1/customers/**",
             "/admin/api/v1/employees/**",
-            "/admin/api/v1/customers/**"
+            "/admin/api/v1/customers/**",
+            "/admin/api/v1/orders/**"
     };
 
     @Bean
@@ -85,6 +86,8 @@ public class SecurityConfig {
                             UserRole.ADMIN.name()
                     )
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(HttpMethod.PUT, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(HttpMethod.POST, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .requestMatchers(SWAGGER_WHITELIST).permitAll()
                     .anyRequest().authenticated();
         }).oauth2ResourceServer(oauth2 -> {

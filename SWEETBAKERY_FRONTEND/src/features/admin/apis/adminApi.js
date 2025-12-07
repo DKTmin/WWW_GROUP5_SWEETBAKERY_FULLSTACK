@@ -13,6 +13,12 @@ const adminApi = {
 
   // customers
   getAllCustomers: () => axiosClient.get("/customer-management/api/v1/customers"),
+
+  // orders
+  getAllOrders: () => axiosClient.get("/admin/api/v1/orders"),
+  getOrderById: (orderId) => axiosClient.get(`/admin/api/v1/orders/${orderId}`),
+  updateOrderStatus: (orderId, status) =>
+    axiosClient.put(`/admin/api/v1/orders/${orderId}/status`, { trangThai: status }),
 };
 
 export default adminApi;
