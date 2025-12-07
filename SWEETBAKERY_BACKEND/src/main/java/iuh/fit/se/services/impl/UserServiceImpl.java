@@ -46,12 +46,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream()
-                .filter(user -> {
-                    Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
-                    if(adminRole != null)
-                        return !user.getRoles().contains(adminRole);
-                    return false;
-                })
+//                .filter(user -> {
+//                    Role adminRole = roleRepository.findById(UserRole.ADMIN.name()).orElse(null);
+//                    if(adminRole != null)
+//                        return !user.getRoles().contains(adminRole);
+//                    return false;
+//                })
                 .map(userMapper::toUserResponse)
                 .map(userResponse -> {
                     Set<AccountCredential> accountCredential = accountCredentialRepository.findAllByUserId(userResponse.getId());

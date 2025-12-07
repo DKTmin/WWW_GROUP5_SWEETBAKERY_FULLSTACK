@@ -35,6 +35,11 @@ const adminApi = {
 
   deletePastry: (id) =>
     axiosClient.delete(`/admin/api/v1/pastries/${id}`),
+  // employees
+  getAllEmployees: () => axiosClient.get("/employee-management/api/v1/employees"),
+  createEmployee: (data) => axiosClient.post("/admin/api/v1/employees", data),
+  updateEmployee: (employeeId, newInfor) =>
+    axiosClient.put(`/admin/api/v1/employees/${employeeId}`, newInfor),
 
   // ===================================================
   // ============ ADMIN CATEGORIES =====================
