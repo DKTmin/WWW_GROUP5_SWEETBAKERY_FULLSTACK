@@ -4,160 +4,467 @@ import adminApi from "./../../apis/adminApi";
 export default function EmployeeManagement() {
   const [showForm, setShowForm] = useState(false);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // ----- TÁCH fetchUsers RA NGOÀI -----
+  // State để biết đang ở chế độ Sửa (có ID) hay Thêm (null)
+  const [editingId, setEditingId] = useState(null);
+
+  // --- STATE FORM ĐẦY ĐỦ ---
+  const initialFormState = {
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    identification: "",
+    address: "",
+    numOfExperience: 0,
+
+    // Field cho Tạo mới
+    password: "",
+    confirmPassword: "",
+
+    // Field cho Cập nhật (Update DTO)
+    oldPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+
+    // Roles
+    roles: ["EMPLOYEE"], // Mặc định chọn Employee
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  // ... (Giữ nguyên phần fetchUsers, handleInputChange, handleRoleChange...)
+  // ----- 1. LẤY DANH SÁCH USER -----
   const fetchUsers = async () => {
     try {
       const res = await adminApi.getAllEmployees();
-
       const mappedUsers = res.data.data.map((u) => ({
         id: u.id,
-        name: `${u.firstName} ${u.lastName}`,
+        fullName: `${u.firstName} ${u.lastName}`,
         email: u.email,
         phone: u.phoneNumber,
-        role: u.roles?.[0]?.name || "Không rõ",
+        roleName: u.roles?.[0]?.name || "N/A",
         status: "Hoạt động",
+        // Data gốc
+        firstName: u.firstName,
+        lastName: u.lastName,
+        username: u.username,
+        identification: u.identification,
+        address: u.address,
+        numOfExperience: u.numOfExperience,
+        roles: u.roles ? u.roles.map((r) => r.name) : [],
       }));
-
       setUsers(mappedUsers);
     } catch (err) {
       console.error("Load users failed:", err);
     }
   };
 
-  // Gọi khi component load lần đầu
   useEffect(() => {
-    const load = async () => {
-      await fetchUsers(); // setUsers chạy trong hàm async → OK
-    };
-    load();
+    fetchUsers();
   }, []);
 
-  // ----- XOÁ USER -----
-  const handleDelete = async (userId) => {
-    const confirmDelete = window.confirm("Anh có chắc chắn muốn xóa người dùng này không?");
-    if (!confirmDelete) return;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleRoleChange = (roleName) => {
+    const currentRoles = formData.roles;
+    if (currentRoles.includes(roleName)) {
+      setFormData({ ...formData, roles: currentRoles.filter((r) => r !== roleName) });
+    } else {
+      setFormData({ ...formData, roles: [...currentRoles, roleName] });
+    }
+  };
+
+  const handleEditClick = (user) => {
+    setEditingId(user.id);
+    setFormData({
+      ...initialFormState,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
+      phoneNumber: user.phone,
+      identification: user.identification,
+      address: user.address,
+      numOfExperience: user.numOfExperience,
+      roles: user.roles,
+    });
+    setShowForm(true);
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData(initialFormState);
+  };
+
+  // ----- 5. SUBMIT (TẠO HOẶC SỬA) - ĐÃ SỬA LOGIC -----
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      await adminApi.deleteUser(userId);
-      alert("Xóa thành công!");
+      // Validate chung
+      const experience = parseInt(formData.numOfExperience) || 0;
 
-      // Load lại danh sách
+      if (editingId) {
+        // === LOGIC SỬA (UPDATE) ===
+        if (formData.newPassword && formData.newPassword !== formData.confirmNewPassword) {
+          alert("Mật khẩu mới không khớp!");
+          setLoading(false);
+          return;
+        }
+
+        const updatePayload = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          identification: formData.identification,
+          numOfExperience: experience,
+          roles: formData.roles,
+          // Password fields
+          oldPassword: formData.oldPassword || null,
+          newPassword: formData.newPassword || null,
+          confirmNewPassword: formData.confirmNewPassword || null,
+        };
+
+        await adminApi.updateEmployee(editingId, updatePayload);
+        alert("Cập nhật thành công!");
+        handleCancel();
+        fetchUsers();
+      } else {
+        // === LOGIC THÊM MỚI (CREATE) ===
+        if (formData.password !== formData.confirmPassword) {
+          alert("Mật khẩu xác nhận không khớp!");
+          setLoading(false);
+          return;
+        }
+
+        const createPayload = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          username: formData.username,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          identification: formData.identification,
+          numOfExperience: experience,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          roles: formData.roles, // QUAN TRỌNG: Thêm roles vào payload
+        };
+
+        // Hứng response về để check status
+        const res = await adminApi.createEmployee(createPayload);
+
+        // Check đúng status 201 Created
+        if (res.status === 201) {
+          alert("Thêm mới thành công!");
+          handleCancel();
+          fetchUsers();
+        } else {
+          // Trường hợp trả về 200 hoặc mã khác nhưng không phải 201
+          alert("Tạo thất bại. Mã phản hồi: " + res.status);
+        }
+      }
+    } catch (error) {
+      console.error("Submit failed:", error);
+      const msg = error.response?.data?.message || "Có lỗi xảy ra!";
+      alert(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ----- 6. XÓA -----
+  const handleDelete = async (userId) => {
+    if (!window.confirm("Bạn có chắc muốn xóa?")) return;
+    try {
+      await adminApi.deleteUser(userId);
       fetchUsers();
     } catch (error) {
-      console.error(error);
       alert("Xóa thất bại!");
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* HEADER */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800">Quản lý tài khoản</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
-        >
-          {showForm ? "Hủy" : "+ Thêm tài khoản"}
-        </button>
+        <h2 className="text-2xl font-bold text-slate-800">Quản lý nhân viên</h2>
+        {!showForm && (
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setEditingId(null);
+              setFormData(initialFormState);
+            }}
+            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+          >
+            + Thêm nhân viên
+          </button>
+        )}
       </div>
 
+      {/* FORM */}
       {showForm && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Thêm tài khoản mới</h3>
-          <form className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800">
+            {editingId ? "Cập nhật thông tin" : "Thêm nhân viên mới"}
+          </h3>
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            {/* HỌ TÊN */}
             <div>
-              <label className="block text-sm font-medium text-slate-700">Họ tên</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Họ</label>
               <input
-                type="text"
-                placeholder="Nhập họ tên"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none"
+                required
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                className="input-style"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700">Email</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Tên</label>
               <input
+                required
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                className="input-style"
+              />
+            </div>
+
+            {/* USERNAME */}
+            <div className={editingId ? "opacity-50" : ""}>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Username</label>
+              <input
+                required={!editingId}
+                readOnly={!!editingId}
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                className="input-style bg-slate-50"
+              />
+            </div>
+
+            {/* EMAIL */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+              <input
+                required
                 type="email"
-                placeholder="Nhập email"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="input-style"
               />
             </div>
+
+            {/* SĐT & CCCD */}
             <div>
-              <label className="block text-sm font-medium text-slate-700">Số điện thoại</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">SĐT</label>
               <input
-                type="tel"
-                placeholder="Nhập số điện thoại"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none"
+                required
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                className="input-style"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700">Vai trò</label>
-              <select className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none">
-                <option>Chọn vai trò</option>
-                <option>Khách hàng</option>
-                <option>Quản trị viên</option>
-              </select>
+              <label className="mb-1 block text-sm font-medium text-slate-700">CCCD</label>
+              <input
+                required
+                name="identification"
+                value={formData.identification}
+                onChange={handleInputChange}
+                className="input-style"
+              />
             </div>
+
+            {/* KINH NGHIỆM & ĐỊA CHỈ */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Kinh nghiệm (năm)
+              </label>
+              <input
+                required
+                type="number"
+                name="numOfExperience"
+                value={formData.numOfExperience}
+                onChange={handleInputChange}
+                className="input-style"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Địa chỉ</label>
+              <input
+                required
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="input-style"
+              />
+            </div>
+
+            {/* ROLES CHECKBOX */}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-slate-700">Mật khẩu</label>
-              <input
-                type="password"
-                placeholder="Nhập mật khẩu"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none"
-              />
+              <label className="mb-1 block text-sm font-medium text-slate-700">Vai trò</label>
+              <div className="flex gap-4 mt-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.roles.includes("EMPLOYEE")}
+                    onChange={() => handleRoleChange("EMPLOYEE")}
+                  />
+                  <span>Nhân viên (EMPLOYEE)</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.roles.includes("ADMIN")}
+                    onChange={() => handleRoleChange("ADMIN")}
+                  />
+                  <span>Quản trị viên (ADMIN)</span>
+                </label>
+              </div>
             </div>
-            <div className="flex gap-3 sm:col-span-2">
+
+            {/* PASSWORD FIELDS */}
+            {!editingId && (
+              <>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">Mật khẩu</label>
+                  <input
+                    required
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="input-style"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Xác nhận mật khẩu
+                  </label>
+                  <input
+                    required
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="input-style"
+                  />
+                </div>
+              </>
+            )}
+
+            {editingId && (
+              <div className="sm:col-span-2 rounded-lg bg-slate-50 p-4 border border-slate-200">
+                <p className="mb-3 text-sm font-bold text-slate-600">
+                  Đổi mật khẩu (Bỏ trống nếu không đổi)
+                </p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-500">
+                      Mật khẩu cũ (Nếu có)
+                    </label>
+                    <input
+                      type="password"
+                      name="oldPassword"
+                      value={formData.oldPassword}
+                      onChange={handleInputChange}
+                      className="input-style text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-500">
+                      Mật khẩu mới
+                    </label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleInputChange}
+                      className="input-style text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-500">
+                      Xác nhận MK mới
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmNewPassword"
+                      value={formData.confirmNewPassword}
+                      onChange={handleInputChange}
+                      className="input-style text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ACTION BUTTONS */}
+            <div className="mt-2 flex gap-3 sm:col-span-2">
               <button
+                disabled={loading}
                 type="submit"
-                className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+                className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:bg-slate-400"
               >
-                Lưu
+                {loading ? "Đang xử lý..." : editingId ? "Cập nhật" : "Lưu mới"}
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                onClick={handleCancel}
+                className="rounded-lg border border-slate-300 px-6 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Hủy
+                Hủy bỏ
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm overflow-x-auto">
+      {/* TABLE */}
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200">
             <tr>
               <th className="px-4 py-3 font-semibold text-slate-600">Tên</th>
               <th className="px-4 py-3 font-semibold text-slate-600">Email</th>
-              <th className="px-4 py-3 font-semibold text-slate-600">Số điện thoại</th>
+              <th className="px-4 py-3 font-semibold text-slate-600">SĐT</th>
               <th className="px-4 py-3 font-semibold text-slate-600">Vai trò</th>
-              <th className="px-4 py-3 font-semibold text-slate-600">Trạng thái</th>
               <th className="px-4 py-3 font-semibold text-slate-600">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className="border-t border-slate-100 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-800">{user.name}</td>
+                <td className="px-4 py-3 font-medium text-slate-800">{user.fullName}</td>
                 <td className="px-4 py-3 text-slate-600">{user.email}</td>
                 <td className="px-4 py-3 text-slate-600">{user.phone}</td>
-                <td className="px-4 py-3 text-slate-600">{user.role}</td>
-                <td className="px-4 py-3">
-                  <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                    {user.status}
-                  </span>
-                </td>
+                <td className="px-4 py-3 text-slate-600">{user.roleName}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <button className="px-3 py-1.5 text-sm bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition">
+                    <button
+                      onClick={() => handleEditClick(user)}
+                      className="rounded-lg bg-amber-100 px-3 py-1.5 text-sm text-amber-700 transition hover:bg-amber-200"
+                    >
                       Sửa
                     </button>
-
                     <button
                       onClick={() => handleDelete(user.id)}
-                      className="px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                      className="rounded-lg bg-red-100 px-3 py-1.5 text-sm text-red-700 transition hover:bg-red-200"
                     >
                       Xóa
                     </button>
@@ -168,6 +475,19 @@ export default function EmployeeManagement() {
           </tbody>
         </table>
       </div>
+
+      <style>{`
+        .input-style {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 1rem;
+            outline: none;
+        }
+        .input-style:focus {
+            border-color: #f59e0b;
+        }
+      `}</style>
     </div>
   );
 }

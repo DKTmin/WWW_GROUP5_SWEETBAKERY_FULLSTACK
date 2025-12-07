@@ -10,6 +10,9 @@ const adminApi = {
 
   // employees
   getAllEmployees: () => axiosClient.get("/employee-management/api/v1/employees"),
+  createEmployee: (data) => axiosClient.post("/admin/api/v1/employees", data),
+  updateEmployee: (employeeId, newInfor) =>
+    axiosClient.put(`/admin/api/v1/employees/${employeeId}`, newInfor),
 
   // customers
   getAllCustomers: () => axiosClient.get("/customer-management/api/v1/customers"),
