@@ -32,4 +32,5 @@ public class EmployeeRegistrationRequest {
     String identification;
     Integer numOfExperience;
     List<String> roles;
+    Boolean isVerified;
 }

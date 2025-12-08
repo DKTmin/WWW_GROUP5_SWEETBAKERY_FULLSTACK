@@ -56,11 +56,13 @@ public class CustomerAdminServiceImpl implements CustomerAdminService {
             throw new AppException(HttpCode.USERNAME_EXISTED);
 
         Customer customer = customerMapper.toCustomer(request);
+
         Set<Role> roles = new HashSet<>();
         Role customerRole = roleRepository.findById(UserRole.CUSTOMER.name())
                 .orElseThrow(() -> new NullPointerException("Customer role not found!"));
         roles.add(customerRole);
         customer.setRoles(roles);
+
         customer.setLoyaltyPoints(request.getLoyaltyPoints() == null ? 0 : request.getLoyaltyPoints());
         customerRepository.save(customer);
 
@@ -69,6 +71,7 @@ public class CustomerAdminServiceImpl implements CustomerAdminService {
         accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialUsedUsername.setType(AccountType.USERNAME);
         accountCredentialUsedUsername.setCredential(request.getUsername());
+        accountCredentialUsedUsername.setIsVerified(request.getIsVerified());
         accountCredentialRepository.save(accountCredentialUsedUsername);
 
         AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
@@ -76,6 +79,7 @@ public class CustomerAdminServiceImpl implements CustomerAdminService {
         accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialUsedEmail.setType(AccountType.EMAIL);
         accountCredentialUsedEmail.setCredential(request.getEmail());
+        accountCredentialUsedEmail.setIsVerified(request.getIsVerified());
         accountCredentialRepository.save(accountCredentialUsedEmail);
 
         Set<AccountCredential> accountCredentialSet = new HashSet<>();
@@ -92,20 +96,23 @@ public class CustomerAdminServiceImpl implements CustomerAdminService {
                 .toCustomerRegistrationResponse(customer);
         customerRegistrationResponse.setAccounts(accountCredentialResponses);
         customerRegistrationResponse.setUsername(request.getUsername());
+        customerRegistrationResponse.setIsVerified(request.getIsVerified());
         return customerRegistrationResponse;
     }
 
     @Override
     public CustomerUpdateByAdminResponse update(String customerId, CustomerUpdateByAdminRequest request) {
-        Customer customer = (Customer) userRepository.findById(customerId).orElse(null);
-        if(customer == null) throw new AppException(HttpCode.NOT_FOUND);
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        if(customer == null) throw new AppException(HttpCode.CUSTOMER_NOT_FOUND);
         customerMapper.updateCustomerByAdmin(customer, request);
 
         Set<AccountCredential> accounts = accountCredentialRepository.findAllByUserId(customerId);
-        if(accounts.isEmpty()) throw new AppException(HttpCode.NOT_FOUND);
+        if(accounts.isEmpty()) throw new AppException(HttpCode.ACCOUNT_NOT_FOUND);
+        accounts.forEach(acc -> acc.setIsVerified(request.getIsVerified()));
+
         AccountCredential emailAccount = accountCredentialRepository
                 .findByUserIdAndAccountType(customerId, AccountType.EMAIL);
-        if(emailAccount == null)throw new AppException(HttpCode.NOT_FOUND);
+        if(emailAccount == null)throw new AppException(HttpCode.ACCOUNT_NOT_FOUND);
         emailAccount.setCredential(request.getEmail());
 
         boolean passwordIsChanging = request.getOldPassword() != null
@@ -125,7 +132,7 @@ public class CustomerAdminServiceImpl implements CustomerAdminService {
         CustomerUpdateByAdminResponse response =  customerMapper.toCustomerUpdateByAdminResponse(customer);
         response.setLoyaltyPoints(request.getLoyaltyPoints());
         response.setNewPassword(request.getNewPassword());
-
+        response.setIsVerified(request.getIsVerified());
         return response;
     }
 }

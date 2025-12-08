@@ -65,6 +65,7 @@ public class ApplicationInitConfig {
                         .password(passwordEncoder.encode(adminPassword))
                         .type(AccountType.USERNAME)
                         .user(employee)
+                        .isVerified(true)
                         .build();
                 accountCredentialRepository.save(accountCredential);
 

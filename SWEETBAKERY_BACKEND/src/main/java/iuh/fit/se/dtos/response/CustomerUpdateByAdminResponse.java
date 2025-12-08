@@ -27,4 +27,5 @@ public class CustomerUpdateByAdminResponse {
     String address;
     Integer loyaltyPoints;
     Set<AccountCredentialResponse> accounts;
+    Boolean isVerified;
 }

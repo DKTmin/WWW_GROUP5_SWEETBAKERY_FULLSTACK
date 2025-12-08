@@ -64,6 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .map(employeeMapper::toEmployeeRegistrationResponse)
                 .map(empResponse -> {
                     empResponse.setUsername(getUserName(empResponse.getId()));
+                    empResponse.setIsVerified(getIsVerified(empResponse.getId()));
                     return empResponse;
                 })
                 .collect(Collectors.toList());
@@ -75,6 +76,11 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .filter(acc -> acc.getType().name().equalsIgnoreCase(AccountType.USERNAME.name()))
                 .toList().getFirst();
         return userNameAccount.getCredential();
+    }
+
+    private boolean getIsVerified(String userId){
+        Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(userId);
+        return accountCredentialSet.stream().toList().getFirst().getIsVerified();
     }
 
 }
