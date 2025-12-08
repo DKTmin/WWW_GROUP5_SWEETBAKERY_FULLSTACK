@@ -27,10 +27,14 @@ function statusLabel(status) {
   switch (status) {
     case "PENDING":
       return "Chờ xác nhận";
+    case "PAID":
+      return "Đã thanh toán";
     case "CONFIRMED":
       return "Đã xác nhận";
     case "COMPLETED":
       return "Hoàn thành";
+    case "REFUND_PENDING":
+      return "Đang đợi hoàn tiền";
     case "CANCELLED":
       return "Đã hủy";
     default:
@@ -42,10 +46,14 @@ function statusClass(status) {
   switch (status) {
     case "PENDING":
       return "bg-amber-100 text-amber-700";
+    case "PAID":
+      return "bg-indigo-100 text-indigo-700";
     case "CONFIRMED":
       return "bg-blue-100 text-blue-700";
     case "COMPLETED":
       return "bg-green-100 text-green-700";
+    case "REFUND_PENDING":
+      return "bg-orange-100 text-orange-700";
     case "CANCELLED":
       return "bg-red-100 text-red-700";
     default:
@@ -55,8 +63,10 @@ function statusClass(status) {
 
 const STATUS_OPTIONS = [
   { value: "PENDING", label: "Chờ xác nhận" },
+  { value: "PAID", label: "Đã thanh toán" },
   { value: "CONFIRMED", label: "Đã xác nhận" },
   { value: "COMPLETED", label: "Hoàn thành" },
+  { value: "REFUND_PENDING", label: "Đang đợi hoàn tiền" },
   { value: "CANCELLED", label: "Đã hủy" },
 ];
 
@@ -66,9 +76,11 @@ export default function OrdersManagement() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [updatingOrderId, setUpdatingOrderId] = useState(null);
-  const [newStatus, setNewStatus] = useState("");
+  const [confirmOrderId, setConfirmOrderId] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [refundOrder, setRefundOrder] = useState(null);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundProofImageUrl, setRefundProofImageUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
@@ -127,27 +139,55 @@ export default function OrdersManagement() {
     }
   };
 
-  // Open status update modal
-  const handleUpdateStatus = (orderId, currentStatus) => {
-    setUpdatingOrderId(orderId);
-    setNewStatus(currentStatus);
-    setShowStatusModal(true);
+  // Confirm order (PAID -> CONFIRMED)
+  const handleConfirmOrder = (orderId) => {
+    setConfirmOrderId(orderId);
+    setShowConfirmModal(true);
   };
 
-  // Update order status
-  const handleConfirmStatusUpdate = async () => {
-    if (!updatingOrderId || !newStatus) return;
-
+  const confirmOrderStatus = async () => {
+    if (!confirmOrderId) return;
     try {
-      await adminApi.updateOrderStatus(updatingOrderId, newStatus);
-      alert("Cập nhật trạng thái thành công!");
-      setShowStatusModal(false);
-      setUpdatingOrderId(null);
-      setNewStatus("");
-      fetchOrders(); // Reload orders
+      await adminApi.updateOrderStatus(confirmOrderId, "CONFIRMED");
+      alert("Đã xác nhận đơn hàng!");
+      setShowConfirmModal(false);
+      setConfirmOrderId(null);
+      fetchOrders();
     } catch (err) {
-      console.error("Update order status failed:", err);
-      alert("Cập nhật trạng thái thất bại!");
+      console.error("Confirm order failed:", err);
+      alert("Không thể xác nhận đơn hàng!");
+    }
+  };
+
+  // Mark refund done (REFUND_PENDING -> CANCELLED)
+  const handleRefund = async (order) => {
+    try {
+      // fetch fresh order details from server to ensure bankName and other fields are present
+      const res = await adminApi.getOrderById(order.id);
+      const full = res.data?.data || order;
+      setRefundOrder(full);
+      // prefill refund proof image if already present
+      setRefundProofImageUrl(full.refundProofImageUrl || "");
+      setShowRefundModal(true);
+    } catch (err) {
+      console.warn('Failed to fetch full order for refund modal, falling back to provided order', err);
+      setRefundOrder(order);
+      setShowRefundModal(true);
+    }
+  };
+
+  const confirmRefund = async () => {
+    if (!refundOrder?.id) return;
+    try {
+      await adminApi.updateOrderStatus(refundOrder.id, "CANCELLED", refundProofImageUrl || undefined);
+      alert("Đã đánh dấu hoàn tiền và hủy đơn.");
+      setShowRefundModal(false);
+      setRefundOrder(null);
+      setRefundProofImageUrl("");
+      fetchOrders();
+    } catch (err) {
+      console.error("Refund mark failed:", err);
+      alert("Không thể cập nhật hoàn tiền!");
     }
   };
 
@@ -233,12 +273,22 @@ export default function OrdersManagement() {
                     >
                       Chi tiết
                     </button>
-                    <button
-                      onClick={() => handleUpdateStatus(order.id, order.trangThai)}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      Cập nhật
-                    </button>
+                    {(order.trangThai === "PAID" || order.trangThai === "PENDING") && (
+                      <button
+                        onClick={() => handleConfirmOrder(order.id)}
+                        className="text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        Xác nhận
+                      </button>
+                    )}
+                    {order.trangThai === "REFUND_PENDING" && (
+                      <button
+                        onClick={() => handleRefund(order)}
+                        className="text-red-600 hover:text-red-700 font-medium"
+                      >
+                        Hoàn tiền
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -289,6 +339,20 @@ export default function OrdersManagement() {
                     {statusLabel(selectedOrder.trangThai)}
                   </span>
                 </div>
+                {selectedOrder.lyDoHuy && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-red-600 font-semibold">Lý do hủy</p>
+                    <p className="text-sm text-slate-700">{selectedOrder.lyDoHuy}</p>
+                  </div>
+                )}
+                {(selectedOrder.bankAccountName || selectedOrder.bankAccountNumber || selectedOrder.bankName) && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-slate-500 font-semibold">Thông tin hoàn tiền (VNPay)</p>
+                    {selectedOrder.bankAccountName && <p className="text-sm">Tên chủ TK: {selectedOrder.bankAccountName}</p>}
+                    {selectedOrder.bankAccountNumber && <p className="text-sm">Số tài khoản: {selectedOrder.bankAccountNumber}</p>}
+                    {selectedOrder.bankName && <p className="text-sm">Ngân hàng: {selectedOrder.bankName}</p>}
+                  </div>
+                )}
               </div>
 
               {/* Order Items */}
@@ -333,47 +397,97 @@ export default function OrdersManagement() {
         </div>
       )}
 
-      {/* Status Update Modal */}
-      {showStatusModal && (
+      {/* Confirm Modal */}
+      {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
             <div className="border-b border-slate-200 px-6 py-4">
-              <h3 className="text-xl font-bold text-slate-800">Cập nhật trạng thái đơn hàng</h3>
+              <h3 className="text-xl font-bold text-slate-800">Xác nhận đơn hàng</h3>
+              <p className="text-sm text-slate-600 mt-1">Xác nhận đơn đã thanh toán để chuẩn bị giao hàng.</p>
             </div>
             <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-700">Bạn có chắc muốn xác nhận đơn hàng <span className="font-semibold">{confirmOrderId}</span>?</p>
+            </div>
+            <div className="flex gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setConfirmOrderId(null);
+                }}
+                className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 hover:bg-slate-50"
+              >
+                Đóng
+              </button>
+              <button
+                onClick={confirmOrderStatus}
+                className="flex-1 rounded-lg bg-amber-600 px-4 py-2 text-white hover:bg-amber-700"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refund Modal */}
+      {showRefundModal && refundOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="border-b border-slate-200 px-6 py-4">
+              <h3 className="text-xl font-bold text-slate-800">Hoàn tiền thủ công</h3>
+              <p className="text-sm text-slate-600 mt-1">Xem thông tin và đánh dấu đã hoàn tiền cho khách.</p>
+            </div>
+            <div className="p-6 space-y-3 text-sm text-slate-700">
+              <p><span className="font-semibold">Mã đơn:</span> {refundOrder.id}</p>
+              <p><span className="font-semibold">Khách hàng:</span> {refundOrder.customerName || "N/A"}</p>
+              <p><span className="font-semibold">Phương thức thanh toán:</span> {refundOrder.paymentMethod || "N/A"}</p>
+              {refundOrder.paymentMethod && refundOrder.paymentMethod.toString().toUpperCase() === 'VNPAY' && (
+                <div className="mt-2 space-y-1">
+                  {refundOrder.bankAccountName && (
+                    <p><span className="font-semibold">Tên chủ TK:</span> {refundOrder.bankAccountName}</p>
+                  )}
+                  {refundOrder.bankAccountNumber && (
+                    <p><span className="font-semibold">Số tài khoản:</span> {refundOrder.bankAccountNumber}</p>
+                  )}
+                  {refundOrder.bankName && (
+                    <p><span className="font-semibold">Ngân hàng:</span> {refundOrder.bankName}</p>
+                  )}
+                </div>
+              )}
+              <p><span className="font-semibold">Trạng thái hiện tại:</span> {statusLabel(refundOrder.trangThai)}</p>
+
+              {refundOrder.lyDoHuy && (
+                <p><span className="font-semibold text-red-700">Lý do hủy:</span> {refundOrder.lyDoHuy}</p>
+              )}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Trạng thái mới
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
-                >
-                  {STATUS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Link chứng từ (Cloudinary)</label>
+                <input
+                  type="text"
+                  value={refundProofImageUrl}
+                  onChange={(e) => setRefundProofImageUrl(e.target.value)}
+                  placeholder="https://res.cloudinary.com/..."
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              </div>
+              <div className="rounded-lg bg-orange-50 border border-orange-200 p-3 text-orange-800">
+                Kiểm tra thông tin chuyển khoản VNPay, thực hiện hoàn tiền thủ công. Sau khi hoàn tất, bấm "Đã hoàn tiền" để đổi trạng thái đơn sang đã hủy.
               </div>
             </div>
             <div className="flex gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
               <button
                 onClick={() => {
-                  setShowStatusModal(false);
-                  setUpdatingOrderId(null);
-                  setNewStatus("");
+                  setShowRefundModal(false);
+                  setRefundOrder(null);
                 }}
                 className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 hover:bg-slate-50"
               >
-                Hủy
+                Đóng
               </button>
               <button
-                onClick={handleConfirmStatusUpdate}
-                className="flex-1 rounded-lg bg-amber-600 px-4 py-2 text-white hover:bg-amber-700"
+                onClick={confirmRefund}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
               >
-                Xác nhận
+                Đã hoàn tiền
               </button>
             </div>
           </div>

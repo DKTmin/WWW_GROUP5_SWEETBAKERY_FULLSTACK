@@ -44,8 +44,8 @@ const adminApi = {
   // orders
   getAllOrders: () => axiosClient.get("/admin/api/v1/orders"),
   getOrderById: (orderId) => axiosClient.get(`/admin/api/v1/orders/${orderId}`),
-  updateOrderStatus: (orderId, status) =>
-    axiosClient.put(`/admin/api/v1/orders/${orderId}/status`, { trangThai: status }),
+  updateOrderStatus: (orderId, status, refundProofImageUrl) =>
+    axiosClient.put(`/admin/api/v1/orders/${orderId}/status`, { trangThai: status, refundProofImageUrl }),
   updateCategory: (id, data) => axiosClient.put(`/admin/api/v1/categories/${id}`, data),
 
   deleteCategory: (id) => axiosClient.delete(`/admin/api/v1/categories/${id}`),

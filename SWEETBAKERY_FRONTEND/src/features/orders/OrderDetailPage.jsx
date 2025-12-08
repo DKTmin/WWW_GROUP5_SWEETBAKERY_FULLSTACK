@@ -85,6 +85,13 @@ export default function OrderDetailPage() {
                     <div className="mb-4 text-sm text-stone-600">
                         <div className="font-semibold">Phương thức thanh toán</div>
                         <div className="text-stone-800">{order.paymentMethod || '-'}</div>
+                        {(order.paymentMethod && order.paymentMethod.toString().toUpperCase() === 'VNPAY') && (
+                            <div className="mt-2 space-y-1">
+                                {order.bankAccountName && <div className="text-sm">Tên chủ TK: {order.bankAccountName}</div>}
+                                {order.bankAccountNumber && <div className="text-sm">Số tài khoản: {order.bankAccountNumber}</div>}
+                                {order.bankName && <div className="text-sm">Ngân hàng: {order.bankName}</div>}
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-4">

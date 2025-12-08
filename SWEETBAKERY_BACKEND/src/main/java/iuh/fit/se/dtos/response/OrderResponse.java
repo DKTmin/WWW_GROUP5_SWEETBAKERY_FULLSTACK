@@ -21,5 +21,9 @@ public class OrderResponse {
     String customerAddress;
     String customerName;
     String lyDoHuy;
+    String bankAccountName;
+    String bankAccountNumber;
+    String bankName;
+    String refundProofImageUrl;
     List<OrderDetailResponse> items;
 }
