@@ -54,11 +54,25 @@ public class OrderAdminServiceImpl implements OrderAdminService {
         if (opt.isEmpty()) {
             throw new AppException(HttpCode.NOT_FOUND);
         }
-        
+
         Order order = opt.get();
-        order.setTrangThai(request.getTrangThai());
+        TrangThaiDH current = order.getTrangThai();
+        TrangThaiDH target = request.getTrangThai();
+
+        boolean allowed = (current == TrangThaiDH.PENDING && target == TrangThaiDH.CONFIRMED) ||
+                (current == TrangThaiDH.PAID && target == TrangThaiDH.CONFIRMED) ||
+                (current == TrangThaiDH.REFUND_PENDING && target == TrangThaiDH.CANCELLED);
+
+        if (!allowed) {
+            throw new AppException(HttpCode.BAD_REQUEST);
+        }
+
+        order.setTrangThai(target);
+        if (target == TrangThaiDH.CANCELLED && current == TrangThaiDH.REFUND_PENDING) {
+            order.setRefundProofImageUrl(request.getRefundProofImageUrl());
+        }
         orderRepository.save(order);
-        
+
         log.info("Order {} status updated to {}", orderId, request.getTrangThai());
         return mapToOrderResponse(order);
     }
@@ -71,7 +85,7 @@ public class OrderAdminServiceImpl implements OrderAdminService {
         r.setPaymentMethod(o.getPaymentMethod());
         r.setTrangThai(o.getTrangThai() == null ? null : o.getTrangThai().name());
         r.setCustomerAddress(o.getCustomer() != null ? o.getCustomer().getAddress() : null);
-        
+
         // Add customer name
         String customerName = null;
         if (o.getCustomer() != null) {
@@ -84,7 +98,11 @@ public class OrderAdminServiceImpl implements OrderAdminService {
         }
         r.setCustomerName(customerName);
         r.setLyDoHuy(o.getLyDoHuy());
-        
+        r.setBankAccountName(o.getBankAccountName());
+        r.setBankAccountNumber(o.getBankAccountNumber());
+        r.setBankName(o.getBankName());
+        r.setRefundProofImageUrl(o.getRefundProofImageUrl());
+
         List<OrderDetailResponse> items = new ArrayList<>();
         if (o.getOrderDetails() != null) {
             for (OrderDetail od : o.getOrderDetails()) {
@@ -102,4 +120,3 @@ public class OrderAdminServiceImpl implements OrderAdminService {
         return r;
     }
 }
-

@@ -17,12 +17,19 @@ function getItemImage(it) {
     return it.image || it.pastryImage || (it.pastry && it.pastry.image) || placeholderImageDataUrl()
 }
 
+function isVnPay(order) {
+    const method = (order?.paymentMethod || order?.payment_method || "").toString().toUpperCase()
+    return method === 'VNPAY'
+}
+
 function statusLabel(status) {
     if (!status) return ''
     switch (status) {
         case 'PENDING': return 'Đang chờ xử lý'
+        case 'PAID': return 'Đã thanh toán'
         case 'CONFIRMED': return 'Đã xác nhận'
         case 'COMPLETED': return 'Hoàn thành'
+        case 'REFUND_PENDING': return 'Đang đợi hoàn tiền'
         case 'CANCELLED': return 'Đã hủy'
         case 'HOAN_THANH': return 'Hoàn thành'
         case 'DA_HUY': return 'Đã hủy'
@@ -33,8 +40,10 @@ function statusLabel(status) {
 function statusClass(status) {
     switch (status) {
         case 'PENDING': return 'bg-yellow-100 text-yellow-800'
+        case 'PAID': return 'bg-indigo-100 text-indigo-800'
         case 'CONFIRMED': return 'bg-blue-100 text-blue-800'
         case 'COMPLETED': return 'bg-green-100 text-green-800'
+        case 'REFUND_PENDING': return 'bg-orange-100 text-orange-800'
         case 'CANCELLED': return 'bg-red-100 text-red-800'
         case 'HOAN_THANH': return 'bg-green-100 text-green-800'
         case 'DA_HUY': return 'bg-red-100 text-red-800'
@@ -242,8 +251,23 @@ export default function OrdersPage() {
                                     ))}
                                 </div>
 
-                                <div className="mt-4 flex items-center justify-end">
+                                {o.lyDoHuy && (
+                                    <div className="mt-3 rounded-lg bg-red-50 border border-red-200 p-3">
+                                        <p className="text-xs font-semibold text-red-800 mb-1">Lý do hủy:</p>
+                                        <p className="text-sm text-red-700">{o.lyDoHuy}</p>
+                                    </div>
+                                )}
+
+                                <div className="mt-4 flex items-center justify-end gap-2">
                                     <button onClick={() => navigate(`/orders/${o.id}`)} className="rounded-full bg-amber-800 px-4 py-2 text-white shadow hover:shadow-lg transition">Xem chi tiết</button>
+                                    {(!o.local && (o.trangThai === 'PENDING' || (o.trangThai === 'PAID' && isVnPay(o)))) && (
+                                        <button
+                                            onClick={() => handleCancelClick(o.id)}
+                                            className="rounded-full bg-red-600 px-4 py-2 text-white shadow hover:shadow-lg transition hover:bg-red-700"
+                                        >
+                                            {o.trangThai === 'PAID' ? 'Hủy & đợi hoàn tiền' : 'Hủy đơn'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -328,12 +352,12 @@ export default function OrdersPage() {
 
                             <div className="mt-4 flex items-center justify-end gap-2">
                                 <button onClick={() => navigate(`/orders/${o.id}`)} className="rounded-full bg-amber-800 px-4 py-2 text-white shadow hover:shadow-lg transition">Xem chi tiết</button>
-                                {o.trangThai === 'PENDING' && !o.local && (
-                                    <button 
+                                {(!o.local && (o.trangThai === 'PENDING' || (o.trangThai === 'PAID' && isVnPay(o)))) && (
+                                    <button
                                         onClick={() => handleCancelClick(o.id)}
                                         className="rounded-full bg-red-600 px-4 py-2 text-white shadow hover:shadow-lg transition hover:bg-red-700"
                                     >
-                                        Hủy đơn
+                                        {o.trangThai === 'PAID' ? 'Hủy & đợi hoàn tiền' : 'Hủy đơn'}
                                     </button>
                                 )}
                             </div>

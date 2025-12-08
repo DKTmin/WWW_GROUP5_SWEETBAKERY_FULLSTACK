@@ -15,4 +15,10 @@ public class OrderRequest {
     // shipping address or customer address
     String address;
     String paymentMethod;
+
+    // Bank info for VNPay refund reference (user-provided)
+    String bankAccountName;
+    String bankAccountNumber;
+    String bankAccountId;
+    String bankName;
 }

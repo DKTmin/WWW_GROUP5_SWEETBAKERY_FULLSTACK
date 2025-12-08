@@ -113,6 +113,10 @@ public class OrderServiceImpl implements OrderService {
         resp.setPaymentMethod(order.getPaymentMethod());
         resp.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
         resp.setLyDoHuy(order.getLyDoHuy());
+        // include bank info if present
+        resp.setBankAccountName(order.getBankAccountName());
+        resp.setBankAccountNumber(order.getBankAccountNumber());
+        resp.setBankName(order.getBankName());
 
         // If payment method is VNPAY, generate a VNPay payment URL and return it to
         // client
@@ -161,11 +165,28 @@ public class OrderServiceImpl implements OrderService {
             Order order = new Order();
             order.setId(tx.getId());
             order.setNgayDatHang(java.time.LocalDateTime.now());
-            // Khi VNPay báo thành công, đơn hàng được tạo ở trạng thái PENDING để chờ xử lý
-            order.setTrangThai(TrangThaiDH.PENDING);
+            // Khi VNPay báo thành công, đơn hàng được tạo ở trạng thái PAID
+            order.setTrangThai(TrangThaiDH.PAID);
             order.setCustomer(user);
             if (req.getPaymentMethod() != null)
                 order.setPaymentMethod(req.getPaymentMethod());
+            else
+                order.setPaymentMethod("VNPAY");
+
+            // Copy VNPay bank info (if any) from the transaction payload into the Order
+            try {
+                if (req.getBankAccountName() != null && !req.getBankAccountName().isBlank()) {
+                    order.setBankAccountName(req.getBankAccountName());
+                }
+                if (req.getBankAccountNumber() != null && !req.getBankAccountNumber().isBlank()) {
+                    order.setBankAccountNumber(req.getBankAccountNumber());
+                }
+                if (req.getBankName() != null && !req.getBankName().isBlank()) {
+                    order.setBankName(req.getBankName());
+                }
+            } catch (Exception ex) {
+                log.warn("Unable to copy VNPay bank info into order: {}", ex.getMessage());
+            }
 
             List<OrderDetail> details = new ArrayList<>();
             double total = 0.0;
@@ -194,8 +215,6 @@ public class OrderServiceImpl implements OrderService {
             // clear user's cart (same behavior as placeOrder)
             try {
                 if (user != null) {
-                    com.fasterxml.jackson.databind.node.ObjectNode noop = null; // placeholder to keep style
-                    com.fasterxml.jackson.databind.ObjectMapper mapper = objectMapper;
                     // find and clear cart
                     iuh.fit.se.entities.Cart cart = cartRepository.findByUser_Id(user.getId()).orElse(null);
                     if (cart != null) {
@@ -232,6 +251,10 @@ public class OrderServiceImpl implements OrderService {
             resp.setPaymentMethod(order.getPaymentMethod());
             resp.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
             resp.setLyDoHuy(order.getLyDoHuy());
+            // include bank info
+            resp.setBankAccountName(order.getBankAccountName());
+            resp.setBankAccountNumber(order.getBankAccountNumber());
+            resp.setBankName(order.getBankName());
             return resp;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -258,6 +281,10 @@ public class OrderServiceImpl implements OrderService {
             r.setTrangThai(o.getTrangThai() == null ? null : o.getTrangThai().name());
             r.setCustomerAddress(o.getCustomer() != null ? o.getCustomer().getAddress() : null);
             r.setLyDoHuy(o.getLyDoHuy());
+            // include bank info on list
+            r.setBankAccountName(o.getBankAccountName());
+            r.setBankAccountNumber(o.getBankAccountNumber());
+            r.setBankName(o.getBankName());
             List<OrderDetailResponse> items = new ArrayList<>();
             if (o.getOrderDetails() != null) {
                 for (OrderDetail od : o.getOrderDetails()) {
@@ -272,6 +299,10 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
             r.setItems(items);
+            // include bank info for single-order response
+            r.setBankAccountName(o.getBankAccountName());
+            r.setBankAccountNumber(o.getBankAccountNumber());
+            r.setBankName(o.getBankName());
             out.add(r);
         }
         return out;
@@ -305,6 +336,9 @@ public class OrderServiceImpl implements OrderService {
         }
         r.setItems(items);
         r.setLyDoHuy(o.getLyDoHuy());
+        r.setBankAccountName(o.getBankAccountName());
+        r.setBankAccountNumber(o.getBankAccountNumber());
+        r.setBankName(o.getBankName());
         return r;
     }
 
@@ -314,7 +348,7 @@ public class OrderServiceImpl implements OrderService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null)
             throw new AppException(HttpCode.UNAUTHORIZED);
-        
+
         String username = authentication.getName();
         AccountCredential account = accountCredentialRepository.findByCredential(username);
         if (account == null || account.getUser() == null)
@@ -325,17 +359,25 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(HttpCode.NOT_FOUND);
 
         Order order = opt.get();
-        
+
         // Kiểm tra quyền: chỉ chủ đơn hàng mới được hủy
         if (!order.getCustomer().getId().equals(account.getUser().getId()))
             throw new AppException(HttpCode.UNAUTHORIZED);
 
-        // Chỉ cho phép hủy khi đơn hàng ở trạng thái PENDING
-        if (order.getTrangThai() != TrangThaiDH.PENDING)
-            throw new RuntimeException("Chỉ có thể hủy đơn hàng khi đang ở trạng thái PENDING");
+        // Chỉ cho phép hủy khi đơn hàng ở trạng thái PENDING hoặc PAID
+        if (order.getTrangThai() == TrangThaiDH.PENDING) {
+            order.setTrangThai(TrangThaiDH.CANCELLED);
+        } else if (order.getTrangThai() == TrangThaiDH.PAID) {
+            // Khi đơn đã thanh toán, khách hàng hủy -> chuyển sang trạng thái
+            // REFUND_PENDING để biểu thị "đợi hoàn tiền". Việc xử lý hoàn tiền
+            // (gọi gateway, ghi lịch sử refund, ...) nên được thực hiện bởi
+            // luồng xử lý riêng sau khi trạng thái này được đặt.
+            order.setTrangThai(TrangThaiDH.REFUND_PENDING);
+        } else {
+            throw new RuntimeException("Chỉ có thể hủy đơn hàng khi đang ở trạng thái PENDING hoặc PAID");
+        }
 
-        // Cập nhật trạng thái và lý do hủy
-        order.setTrangThai(TrangThaiDH.CANCELLED);
+        // Cập nhật lý do hủy
         order.setLyDoHuy(request.getLyDoHuy());
         orderRepository.save(order);
 
