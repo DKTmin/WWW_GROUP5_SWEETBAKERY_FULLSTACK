@@ -45,8 +45,22 @@ function statusClass(status) {
 export default function OrdersPage() {
     const [orders, setOrders] = useState(null)
     const [searchText, setSearchText] = useState("")
+    const [showCancelModal, setShowCancelModal] = useState(false)
+    const [selectedOrderId, setSelectedOrderId] = useState(null)
+    const [cancelReason, setCancelReason] = useState("")
+    const [customReason, setCustomReason] = useState("")
+    const [cancelling, setCancelling] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
+
+    const CANCEL_REASONS = [
+        "Thay đổi ý định mua hàng",
+        "Đặt nhầm sản phẩm",
+        "Tìm thấy sản phẩm tốt hơn ở nơi khác",
+        "Giá cả không phù hợp",
+        "Không còn nhu cầu sử dụng",
+        "Lý do khác"
+    ]
 
     useEffect(() => {
         // Nếu URL có fromPayment=1 (VNPay redirect sau khi thanh toán thành công)
@@ -101,6 +115,69 @@ export default function OrdersPage() {
         })
         return () => { mounted = false }
     }, [])
+
+    const fetchOrders = () => {
+        orderApi.list().then(res => {
+            try {
+                let serverOrders = []
+                if (Array.isArray(res.data)) {
+                    serverOrders = res.data
+                } else if (Array.isArray(res.data?.data)) {
+                    serverOrders = res.data.data
+                } else if (res.data && typeof res.data === 'object') {
+                    const possible = Object.values(res.data).find(v => Array.isArray(v))
+                    if (Array.isArray(possible)) serverOrders = possible
+                    else {
+                        console.warn('Unexpected orders response shape', res.data)
+                        serverOrders = []
+                    }
+                }
+
+                const localJson = localStorage.getItem('local_orders') || '[]'
+                const localOrders = JSON.parse(localJson) || []
+                const markedLocal = localOrders.map(o => ({ ...o, local: true }))
+                setOrders([...markedLocal, ...serverOrders])
+            } catch (parseErr) {
+                console.error('Failed to parse orders response', parseErr, res)
+                setOrders(false)
+            }
+        }).catch(e => {
+            console.warn('orders fetch failed', e)
+            setOrders(false)
+        })
+    }
+
+    const handleCancelClick = (orderId) => {
+        setSelectedOrderId(orderId)
+        setCancelReason("")
+        setCustomReason("")
+        setShowCancelModal(true)
+    }
+
+    const handleConfirmCancel = async () => {
+        const finalReason = cancelReason === "Lý do khác" ? customReason : cancelReason
+        if (!finalReason.trim()) {
+            alert("Vui lòng chọn hoặc nhập lý do hủy đơn hàng")
+            return
+        }
+
+        setCancelling(true)
+        try {
+            await orderApi.cancel(selectedOrderId, finalReason)
+            alert("Hủy đơn hàng thành công!")
+            setShowCancelModal(false)
+            setSelectedOrderId(null)
+            setCancelReason("")
+            setCustomReason("")
+            fetchOrders() // Reload orders
+        } catch (error) {
+            console.error("Cancel order failed:", error)
+            const errorMsg = error.response?.data?.message || error.message || "Không thể hủy đơn hàng"
+            alert(errorMsg)
+        } finally {
+            setCancelling(false)
+        }
+    }
 
     if (orders === null) {
         return (
@@ -242,13 +319,94 @@ export default function OrdersPage() {
                                 ))}
                             </div>
 
-                            <div className="mt-4 flex items-center justify-end">
+                            {o.lyDoHuy && (
+                                <div className="mt-3 rounded-lg bg-red-50 border border-red-200 p-3">
+                                    <p className="text-xs font-semibold text-red-800 mb-1">Lý do hủy:</p>
+                                    <p className="text-sm text-red-700">{o.lyDoHuy}</p>
+                                </div>
+                            )}
+
+                            <div className="mt-4 flex items-center justify-end gap-2">
                                 <button onClick={() => navigate(`/orders/${o.id}`)} className="rounded-full bg-amber-800 px-4 py-2 text-white shadow hover:shadow-lg transition">Xem chi tiết</button>
+                                {o.trangThai === 'PENDING' && !o.local && (
+                                    <button 
+                                        onClick={() => handleCancelClick(o.id)}
+                                        className="rounded-full bg-red-600 px-4 py-2 text-white shadow hover:shadow-lg transition hover:bg-red-700"
+                                    >
+                                        Hủy đơn
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
+
+            {/* Cancel Order Modal */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+                        <div className="border-b border-slate-200 px-6 py-4">
+                            <h3 className="text-xl font-bold text-slate-800">Hủy đơn hàng</h3>
+                            <p className="mt-1 text-sm text-slate-600">Vui lòng chọn lý do hủy đơn hàng của bạn</p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    Lý do hủy đơn hàng
+                                </label>
+                                <select
+                                    value={cancelReason}
+                                    onChange={(e) => setCancelReason(e.target.value)}
+                                    className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                                >
+                                    <option value="">-- Chọn lý do hủy --</option>
+                                    {CANCEL_REASONS.map((reason, idx) => (
+                                        <option key={idx} value={reason}>
+                                            {reason}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {cancelReason === "Lý do khác" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        Mô tả chi tiết
+                                    </label>
+                                    <textarea
+                                        value={customReason}
+                                        onChange={(e) => setCustomReason(e.target.value)}
+                                        placeholder="Nhập lý do hủy đơn hàng..."
+                                        rows={3}
+                                        className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+                            <button
+                                onClick={() => {
+                                    setShowCancelModal(false)
+                                    setSelectedOrderId(null)
+                                    setCancelReason("")
+                                    setCustomReason("")
+                                }}
+                                disabled={cancelling}
+                                className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                onClick={handleConfirmCancel}
+                                disabled={cancelling || (!cancelReason.trim() || (cancelReason === "Lý do khác" && !customReason.trim()))}
+                                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {cancelling ? "Đang xử lý..." : "Xác nhận hủy"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     )
 }

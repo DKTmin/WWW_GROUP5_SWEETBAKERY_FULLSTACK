@@ -15,6 +15,7 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
     address: "",
     numOfExperience: 0,
     roles: ["EMPLOYEE"],
+    isVerified: true, // <--- 1. Thêm mặc định là true
     // Password fields
     password: "",
     confirmPassword: "",
@@ -34,18 +35,23 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
         lastName: editingUser.lastName,
         username: editingUser.username,
         email: editingUser.email,
-        phoneNumber: editingUser.phone, // Lưu ý field này map từ api
+        phoneNumber: editingUser.phone,
         identification: editingUser.identification,
         address: editingUser.address,
         numOfExperience: editingUser.numOfExperience,
         roles: editingUser.roles || ["EMPLOYEE"],
+        isVerified: editingUser.isVerified, // <--- 2. Load trạng thái từ user
       });
     }
   }, [editingUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+    // <--- 3. Xử lý riêng cho isVerified vì value từ select luôn là string
+    const newValue = name === "isVerified" ? value === "true" : value;
+
+    setFormData({ ...formData, [name]: newValue });
   };
 
   const handleRoleChange = (roleName) => {
@@ -64,6 +70,19 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
     try {
       const experience = parseInt(formData.numOfExperience) || 0;
 
+      // Common fields
+      const commonPayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+        identification: formData.identification,
+        numOfExperience: experience,
+        roles: formData.roles,
+        isVerified: formData.isVerified, // <--- 4. Gửi status lên server
+      };
+
       // === TRƯỜNG HỢP SỬA ===
       if (editingUser) {
         if (formData.newPassword && formData.newPassword !== formData.confirmNewPassword) {
@@ -73,22 +92,19 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
         }
 
         const updatePayload = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          address: formData.address,
-          identification: formData.identification,
-          numOfExperience: experience,
-          roles: formData.roles,
+          ...commonPayload,
           oldPassword: formData.oldPassword || null,
           newPassword: formData.newPassword || null,
           confirmNewPassword: formData.confirmNewPassword || null,
         };
 
-        await adminApi.updateEmployee(editingUser.id, updatePayload);
-        alert("Cập nhật thành công!");
-        onSuccess(); // Báo cho cha biết để reload list
+        const res = await adminApi.updateEmployee(editingUser.id, updatePayload);
+        if (res.data?.code === 201 && res.data?.data != null) {
+          alert("Cập nhật thành công!");
+          onSuccess();
+        } else {
+          alert("Lỗi: " + res.message);
+        }
       }
       // === TRƯỜNG HỢP THÊM MỚI ===
       else {
@@ -99,31 +115,19 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
         }
 
         const createPayload = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          ...commonPayload,
           username: formData.username,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          address: formData.address,
-          identification: formData.identification,
-          numOfExperience: experience,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
-          roles: formData.roles,
         };
 
         const res = await adminApi.createEmployee(createPayload);
 
-        // --- FIX LỖI CHECK STATUS ---
-        // Đôi khi axios interceptor trả về res.data luôn, nên ta check an toàn:
-        // Nếu res tồn tại VÀ (status là 201 HOẶC code trong data là 201/200)
-        if (res && (res.status === 201 || res.status === 200)) {
+        if (res && res.data?.code === 201) {
           alert("Thêm mới thành công!");
           onSuccess();
         } else {
-          // Log ra để debug nếu lỗi
-          console.log("Response create:", res);
-          // Nếu backend trả về data luôn mà không có status
+          console.log("Response create:", res.data?.message);
           if (res?.data) {
             alert("Thêm mới thành công!");
             onSuccess();
@@ -182,7 +186,7 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
           />
         </div>
 
-        {/* EMAIL & SĐT */}
+        {/* EMAIL */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
           <input
@@ -194,6 +198,8 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
             className="input-style"
           />
         </div>
+
+        {/* SĐT & CCCD */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">SĐT</label>
           <input
@@ -204,8 +210,6 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
             className="input-style"
           />
         </div>
-
-        {/* CCCD, KINH NGHIỆM, ĐỊA CHỈ */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">CCCD</label>
           <input
@@ -216,6 +220,8 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
             className="input-style"
           />
         </div>
+
+        {/* KINH NGHIỆM & ĐỊA CHỈ */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">Kinh nghiệm (năm)</label>
           <input
@@ -236,6 +242,22 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
             onChange={handleInputChange}
             className="input-style"
           />
+        </div>
+
+        {/* --- 5. FIELD TRẠNG THÁI (isVerified) --- */}
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-sm font-medium text-slate-700">
+            Trạng thái tài khoản
+          </label>
+          <select
+            name="isVerified"
+            value={formData.isVerified.toString()} // Convert boolean sang string cho value select
+            onChange={handleInputChange}
+            className="input-style"
+          >
+            <option value="true">Kích hoạt (Verified)</option>
+            <option value="false">Vô hiệu hóa (Unverified)</option>
+          </select>
         </div>
 
         {/* ROLES */}
@@ -349,8 +371,6 @@ export default function EmployeeForm({ editingUser, onSuccess, onCancel }) {
           </button>
         </div>
       </form>
-
-      {/* Style CSS nội bộ */}
       <style>{`
         .input-style {
             width: 100%;

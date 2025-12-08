@@ -28,4 +28,5 @@ public class CustomerRegistrationRequest {
     String phoneNumber;
     String address;
     Integer loyaltyPoints;
+    Boolean isVerified;
 }

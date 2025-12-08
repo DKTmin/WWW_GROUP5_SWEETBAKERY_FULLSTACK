@@ -6,10 +6,8 @@ export default function EmployeeManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // State để biết đang ở chế độ Sửa (có ID) hay Thêm (null)
   const [editingId, setEditingId] = useState(null);
 
-  // --- STATE FORM ĐẦY ĐỦ ---
   const initialFormState = {
     firstName: "",
     lastName: "",
@@ -19,8 +17,8 @@ export default function EmployeeManagement() {
     identification: "",
     address: "",
     numOfExperience: 0,
-    roles: ["EMPLOYEE"], // Mặc định chọn Employee
-    // Password fields
+    roles: ["EMPLOYEE"],
+    isVerified: true,
     password: "",
     confirmPassword: "",
     oldPassword: "",
@@ -30,12 +28,11 @@ export default function EmployeeManagement() {
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // ----- 1. LẤY DANH SÁCH USER (Dùng useCallback để tránh render vô hạn) -----
+  // ----- 1. LẤY DANH SÁCH USER -----
   const fetchUsers = useCallback(async () => {
     try {
       const res = await adminApi.getAllEmployees();
 
-      // Kiểm tra data trả về có hợp lệ không
       if (res && res.data && res.data.data) {
         const mappedUsers = res.data.data.map((u) => ({
           id: u.id,
@@ -43,8 +40,11 @@ export default function EmployeeManagement() {
           email: u.email,
           phone: u.phoneNumber,
           roleName: u.roles?.[0]?.name || "N/A",
-          status: "Hoạt động",
-          // Data gốc để fill vào form sửa
+
+          // --- FIX 1: Xử lý null ngay tại nguồn ---
+          // Nếu u.isVerified là null => coi như true (Kích hoạt), ngược lại giữ nguyên
+          isVerified: u.isVerified === null ? true : u.isVerified,
+
           firstName: u.firstName,
           lastName: u.lastName,
           username: u.username,
@@ -57,14 +57,12 @@ export default function EmployeeManagement() {
       }
     } catch (err) {
       console.error("Load users failed:", err);
-      // Nếu load danh sách mà bị 401 thì cũng báo lỗi luôn
       if (err.response && err.response.status === 401) {
         console.warn("Token hết hạn hoặc không có quyền!");
       }
     }
   }, []);
 
-  // Gọi hàm trong useEffect
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
@@ -72,7 +70,9 @@ export default function EmployeeManagement() {
   // ----- HANDLERS FORM -----
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    // Convert string "true"/"false" từ select box thành boolean
+    const newValue = name === "isVerified" ? value === "true" : value;
+    setFormData({ ...formData, [name]: newValue });
   };
 
   const handleRoleChange = (roleName) => {
@@ -97,6 +97,9 @@ export default function EmployeeManagement() {
       address: user.address,
       numOfExperience: user.numOfExperience,
       roles: user.roles,
+
+      // --- FIX 2: Lấy giá trị đã xử lý từ user ---
+      isVerified: user.isVerified,
     });
     setShowForm(true);
   };
@@ -107,107 +110,73 @@ export default function EmployeeManagement() {
     setFormData(initialFormState);
   };
 
-  // ----- 5. SUBMIT (QUAN TRỌNG: XỬ LÝ LỖI 401 TẠI ĐÂY) -----
+  // ----- SUBMIT -----
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Validate chung
       const experience = parseInt(formData.numOfExperience) || 0;
-      let res; // Biến hứng kết quả trả về
+      let res;
+
+      const commonPayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+        identification: formData.identification,
+        numOfExperience: experience,
+        roles: formData.roles,
+        isVerified: formData.isVerified,
+      };
 
       if (editingId) {
-        // === LOGIC SỬA (UPDATE) ===
         if (formData.newPassword && formData.newPassword !== formData.confirmNewPassword) {
           alert("Mật khẩu mới không khớp!");
           setLoading(false);
           return;
         }
-
         const updatePayload = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          address: formData.address,
-          identification: formData.identification,
-          numOfExperience: experience,
-          roles: formData.roles,
+          ...commonPayload,
           oldPassword: formData.oldPassword || null,
           newPassword: formData.newPassword || null,
           confirmNewPassword: formData.confirmNewPassword || null,
         };
-
         res = await adminApi.updateEmployee(editingId, updatePayload);
       } else {
-        // === LOGIC THÊM MỚI (CREATE) ===
         if (formData.password !== formData.confirmPassword) {
           alert("Mật khẩu xác nhận không khớp!");
           setLoading(false);
           return;
         }
-
         const createPayload = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          ...commonPayload,
           username: formData.username,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          address: formData.address,
-          identification: formData.identification,
-          numOfExperience: experience,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
-          roles: formData.roles,
         };
-
-        console.log("Đang gửi payload:", createPayload); // Debug: Xem dữ liệu gửi đi
         res = await adminApi.createEmployee(createPayload);
       }
 
-      console.log("API Success Response:", res); // Debug: Xem kết quả thành công
-
-      // Kiểm tra status code (201 cho create, 200 cho update)
-      if (res && (res.status === 201 || res.status === 200)) {
+      if (res && (res.status === 201 || res.status === 200 || res.data?.code === 200)) {
         alert(editingId ? "Cập nhật thành công!" : "Thêm mới thành công!");
         handleCancel();
         fetchUsers();
       } else {
-        // Trường hợp API trả về 200 nhưng message lỗi (nếu có logic đó)
         alert("Thao tác thành công (Status: " + res?.status + ")");
         handleCancel();
         fetchUsers();
       }
     } catch (error) {
-      console.error("API Error Response:", error); // Debug: Xem lỗi chi tiết
-
-      const status = error.response?.status;
-      const data = error.response?.data;
-
-      // --- XỬ LÝ LỖI CỤ THỂ ---
-      if (status === 401) {
-        alert(
-          `Lỗi 401: Phiên đăng nhập hết hạn hoặc Token không hợp lệ.\nChi tiết: ${data?.message || "Unauthenticated"}`
-        );
-        // Bạn có thể thêm lệnh chuyển hướng về trang login ở đây:
-        // window.location.href = '/admin';
-      } else if (status === 403) {
-        alert("Lỗi 403: Bạn không có quyền thực hiện hành động này!");
-      } else if (status === 400 || status === 422) {
-        // Lỗi validation từ backend
-        const msg = data?.message || "Dữ liệu không hợp lệ!";
-        alert(`Lỗi nhập liệu: ${msg}`);
-      } else {
-        const msg = data?.message || "Có lỗi không xác định xảy ra!";
-        alert(`Thất bại: ${msg}`);
-      }
+      console.error("API Error Response:", error);
+      const msg = error.response?.data?.message || "Có lỗi xảy ra!";
+      alert(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  // ----- 6. XÓA -----
   const handleDelete = async (userId) => {
     if (!window.confirm("Bạn có chắc muốn xóa?")) return;
     try {
@@ -216,11 +185,7 @@ export default function EmployeeManagement() {
       fetchUsers();
     } catch (error) {
       console.error("Delete error:", error);
-      if (error.response?.status === 401) {
-        alert("Lỗi 401: Hết phiên đăng nhập. Vui lòng login lại.");
-      } else {
-        alert("Xóa thất bại!");
-      }
+      alert("Xóa thất bại!");
     }
   };
 
@@ -345,6 +310,23 @@ export default function EmployeeManagement() {
               />
             </div>
 
+            {/* --- FIX 3: SỬA VALUE SELECT ĐỂ KHÔNG BỊ LỖI .toString() --- */}
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Trạng thái tài khoản
+              </label>
+              <select
+                name="isVerified"
+                // Dùng cách này an toàn tuyệt đối, không bao giờ lỗi null
+                value={formData.isVerified ? "true" : "false"}
+                onChange={handleInputChange}
+                className="input-style"
+              >
+                <option value="true">Kích hoạt (Verified)</option>
+                <option value="false">Vô hiệu hóa (Unverified)</option>
+              </select>
+            </div>
+
             {/* ROLES CHECKBOX */}
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium text-slate-700">Vai trò</label>
@@ -369,7 +351,7 @@ export default function EmployeeManagement() {
             </div>
 
             {/* PASSWORD FIELDS */}
-            {!editingId && (
+            {!editingId ? (
               <>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">Mật khẩu</label>
@@ -396,9 +378,7 @@ export default function EmployeeManagement() {
                   />
                 </div>
               </>
-            )}
-
-            {editingId && (
+            ) : (
               <div className="sm:col-span-2 rounded-lg bg-slate-50 p-4 border border-slate-200">
                 <p className="mb-3 text-sm font-bold text-slate-600">
                   Đổi mật khẩu (Bỏ trống nếu không đổi)
@@ -406,7 +386,7 @@ export default function EmployeeManagement() {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-slate-500">
-                      Mật khẩu cũ (Nếu có)
+                      Mật khẩu cũ
                     </label>
                     <input
                       type="password"
@@ -471,9 +451,11 @@ export default function EmployeeManagement() {
           <thead className="border-b border-slate-200">
             <tr>
               <th className="px-4 py-3 font-semibold text-slate-600">Tên</th>
+              <th className="px-4 py-3 font-semibold text-slate-600">Username</th>
               <th className="px-4 py-3 font-semibold text-slate-600">Email</th>
               <th className="px-4 py-3 font-semibold text-slate-600">SĐT</th>
               <th className="px-4 py-3 font-semibold text-slate-600">Vai trò</th>
+              <th className="px-4 py-3 font-semibold text-slate-600">Trạng thái</th>
               <th className="px-4 py-3 font-semibold text-slate-600">Hành động</th>
             </tr>
           </thead>
@@ -481,9 +463,17 @@ export default function EmployeeManagement() {
             {users.map((user) => (
               <tr key={user.id} className="border-t border-slate-100 hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium text-slate-800">{user.fullName}</td>
+                <td className="px-4 py-3 text-slate-600 font-medium">{user.username}</td>
                 <td className="px-4 py-3 text-slate-600">{user.email}</td>
                 <td className="px-4 py-3 text-slate-600">{user.phone}</td>
                 <td className="px-4 py-3 text-slate-600">{user.roleName}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${user.isVerified ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                  >
+                    {user.isVerified ? "Đã kích hoạt" : "Vô hiệu hóa"}
+                  </span>
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <button
@@ -502,6 +492,13 @@ export default function EmployeeManagement() {
                 </td>
               </tr>
             ))}
+            {users.length === 0 && (
+              <tr>
+                <td colSpan="7" className="text-center py-4 text-slate-500">
+                  Chưa có dữ liệu
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
