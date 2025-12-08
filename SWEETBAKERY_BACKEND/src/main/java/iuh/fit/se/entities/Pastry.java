@@ -38,7 +38,7 @@ public class Pastry {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private PastryStatus status = PastryStatus.DRAFT; // Mặc định là Nháp
+    private PastryStatus status = PastryStatus.DRAFT;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
