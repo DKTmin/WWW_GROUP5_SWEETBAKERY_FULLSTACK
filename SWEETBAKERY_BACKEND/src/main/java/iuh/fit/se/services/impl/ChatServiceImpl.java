@@ -11,8 +11,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +42,9 @@ public class ChatServiceImpl implements ChatService {
         List<Pastry> pastries = pastryRepository.findAll();
         if (pastries.isEmpty()) return "Menu đang cập nhật.";
 
-        // Format: ID - Tên - Giá - Mô tả
+        // TỐI ƯU: Chỉ lấy tối đa 30 sản phẩm để tránh làm đầy Context Token của gói Free
         return pastries.stream()
+                .limit(30)
                 .map(p -> String.format("ID: %s | Tên: %s | Giá: %s VND | Mô tả: %s",
                         p.getId(), p.getName(), p.getPrice(), p.getDescription()))
                 .collect(Collectors.joining("\n"));
@@ -50,42 +53,48 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatResponse generateResponse(String userMessage) {
         try {
-            String cleanKey = apiKey.trim();
-            String cleanUrl = apiUrl.trim();
-            String finalUrl = cleanUrl + "?key=" + cleanKey;
+            // Kiểm tra API Key
+            if (apiKey == null || apiKey.isEmpty() || apiKey.contains("YOUR_API_KEY")) {
+                return new ChatResponse("Lỗi cấu hình Server: Chưa có API Key.");
+            }
+
+            String finalUrl = apiUrl + "?key=" + apiKey;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             String menuData = getMenuFromDatabase();
 
-            // --- PROMPT CẬP NHẬT: YÊU CẦU TRẢ VỀ LINK ---
+            // Prompt
             String systemPrompt = """
-                    Bạn là nhân viên Sweet Bakery. Dưới đây là MENU (kèm ID):
-                    --------------------
+                    Bạn là nhân viên tư vấn của Sweet Bakery.
+                    MENU HIỆN TẠI:
                     %s
                     --------------------
-                    QUY TẮC QUAN TRỌNG:
-                    1. Khi nhắc đến tên bánh cụ thể, BẮT BUỘC dùng định dạng: [Tên Bánh](ID)
-                       Ví dụ: Bạn nên thử [Bánh Tiramisu](101) nhé.
-                    2. Không bịa ra ID không có trong danh sách.
-                    3. Trả lời ngắn gọn, thân thiện, dùng emoji.
+                    YÊU CẦU:
+                    1. Nếu khách hỏi về bánh, hãy gợi ý dựa trên menu trên.
+                    2. Khi nhắc tên bánh, PHẢI dùng định dạng: [Tên Bánh](ID) (Ví dụ: [Bánh Tiramisu](101)).
+                    3. Trả lời ngắn gọn (dưới 100 từ), thân thiện, dùng emoji.
                     
-                    Khách hỏi: "%s"
+                    Khách hàng: "%s"
                     """.formatted(menuData, userMessage);
 
+            // Cấu trúc Request Body chuẩn cho Gemini
             Map<String, Object> part = new HashMap<>();
             part.put("text", systemPrompt);
 
             Map<String, Object> content = new HashMap<>();
-            content.put("parts", List.of(part));
+            content.put("parts", Collections.singletonList(part)); // Dùng singletonList cho gọn
 
             Map<String, Object> body = new HashMap<>();
-            body.put("contents", List.of(content));
+            body.put("contents", Collections.singletonList(content));
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            // Gọi API
             ResponseEntity<Map> response = restTemplate.postForEntity(finalUrl, entity, Map.class);
 
+            // Xử lý Response
             if (response.getBody() != null) {
                 List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
                 if (candidates != null && !candidates.isEmpty()) {
@@ -96,10 +105,23 @@ public class ChatServiceImpl implements ChatService {
                     }
                 }
             }
+
+        } catch (HttpClientErrorException.TooManyRequests e) {
+            // Log chi tiết nội dung trả về từ Gemini
+            System.err.println("=== GEMINI 429 BODY ===");
+            System.err.println(e.getResponseBodyAsString());
+            System.err.println("=== END 429 BODY ===");
+
+            return new ChatResponse(
+                    "Bot đang quá tải do nhiều người dùng (Lỗi 429). " +
+                            "Bạn vui lòng đợi một lúc rồi hỏi lại giúp mình nhé! ☕"
+            );
+        } catch (HttpClientErrorException e) {
+            return new ChatResponse("Lỗi kết nối AI: " + e.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
             return new ChatResponse("Hệ thống đang bận chút xíu. (" + e.getMessage() + ")");
         }
-        return new ChatResponse("Mình chưa hiểu ý bạn lắm.");
+        return new ChatResponse("Xin lỗi, mình chưa hiểu ý bạn.");
     }
 }
