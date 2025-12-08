@@ -1,5 +1,6 @@
 package iuh.fit.se.services;
 
+import iuh.fit.se.dtos.request.CancelOrderRequest;
 import iuh.fit.se.dtos.request.OrderRequest;
 import iuh.fit.se.dtos.response.OrderResponse;
 
@@ -15,4 +16,6 @@ public interface OrderService {
     List<OrderResponse> getOrdersForCurrentUser();
 
     OrderResponse getOrderById(String id);
+
+    OrderResponse cancelOrder(String orderId, CancelOrderRequest request);
 }

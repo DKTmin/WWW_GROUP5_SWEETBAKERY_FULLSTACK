@@ -31,6 +31,10 @@ public class Order {
     // payment method (e.g., CASH, MOMO)
     private String paymentMethod;
 
+    // Lý do hủy đơn hàng
+    @Column(name = "ly_do_huy", length = 500)
+    private String lyDoHuy;
+
     // @ManyToOne
     // @JoinColumn(name = "nhan_vien_id")
     // private Employee employee;
