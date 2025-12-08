@@ -1,5 +1,6 @@
 package iuh.fit.se.controllers;
 
+import iuh.fit.se.dtos.request.CancelOrderRequest;
 import iuh.fit.se.dtos.request.OrderRequest;
 import iuh.fit.se.dtos.response.OrderResponse;
 import iuh.fit.se.services.OrderService;
@@ -9,6 +10,7 @@ import lombok.AccessLevel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -46,6 +48,18 @@ public class OrderController {
             OrderResponse r = orderService.getOrderById(id);
             if (r == null)
                 return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().body(r);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelOrder(
+            @PathVariable String id,
+            @Valid @RequestBody CancelOrderRequest request) {
+        try {
+            OrderResponse r = orderService.cancelOrder(id, request);
             return ResponseEntity.ok().body(r);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());

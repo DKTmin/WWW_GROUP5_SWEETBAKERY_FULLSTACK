@@ -20,5 +20,6 @@ public class OrderResponse {
     String paymentUrl;
     String customerAddress;
     String customerName;
+    String lyDoHuy;
     List<OrderDetailResponse> items;
 }

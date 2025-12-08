@@ -83,6 +83,7 @@ public class OrderAdminServiceImpl implements OrderAdminService {
             }
         }
         r.setCustomerName(customerName);
+        r.setLyDoHuy(o.getLyDoHuy());
         
         List<OrderDetailResponse> items = new ArrayList<>();
         if (o.getOrderDetails() != null) {
