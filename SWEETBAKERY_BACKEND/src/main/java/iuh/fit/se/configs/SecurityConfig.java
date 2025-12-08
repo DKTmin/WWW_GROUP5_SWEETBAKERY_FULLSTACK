@@ -38,11 +38,14 @@ public class SecurityConfig {
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
 //            "/category-management/api/v1/categories/**",
-            "/api/chat"
+            "/api/chat",
+            "/gmail-management/api/v1/gmail/otp-forget-password",
+            "/gmail-management/api/v1/gmail/verify-otp-forget-password"
     };
 
     private final String[] POST_CUSTOMER_ENDPOINT = {
             "/customer-management/api/v1/customers/update/**",
+            "/gmail-management/api/v1/gmail/otp-forget-password"
     };
 
     private final String[] GET_PUBLIC_ENDPOINT = {
@@ -63,7 +66,7 @@ public class SecurityConfig {
             "/customer-management/api/v1/customers/**",
             "/admin/api/v1/employees/**",
             "/admin/api/v1/customers/**",
-            "/admin/api/v1/pastries/**",          // <-- THÊM
+            "/admin/api/v1/pastries/**",
             "/admin/api/v1/categories/**",
             "/admin/api/v1/customers/**",
             "/admin/api/v1/orders/**"

@@ -1,7 +1,10 @@
 package iuh.fit.se.controllers;
 
+import iuh.fit.se.dtos.request.ForgetPasswordRequest;
+import iuh.fit.se.dtos.request.OtpForgetPasswordVerificationRequest;
 import iuh.fit.se.dtos.request.OtpVerificationRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
+import iuh.fit.se.dtos.response.ForgetPasswordOTPResponse;
 import iuh.fit.se.dtos.response.OtpVerificationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.GmailService;
@@ -36,9 +39,28 @@ public class GmailController {
     ApiResponse<OtpVerificationResponse> verifyOtp(@RequestBody OtpVerificationRequest request){
         return ApiResponse.<OtpVerificationResponse>builder()
                 .code(HttpCode.OK.getCODE())
-                .message("OTP không hợp lệ hoặc đã hết hạn!")
+                .message(HttpCode.OK.getMESSAGE())
                 .data(OtpVerificationResponse.builder().valid(gmailService.verifyOtp(request)).build())
                 .build();
     }
 
+    @PostMapping("/otp-forget-password")
+    ApiResponse<ForgetPasswordOTPResponse> sendOtp(@RequestBody ForgetPasswordRequest request){
+        ForgetPasswordOTPResponse forgetPasswordOTPResponse = gmailService.sendOtpToCustomer(request);
+        return ApiResponse.<ForgetPasswordOTPResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(forgetPasswordOTPResponse)
+                .build();
+    }
+
+    @PostMapping("/verify-otp-forget-password")
+    ApiResponse<OtpVerificationResponse> verifyOtp(@RequestBody OtpForgetPasswordVerificationRequest request){
+        OtpVerificationResponse otpVerificationResponse = gmailService.verifyOtpForgetPassword(request);
+        return ApiResponse.<OtpVerificationResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(otpVerificationResponse)
+                .build();
+    }
 }

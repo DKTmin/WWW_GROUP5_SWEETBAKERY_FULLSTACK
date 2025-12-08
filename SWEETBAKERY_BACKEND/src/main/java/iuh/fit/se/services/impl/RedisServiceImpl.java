@@ -43,6 +43,11 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public void setOtpCustomer(String email, String otp, long duration, TimeUnit timeUnit) {
+        redisTemplate.opsForValue().set(email, otp, duration, timeUnit);
+    }
+
+    @Override
     public String getByKey(String key) {
         return redisTemplate.opsForValue().get(key);
     }

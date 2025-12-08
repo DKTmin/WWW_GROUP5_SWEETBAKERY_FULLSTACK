@@ -1,7 +1,14 @@
 package iuh.fit.se.services.impl;
 
+import iuh.fit.se.dtos.request.ForgetPasswordRequest;
+import iuh.fit.se.dtos.request.OtpForgetPasswordVerificationRequest;
 import iuh.fit.se.dtos.request.OtpVerificationRequest;
+import iuh.fit.se.dtos.response.ForgetPasswordOTPResponse;
 import iuh.fit.se.dtos.response.OtpVerificationResponse;
+import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.exceptions.AppException;
+import iuh.fit.se.repositories.AccountCredentialRepository;
 import iuh.fit.se.services.GmailService;
 import iuh.fit.se.services.RedisService;
 import jakarta.mail.MessagingException;
@@ -11,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -19,8 +25,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.security.SecureRandom;
-import java.time.Instant;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,6 +42,7 @@ public class GmailServiceImpl implements GmailService {
 
     JavaMailSender javaMailSender;
     RedisService redisService;
+    AccountCredentialRepository accountCredentialRepository;
 
     @NonFinal
     @Value("${spring.valid-time}")
@@ -48,6 +53,7 @@ public class GmailServiceImpl implements GmailService {
     String OTP_VALUE;
 
     TemplateEngine templateEngine;
+
     @Override
     public OtpVerificationResponse sendOtpTOAdmin() {
         SecureRandom random = new SecureRandom();
@@ -81,10 +87,63 @@ public class GmailServiceImpl implements GmailService {
     }
 
     @Override
+    public ForgetPasswordOTPResponse sendOtpToCustomer(ForgetPasswordRequest request) {
+        AccountCredential emailAccount = accountCredentialRepository
+                .findByCredential(request.getEmail());
+        if(emailAccount == null) throw new AppException(HttpCode.EMAIL_NOT_FOUND);
+
+        SecureRandom random = new SecureRandom();
+        String otp = String.format("%06d", random.nextInt(1_000_000));
+
+        redisService.setOtpCustomer(request.getEmail(), otp, OTP_VALID_TIME, TimeUnit.MINUTES);
+
+        Context context = new Context();
+        context.setVariable("otp", otp);
+        context.setVariable("expiry", OTP_VALID_TIME);
+
+        String htmlContent = templateEngine.process("email/customer-otp.html", context);
+
+        MimeMessage mime = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mime, true);
+            helper.setFrom(ADMIN_GMAIL);          // Gmail hệ thống
+            helper.setTo(request.getEmail());          // Gmail khách
+            helper.setSubject("OTP Quên mật khẩu");
+            helper.setText(htmlContent, true);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+
+        javaMailSender.send(mime);
+
+        return ForgetPasswordOTPResponse.builder()
+                .otp(otp)
+                .valid(true)
+                .emai(request.getEmail())
+                .build();
+    }
+
+    @Override
     public boolean verifyOtp(OtpVerificationRequest request) {
         String savedOtp = redisService.getByKey(request.getOtp());
 
         if (savedOtp == null) return false;
         return savedOtp.equals(OTP_VALUE);
+    }
+
+    @Override
+    public OtpVerificationResponse verifyOtpForgetPassword(OtpForgetPasswordVerificationRequest request) {
+        String savedOtp = redisService.getByKey(request.getEmail());
+
+        if (savedOtp == null)
+            return OtpVerificationResponse.builder()
+                    .valid(false)
+                    .otp(null)
+                    .build();
+        boolean valid = savedOtp.equals(request.getOtp());
+        return OtpVerificationResponse.builder()
+                .valid(valid)
+                .otp(valid ? request.getOtp() : null)
+                .build();
     }
 }

@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
+import iuh.fit.se.dtos.response.CreateNewPasswordResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.User;
@@ -68,8 +69,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(request.getIdentifier());
-        if(accountCredential == null)
-             throw new NullPointerException("Account not found!");
+        if(accountCredential == null) throw new AppException(HttpCode.ACCOUNT_NOT_FOUND);
+        if(!accountCredential.getIsVerified()) throw new AppException(HttpCode.DISABLE_ACCOUNT);
         if(!passwordEncoder.matches(request.getPassword(), accountCredential.getPassword()))
             throw new AppException(HttpCode.PASSWORD_INCORRECT);
         User user = userRepository.findById(accountCredential.getUser().getId())
@@ -145,6 +146,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .refreshToken(refreshToken)
                 .tokenType(TokenType.BEARER.getTokenType())
                 .build();
+    }
+
+    @Override
+    public CreateNewPasswordResponse forgetPassword(CreateNewPasswordRequest request) {
+        return null;
     }
 
     private String generateAccessToken(User user, AccountCredential accountCredential){
