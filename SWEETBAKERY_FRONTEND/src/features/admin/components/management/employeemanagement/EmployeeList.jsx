@@ -7,9 +7,13 @@ export default function EmployeeList({ users, onEdit, onDelete }) {
         <thead className="border-b border-slate-200">
           <tr>
             <th className="px-4 py-3 font-semibold text-slate-600">Tên</th>
+            {/* 1. Thêm cột Username */}
+            <th className="px-4 py-3 font-semibold text-slate-600">Username</th>
             <th className="px-4 py-3 font-semibold text-slate-600">Email</th>
             <th className="px-4 py-3 font-semibold text-slate-600">SĐT</th>
             <th className="px-4 py-3 font-semibold text-slate-600">Vai trò</th>
+            {/* 2. Thêm cột Trạng thái */}
+            <th className="px-4 py-3 font-semibold text-slate-600">Trạng thái</th>
             <th className="px-4 py-3 font-semibold text-slate-600">Hành động</th>
           </tr>
         </thead>
@@ -18,9 +22,25 @@ export default function EmployeeList({ users, onEdit, onDelete }) {
             users.map((user) => (
               <tr key={user.id} className="border-t border-slate-100 hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium text-slate-800">{user.fullName}</td>
+
+                {/* Hiển thị Username */}
+                <td className="px-4 py-3 text-slate-600 font-medium">{user.username}</td>
+
                 <td className="px-4 py-3 text-slate-600">{user.email}</td>
                 <td className="px-4 py-3 text-slate-600">{user.phone}</td>
                 <td className="px-4 py-3 text-slate-600">{user.roleName}</td>
+
+                {/* Hiển thị Trạng thái (Màu sắc theo isVerified) */}
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                      user.isVerified ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {user.isVerified ? "Đã kích hoạt" : "Vô hiệu hóa"}
+                  </span>
+                </td>
+
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <button
@@ -41,7 +61,8 @@ export default function EmployeeList({ users, onEdit, onDelete }) {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="py-4 text-center text-slate-500">
+              {/* Cập nhật colSpan thành 7 vì đã thêm 2 cột mới */}
+              <td colSpan="7" className="py-4 text-center text-slate-500">
                 Chưa có dữ liệu
               </td>
             </tr>

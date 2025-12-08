@@ -28,4 +28,5 @@ public class EmployeeUpdateResponse {
     Integer numOfExperience;
     Set<AccountCredentialResponse> accounts;
     Set<Role> roles;
+    Boolean isVerified;
 }

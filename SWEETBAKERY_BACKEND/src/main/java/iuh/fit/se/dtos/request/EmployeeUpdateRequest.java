@@ -31,4 +31,5 @@ public class EmployeeUpdateRequest {
     String identification;
     Integer numOfExperience;
     List<String> roles;
+    Boolean isVerified;
 }

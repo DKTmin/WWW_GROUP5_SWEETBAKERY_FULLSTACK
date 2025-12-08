@@ -21,6 +21,10 @@ public enum HttpCode {
     UNAUTHENTICATED(401, "Unauthenticated!", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(403, "You do not have any permissions!", HttpStatus.FORBIDDEN),
     NOT_FOUND(404, "Not found!", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND(404, "User not found!", HttpStatus.NOT_FOUND),
+    EMPLOYEE_NOT_FOUND(404, "Employee not found!", HttpStatus.NOT_FOUND),
+    CUSTOMER_NOT_FOUND(404, "Customer not found!", HttpStatus.NOT_FOUND),
+    ACCOUNT_NOT_FOUND(404, "Account not found!", HttpStatus.NOT_FOUND),
     USERNAME_EXISTED(409, "Username existed!", HttpStatus.CONFLICT),
     EMAIL_EXISTED(409, "Email existed!", HttpStatus.CONFLICT);
 
