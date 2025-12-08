@@ -31,4 +31,5 @@ public class CustomerRegistrationResponse {
     Integer loyaltyPoints;
     Set<AccountCredentialResponse> accounts;
     Set<Role> roles;
+    Boolean isVerified;
 }

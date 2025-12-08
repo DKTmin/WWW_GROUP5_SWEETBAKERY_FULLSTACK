@@ -32,4 +32,5 @@ public class EmployeeRegistrationResponse {
     Integer numOfExperience;
     Set<AccountCredentialResponse> accounts;
     Set<Role> roles;
+    Boolean isVerified;
 }

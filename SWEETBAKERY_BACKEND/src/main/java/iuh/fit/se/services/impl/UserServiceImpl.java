@@ -59,6 +59,7 @@ public class UserServiceImpl implements UserService {
                             accountCredential.stream()
                                     .map(accountMapper::toAccountCredentialResponse).collect(Collectors.toSet())
                     );
+                    userResponse.setIsVerified(accountCredential.stream().toList().getFirst().getIsVerified());
                     accountCredential.stream()
                             .filter(acc -> acc.getType().name().equalsIgnoreCase(AccountType.USERNAME.name()))
                             .findFirst().ifPresent(usernameAccount -> userResponse.setUsername(usernameAccount.getCredential()));

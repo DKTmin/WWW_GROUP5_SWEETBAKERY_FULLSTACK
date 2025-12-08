@@ -71,6 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
         accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialUsedUsername.setType(AccountType.USERNAME);
         accountCredentialUsedUsername.setCredential(request.getUsername());
+        accountCredentialUsedUsername.setIsVerified(true);
         accountCredentialRepository.save(accountCredentialUsedUsername);
 
         AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
@@ -78,6 +79,7 @@ public class CustomerServiceImpl implements CustomerService {
         accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialUsedEmail.setType(AccountType.EMAIL);
         accountCredentialUsedEmail.setCredential(request.getEmail());
+        accountCredentialUsedEmail.setIsVerified(true);
         accountCredentialRepository.save(accountCredentialUsedEmail);
 
         Set<AccountCredential> accountCredentialSet = new HashSet<>();
@@ -94,6 +96,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .toCustomerRegistrationResponse(customer);
         customerRegistrationResponse.setAccounts(accountCredentialResponses);
         customerRegistrationResponse.setUsername(request.getUsername());
+        customerRegistrationResponse.setIsVerified(true);
         return customerRegistrationResponse;
     }
 
@@ -142,6 +145,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(customerMapper::toCustomerRegistrationResponse)
                 .map(cus -> {
                     cus.setUsername(getUserName(cus.getId()));
+                    cus.setIsVerified(getIsVerified(cus.getId()));
                     return cus;
                 })
                 .collect(Collectors.toList());
@@ -153,5 +157,10 @@ public class CustomerServiceImpl implements CustomerService {
                 .filter(acc -> acc.getType().name().equalsIgnoreCase(AccountType.USERNAME.name()))
                 .toList().getFirst();
         return userNameAccount.getCredential();
+    }
+
+    private boolean getIsVerified(String userId){
+        Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(userId);
+        return accountCredentialSet.stream().toList().getFirst().getIsVerified();
     }
 }

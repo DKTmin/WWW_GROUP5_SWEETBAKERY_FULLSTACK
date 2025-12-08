@@ -36,7 +36,7 @@ public class GmailController {
     ApiResponse<OtpVerificationResponse> verifyOtp(@RequestBody OtpVerificationRequest request){
         return ApiResponse.<OtpVerificationResponse>builder()
                 .code(HttpCode.OK.getCODE())
-                .message(HttpCode.OK.getMESSAGE())
+                .message("OTP không hợp lệ hoặc đã hết hạn!")
                 .data(OtpVerificationResponse.builder().valid(gmailService.verifyOtp(request)).build())
                 .build();
     }

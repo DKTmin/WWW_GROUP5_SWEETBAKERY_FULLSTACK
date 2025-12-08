@@ -59,12 +59,13 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
             throw new AppException(HttpCode.USERNAME_EXISTED);
 
         Employee employee = employeeMapper.toEmployee(request);
-        Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
 
-        if(roles.isEmpty())
-            throw new AppException(HttpCode.NOT_FOUND);
+        Set<Role> roles = null;
+        if(request.getRoles() != null){
+            roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
+            employee.setRoles(roles);
+        }
 
-        employee.setRoles(roles);
         employeeRepository.save(employee);
 
         AccountCredential accountCredentialUsedUsername = accountMapper.toAccountUsedUsername(request);
@@ -72,6 +73,7 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
         accountCredentialUsedUsername.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialUsedUsername.setType(AccountType.USERNAME);
         accountCredentialUsedUsername.setCredential(request.getUsername());
+        accountCredentialUsedUsername.setIsVerified(request.getIsVerified());
         accountCredentialRepository.save(accountCredentialUsedUsername);
 
         AccountCredential accountCredentialUsedEmail = accountMapper.toAccountUsedEmail(request);
@@ -79,6 +81,7 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
         accountCredentialUsedEmail.setPassword(passwordEncoder.encode(request.getPassword()));
         accountCredentialUsedEmail.setType(AccountType.EMAIL);
         accountCredentialUsedEmail.setCredential(request.getEmail());
+        accountCredentialUsedEmail.setIsVerified(request.getIsVerified());
         accountCredentialRepository.save(accountCredentialUsedEmail);
 
         Set<AccountCredential> accountCredentialSet = new HashSet<>();
@@ -94,29 +97,33 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
         EmployeeRegistrationResponse employeeRegistrationResponse = employeeMapper.toEmployeeRegistrationResponse(employee);
         employeeRegistrationResponse.setUsername(request.getUsername());
         employeeRegistrationResponse.setAccounts(accountCredentialResponses);
+        employeeRegistrationResponse.setIsVerified(request.getIsVerified());
         return employeeRegistrationResponse;
     }
 
     @Override
     public EmployeeUpdateResponse update(String employeeId, EmployeeUpdateRequest request) {
         Employee employee = (Employee) userRepository.findById(employeeId).orElse(null);
-        if (employee == null)
-            throw new AppException(HttpCode.NOT_FOUND);
+        if (employee == null) throw new AppException(HttpCode.EMPLOYEE_NOT_FOUND);
 
         employeeMapper.update(employee, request);
 
         Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(employeeId);
-        if(accountCredentialSet.isEmpty())
-            throw new AppException(HttpCode.NOT_FOUND);
+        if(accountCredentialSet.isEmpty()) throw new AppException(HttpCode.ACCOUNT_NOT_FOUND);
+        accountCredentialSet.forEach(acc -> acc.setIsVerified(request.getIsVerified()));
 
-        AccountCredential emailAccount = accountCredentialRepository.findByUserIdAndAccountType(employeeId, AccountType.EMAIL);
-        emailAccount.setCredential(request.getEmail());
+        AccountCredential emailAccount = null;
+        if(request.getEmail() != null){
+            emailAccount = accountCredentialRepository.findByUserIdAndAccountType(employeeId, AccountType.EMAIL);
+            emailAccount.setCredential(request.getEmail());
+        }
+
 
         boolean passwordIsChanging = request.getOldPassword() != null
                 && request.getNewPassword() != null
                 && request.getConfirmNewPassword() != null;
 
-        if (passwordIsChanging) {
+        if (passwordIsChanging && emailAccount != null) {
             if(!passwordEncoder.matches(request.getOldPassword(), emailAccount.getPassword()))
                 throw new AppException(HttpCode.PASSWORD_INCORRECT);
             if (!request.getNewPassword().equalsIgnoreCase(request.getConfirmNewPassword()))
@@ -126,15 +133,17 @@ public class EmployeeAdminServiceImpl implements EmployeeAdminService {
             );
         }
 
-        Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
-        employee.setRoles(roles);
+        if(request.getRoles() != null && !request.getRoles().isEmpty()){
+            Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoles()));
+            employee.setRoles(roles);
+        }
 
         employeeRepository.save(employee);
         accountCredentialRepository.saveAll(accountCredentialSet);
 
         EmployeeUpdateResponse employeeUpdateResponse = employeeMapper.toEmployeeUpdateResponse(employee);
-        if(passwordIsChanging)
-            employeeUpdateResponse.setNewPassword(request.getNewPassword());
+        if(passwordIsChanging) employeeUpdateResponse.setNewPassword(request.getNewPassword());
+        employeeUpdateResponse.setIsVerified(request.getIsVerified());
         return employeeUpdateResponse;
     }
 }

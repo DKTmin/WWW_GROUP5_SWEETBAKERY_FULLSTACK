@@ -28,4 +28,5 @@ public class UserResponse {
     String address;
     Set<AccountCredentialResponse> accounts;
     Set<Role> roles;
+    Boolean isVerified;
 }
