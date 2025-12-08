@@ -1,5 +1,6 @@
 package iuh.fit.se.services.impl;
 
+import iuh.fit.se.dtos.request.CancelOrderRequest;
 import iuh.fit.se.dtos.request.OrderItemRequest;
 import iuh.fit.se.dtos.response.OrderDetailResponse;
 import iuh.fit.se.dtos.response.OrderResponse;
@@ -7,6 +8,8 @@ import iuh.fit.se.entities.*;
 import iuh.fit.se.entities.enums.TrangThaiDH;
 import iuh.fit.se.repositories.*;
 import iuh.fit.se.services.OrderService;
+import iuh.fit.se.entities.enums.HttpCode;
+import iuh.fit.se.exceptions.AppException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -109,6 +112,7 @@ public class OrderServiceImpl implements OrderService {
         resp.setItems(out);
         resp.setPaymentMethod(order.getPaymentMethod());
         resp.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
+        resp.setLyDoHuy(order.getLyDoHuy());
 
         // If payment method is VNPAY, generate a VNPay payment URL and return it to
         // client
@@ -227,6 +231,7 @@ public class OrderServiceImpl implements OrderService {
             resp.setItems(out);
             resp.setPaymentMethod(order.getPaymentMethod());
             resp.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
+            resp.setLyDoHuy(order.getLyDoHuy());
             return resp;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -252,6 +257,7 @@ public class OrderServiceImpl implements OrderService {
             r.setPaymentMethod(o.getPaymentMethod());
             r.setTrangThai(o.getTrangThai() == null ? null : o.getTrangThai().name());
             r.setCustomerAddress(o.getCustomer() != null ? o.getCustomer().getAddress() : null);
+            r.setLyDoHuy(o.getLyDoHuy());
             List<OrderDetailResponse> items = new ArrayList<>();
             if (o.getOrderDetails() != null) {
                 for (OrderDetail od : o.getOrderDetails()) {
@@ -287,6 +293,66 @@ public class OrderServiceImpl implements OrderService {
         List<OrderDetailResponse> items = new ArrayList<>();
         if (o.getOrderDetails() != null) {
             for (OrderDetail od : o.getOrderDetails()) {
+                OrderDetailResponse dr = new OrderDetailResponse();
+                dr.setId(od.getId());
+                dr.setPastryId(od.getPastry() != null ? od.getPastry().getId() : null);
+                dr.setName(od.getPastry() != null ? od.getPastry().getName() : null);
+                dr.setQty(od.getSoLuong());
+                dr.setPrice(od.getPastry() != null ? od.getPastry().getPrice() : null);
+                dr.setImage(od.getPastry() != null ? od.getPastry().getImageUrl() : null);
+                items.add(dr);
+            }
+        }
+        r.setItems(items);
+        r.setLyDoHuy(o.getLyDoHuy());
+        return r;
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancelOrder(String orderId, CancelOrderRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            throw new AppException(HttpCode.UNAUTHORIZED);
+        
+        String username = authentication.getName();
+        AccountCredential account = accountCredentialRepository.findByCredential(username);
+        if (account == null || account.getUser() == null)
+            throw new AppException(HttpCode.UNAUTHORIZED);
+
+        Optional<Order> opt = orderRepository.findById(orderId);
+        if (opt.isEmpty())
+            throw new AppException(HttpCode.NOT_FOUND);
+
+        Order order = opt.get();
+        
+        // Kiểm tra quyền: chỉ chủ đơn hàng mới được hủy
+        if (!order.getCustomer().getId().equals(account.getUser().getId()))
+            throw new AppException(HttpCode.UNAUTHORIZED);
+
+        // Chỉ cho phép hủy khi đơn hàng ở trạng thái PENDING
+        if (order.getTrangThai() != TrangThaiDH.PENDING)
+            throw new RuntimeException("Chỉ có thể hủy đơn hàng khi đang ở trạng thái PENDING");
+
+        // Cập nhật trạng thái và lý do hủy
+        order.setTrangThai(TrangThaiDH.CANCELLED);
+        order.setLyDoHuy(request.getLyDoHuy());
+        orderRepository.save(order);
+
+        log.info("Order {} cancelled by user {} with reason: {}", orderId, username, request.getLyDoHuy());
+
+        // Build response
+        OrderResponse r = new OrderResponse();
+        r.setId(order.getId());
+        r.setNgayDatHang(order.getNgayDatHang());
+        r.setTongTien(order.getTongTien());
+        r.setPaymentMethod(order.getPaymentMethod());
+        r.setTrangThai(order.getTrangThai().name());
+        r.setCustomerAddress(order.getCustomer() != null ? order.getCustomer().getAddress() : null);
+        r.setLyDoHuy(order.getLyDoHuy());
+        List<OrderDetailResponse> items = new ArrayList<>();
+        if (order.getOrderDetails() != null) {
+            for (OrderDetail od : order.getOrderDetails()) {
                 OrderDetailResponse dr = new OrderDetailResponse();
                 dr.setId(od.getId());
                 dr.setPastryId(od.getPastry() != null ? od.getPastry().getId() : null);

@@ -18,7 +18,8 @@ const orderApi = {
         }
     },
     list: () => axiosClient.get("/orders"),
-    get: (id) => axiosClient.get(`/orders/${id}`)
+    get: (id) => axiosClient.get(`/orders/${id}`),
+    cancel: (id, lyDoHuy) => axiosClient.put(`/orders/${id}/cancel`, { lyDoHuy })
 }
 
 export default orderApi
