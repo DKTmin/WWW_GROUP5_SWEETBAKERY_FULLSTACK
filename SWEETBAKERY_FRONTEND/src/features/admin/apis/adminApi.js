@@ -49,6 +49,9 @@ const adminApi = {
   updateCategory: (id, data) => axiosClient.put(`/admin/api/v1/categories/${id}`, data),
 
   deleteCategory: (id) => axiosClient.delete(`/admin/api/v1/categories/${id}`),
+
+  //stat
+  getAllUsers: () => axiosClient.get("/user-management/api/v1/users"),
 };
 
 export default adminApi;
