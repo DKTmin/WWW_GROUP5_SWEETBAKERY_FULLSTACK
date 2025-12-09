@@ -107,14 +107,15 @@ export default function PastriesManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Xác nhận xóa bánh này?")) return;
-    try {
-      await adminApi.deletePastry(id);
-      setPastries(prev => prev.filter(p => p.id !== id));
-    } catch (err) {
-      alert("Xóa thất bại!");
-    }
-  };
+    if (!window.confirm("Xác nhận xóa bánh này?")) return;
+    try {
+      await adminApi.deletePastry(id);
+      await loadData(); 
+    } catch (err) {
+      console.error(err);
+      alert("Xóa thất bại!");
+    }
+  };
 
   // --- 4. FRONTEND LOGIC: SEARCH & PAGING (MỚI THÊM) ---
   
