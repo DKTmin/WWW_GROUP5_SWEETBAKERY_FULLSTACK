@@ -28,7 +28,6 @@ const MENU_ITEMS = [
       { id: "orders", label: "Quản lý đơn hàng", icon: OrderIcon, adminOnly: false },
     ],
   },
-  { id: "settings", label: "Cài đặt", icon: SettingsIcon, adminOnly: true },
 ];
 
 export default function Sidebar({

@@ -35,8 +35,14 @@ export default function DashboardOverview() {
         const customers = (customersRes.data?.data) || [];
 
         // total revenue (sum tongTien)
-        const revenue = orders.reduce((s, o) => s + (Number(o.tongTien) || 0), 0);
-
+        const revenue = orders.reduce((s, o) => {
+    const status = String(o.trangThai || "").toUpperCase();
+    // Copy logic lọc trạng thái từ StatisticsView sang
+    if(status === 'COMPLETED' || status === 'PAID' || status === 'DONE') {
+        return s + (Number(o.tongTien) || 0);
+    }
+    return s;
+}, 0);
         // orders today
         const today = new Date();
         const isSameDay = (d) => {

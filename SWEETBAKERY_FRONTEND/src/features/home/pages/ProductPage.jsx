@@ -227,12 +227,6 @@ const toggleFavorite = () => {
           <div className="flex flex-col">
             <h1 className="text-3xl font-bold font-serif text-amber-900 md:text-4xl">{pastry.name}</h1>
 
-            {/* Rating giả lập */}
-            <div className="mt-2 flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="h-4 w-4 text-amber-400" />)}
-              <span className="ml-2 text-xs text-stone-400">(50 đánh giá)</span>
-            </div>
-
             <div className="mt-4 text-3xl font-bold text-amber-700">{priceText}</div>
 
             {/* Description */}
