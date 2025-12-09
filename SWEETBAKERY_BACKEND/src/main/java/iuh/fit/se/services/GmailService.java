@@ -1,6 +1,9 @@
 package iuh.fit.se.services;
 
+import iuh.fit.se.dtos.request.ForgetPasswordRequest;
+import iuh.fit.se.dtos.request.OtpForgetPasswordVerificationRequest;
 import iuh.fit.se.dtos.request.OtpVerificationRequest;
+import iuh.fit.se.dtos.response.ForgetPasswordOTPResponse;
 import iuh.fit.se.dtos.response.OtpVerificationResponse;
 
 /**
@@ -10,5 +13,7 @@ import iuh.fit.se.dtos.response.OtpVerificationResponse;
  **/
 public interface GmailService {
     OtpVerificationResponse sendOtpTOAdmin();
+    ForgetPasswordOTPResponse sendOtpToCustomer(ForgetPasswordRequest request);
     boolean verifyOtp(OtpVerificationRequest request);
+    OtpVerificationResponse verifyOtpForgetPassword(OtpForgetPasswordVerificationRequest request);
 }

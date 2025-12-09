@@ -1,0 +1,21 @@
+package iuh.fit.se.dtos.request;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+/**
+ * @author : user664dntp
+ * @mailto : phatdang19052004@gmail.com
+ * @created : 8/12/2025, Monday
+ **/
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class CreateNewPasswordRequest {
+    String newPassword;
+    String confirmNewPassword;
+    String resetPasswordToken;
+}

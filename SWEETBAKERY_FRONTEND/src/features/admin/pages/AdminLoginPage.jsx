@@ -146,10 +146,12 @@ export default function AdminLoginPage() {
 
       // Check if user has ADMIN role
       const roles = userData.roles || [];
-      const isAdmin = roles.some((role) => role.name === "ADMIN");
+      const isAdminOrEmployee = roles.some(
+        (role) => role.name === "ADMIN" || role.name === "EMPLOYEE"
+      );
 
-      if (!isAdmin) {
-        setError("Tài khoản không có quyền truy cập Admin.");
+      if (!isAdminOrEmployee) {
+        setError("Tài khoản không có quyền truy cập.");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         setLoading(false);

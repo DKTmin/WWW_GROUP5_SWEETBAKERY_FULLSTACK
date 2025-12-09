@@ -34,15 +34,19 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
             "/auth-management/api/v1/auth/refresh",
+            "/auth-management/api/v1/auth/forget-password",
             "/payments/vnpay/create",
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",
 //            "/category-management/api/v1/categories/**",
-            "/api/chat"
+            "/api/chat",
+            "/gmail-management/api/v1/gmail/otp-forget-password",
+            "/gmail-management/api/v1/gmail/verify-otp-forget-password"
     };
 
     private final String[] POST_CUSTOMER_ENDPOINT = {
             "/customer-management/api/v1/customers/update/**",
+            "/gmail-management/api/v1/gmail/otp-forget-password"
     };
 
     private final String[] GET_PUBLIC_ENDPOINT = {
@@ -54,6 +58,13 @@ public class SecurityConfig {
             "/payments/vnpay/ipn",
     };
 
+    private final String[] EMPLOYEE_ENDPOINT = {
+            "/auth-management/api/v1/auth/**",
+            "/gmail-management/api/v1/gmail/**",
+            "/admin/api/v1/orders/**",
+            "/admin/api/v1/pastries/**",
+            "/customer-management/api/v1/customers/**",
+    };
     private final String[] ADMIN_ENDPOINT = {
             "/auth-management/api/v1/auth/**",
             "/pastry-management/api/v1/pastries/**",
@@ -63,7 +74,7 @@ public class SecurityConfig {
             "/customer-management/api/v1/customers/**",
             "/admin/api/v1/employees/**",
             "/admin/api/v1/customers/**",
-            "/admin/api/v1/pastries/**",          // <-- THÊM
+            "/admin/api/v1/pastries/**",
             "/admin/api/v1/categories/**",
             "/admin/api/v1/customers/**",
             "/admin/api/v1/orders/**"
@@ -88,6 +99,18 @@ public class SecurityConfig {
                             UserRole.CUSTOMER.name(),
                             UserRole.ADMIN.name()
                     )
+                    .requestMatchers(HttpMethod.POST, EMPLOYEE_ENDPOINT).hasAnyRole(
+                            UserRole.EMPLOYEE.name(),
+                            UserRole.ADMIN.name()
+                    )
+                    .requestMatchers(HttpMethod.GET, EMPLOYEE_ENDPOINT).hasAnyRole(
+                            UserRole.EMPLOYEE.name(),
+                            UserRole.ADMIN.name()
+                    )
+                    .requestMatchers(HttpMethod.PUT, EMPLOYEE_ENDPOINT).hasAnyRole(
+                            UserRole.EMPLOYEE.name(),
+                            UserRole.ADMIN.name()
+                    )
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .requestMatchers(HttpMethod.PUT, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
                     .requestMatchers(HttpMethod.POST, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
@@ -95,7 +118,7 @@ public class SecurityConfig {
                     .anyRequest().authenticated();
         }).oauth2ResourceServer(oauth2 -> {
             oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                            .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                     .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
                     .accessDeniedHandler(new CustomAccessDeniedHandler());
         });

@@ -1,7 +1,10 @@
 package iuh.fit.se.controllers;
 
+import iuh.fit.se.dtos.request.ForgetPasswordRequest;
+import iuh.fit.se.dtos.request.OtpForgetPasswordVerificationRequest;
 import iuh.fit.se.dtos.request.OtpVerificationRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
+import iuh.fit.se.dtos.response.ForgetPasswordOTPResponse;
 import iuh.fit.se.dtos.response.OtpVerificationResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.GmailService;
@@ -23,7 +26,7 @@ public class GmailController {
     GmailService gmailService;
 
     @GetMapping("/send-otp")
-    ApiResponse<OtpVerificationResponse> sendOtp(){
+    ApiResponse<OtpVerificationResponse> sendOtp() {
         OtpVerificationResponse otpVerificationResponse = gmailService.sendOtpTOAdmin();
         return ApiResponse.<OtpVerificationResponse>builder()
                 .code(HttpCode.OK.getCODE())
@@ -33,12 +36,34 @@ public class GmailController {
     }
 
     @PostMapping("/verify-otp")
-    ApiResponse<OtpVerificationResponse> verifyOtp(@RequestBody OtpVerificationRequest request){
+    ApiResponse<OtpVerificationResponse> verifyOtp(@RequestBody OtpVerificationRequest request) {
+        OtpVerificationResponse response = OtpVerificationResponse.builder()
+                .valid(gmailService.verifyOtp(request))
+                .build();
         return ApiResponse.<OtpVerificationResponse>builder()
                 .code(HttpCode.OK.getCODE())
-                .message("OTP không hợp lệ hoặc đã hết hạn!")
-                .data(OtpVerificationResponse.builder().valid(gmailService.verifyOtp(request)).build())
+                .message(response.isValid() ? HttpCode.OK.getMESSAGE() : "OTP is not valid!")
+                .data(response)
                 .build();
     }
 
+    @PostMapping("/otp-forget-password")
+    ApiResponse<ForgetPasswordOTPResponse> sendOtp(@RequestBody ForgetPasswordRequest request) {
+        ForgetPasswordOTPResponse forgetPasswordOTPResponse = gmailService.sendOtpToCustomer(request);
+        return ApiResponse.<ForgetPasswordOTPResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(forgetPasswordOTPResponse)
+                .build();
+    }
+
+    @PostMapping("/verify-otp-forget-password")
+    ApiResponse<OtpVerificationResponse> verifyOtp(@RequestBody OtpForgetPasswordVerificationRequest request) {
+        OtpVerificationResponse otpVerificationResponse = gmailService.verifyOtpForgetPassword(request);
+        return ApiResponse.<OtpVerificationResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(otpVerificationResponse.isValid() ? HttpCode.OK.getMESSAGE() : "OTP is not valid!")
+                .data(otpVerificationResponse)
+                .build();
+    }
 }

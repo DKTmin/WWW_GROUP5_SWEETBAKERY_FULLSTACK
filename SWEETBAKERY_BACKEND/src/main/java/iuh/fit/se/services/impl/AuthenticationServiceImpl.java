@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
+import iuh.fit.se.dtos.response.CreateNewPasswordResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.User;
@@ -26,6 +27,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -68,8 +70,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         AccountCredential accountCredential = accountCredentialRepository.findByCredential(request.getIdentifier());
-        if(accountCredential == null)
-             throw new NullPointerException("Account not found!");
+        if(accountCredential == null) throw new AppException(HttpCode.ACCOUNT_NOT_FOUND);
+        if(!accountCredential.getIsVerified()) throw new AppException(HttpCode.DISABLE_ACCOUNT);
         if(!passwordEncoder.matches(request.getPassword(), accountCredential.getPassword()))
             throw new AppException(HttpCode.PASSWORD_INCORRECT);
         User user = userRepository.findById(accountCredential.getUser().getId())
@@ -147,7 +149,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
-    private String generateAccessToken(User user, AccountCredential accountCredential){
+    @Override
+    public CreateNewPasswordResponse forgetPassword(CreateNewPasswordRequest request) {
+        if(request.getNewPassword() == null) throw new AppException(HttpCode.NOT_FOUND);
+        if(!request.getNewPassword().equalsIgnoreCase(request.getConfirmNewPassword()))
+            throw new AppException((HttpCode.PASSWORD_NOMATCH));
+        SignedJWT signedJWT = verifyToken(request.getResetPasswordToken());
+        try {
+            String email = signedJWT.getJWTClaimsSet().getSubject();
+            AccountCredential emailAccount = accountCredentialRepository.findByCredential(email);
+            if(emailAccount == null) throw new AppException(HttpCode.EMAIL_NOT_FOUND);
+            String userId = emailAccount.getUser().getId();
+
+            Set<AccountCredential> accounts = accountCredentialRepository.findAllByUserId(userId);
+            String newPasswordEncode = passwordEncoder.encode(request.getNewPassword());
+            accounts.forEach(acc -> acc.setPassword(newPasswordEncode));
+            accountCredentialRepository.saveAll(accounts);
+            return CreateNewPasswordResponse.builder()
+                    .newPassword(newPasswordEncode)
+                    .build();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    @Override
+    public String generateAccessToken(User user, AccountCredential accountCredential){
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")

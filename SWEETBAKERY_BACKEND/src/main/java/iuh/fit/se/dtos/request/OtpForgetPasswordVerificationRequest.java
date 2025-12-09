@@ -1,4 +1,4 @@
-package iuh.fit.se.dtos.response;
+package iuh.fit.se.dtos.request;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,15 +9,13 @@ import lombok.experimental.FieldDefaults;
 /**
  * @author : user664dntp
  * @mailto : phatdang19052004@gmail.com
- * @created : 29/11/2025, Saturday
+ * @created : 8/12/2025, Monday
  **/
-
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class OtpVerificationResponse {
+public class OtpForgetPasswordVerificationRequest {
     String otp;
-    boolean valid;
-    String resetPasswordToken;
+    String email;
 }
