@@ -12,22 +12,23 @@ import {
 } from "./icons";
 
 const MENU_ITEMS = [
-  { id: "dashboard", label: "Tổng quan", icon: HomeIcon },
-  { id: "statistics", label: "Thống kê", icon: ChartIcon },
+  { id: "dashboard", label: "Tổng quan", icon: HomeIcon, adminOnly: false },
+  { id: "statistics", label: "Thống kê", icon: ChartIcon, adminOnly: true },
   {
     id: "management",
     label: "Quản lý",
     icon: SettingsIcon,
+    adminOnly: true,
     children: [
-      { id: "pastries", label: "Quản lý bánh", icon: CakeIcon },
-      { id: "categories", label: "Quản lý danh mục", icon: CategoryIcon },
-      { id: "users", label: "Quản lý tài khoản", icon: UsersIcon },
-      { id: "employees", label: "Quản lý nhân viên", icon: UsersIcon },
-      { id: "customers", label: "Quản lý khách hàng", icon: UsersIcon },
-      { id: "orders", label: "Quản lý đơn hàng", icon: OrderIcon },
+      { id: "pastries", label: "Quản lý bánh", icon: CakeIcon, adminOnly: true },
+      { id: "categories", label: "Quản lý danh mục", icon: CategoryIcon, adminOnly: true },
+      { id: "users", label: "Quản lý tài khoản", icon: UsersIcon, adminOnly: true },
+      { id: "employees", label: "Quản lý nhân viên", icon: UsersIcon, adminOnly: true },
+      { id: "customers", label: "Quản lý khách hàng", icon: UsersIcon, adminOnly: true },
+      { id: "orders", label: "Quản lý đơn hàng", icon: OrderIcon, adminOnly: false },
     ],
   },
-  { id: "settings", label: "Cài đặt", icon: SettingsIcon },
+  { id: "settings", label: "Cài đặt", icon: SettingsIcon, adminOnly: true },
 ];
 
 export default function Sidebar({
@@ -38,7 +39,38 @@ export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
   onLogout,
+  isAdmin = false, // Default false cho EMPLOYEE
 }) {
+  // Lọc menu items dựa trên role
+  const getVisibleItems = () => {
+    if (isAdmin) {
+      return MENU_ITEMS; // ADMIN thấy tất cả
+    }
+
+    // EMPLOYEE: chỉ thấy Dashboard + Orders
+    return MENU_ITEMS.filter((item) => {
+      if (!item.adminOnly) return true;
+      // Nếu là management menu, filter children
+      if (item.id === "management") {
+        return {
+          ...item,
+          children: item.children.filter((child) => !child.adminOnly),
+        };
+      }
+      return false;
+    }).map((item) => {
+      if (item.id === "management" && item.children) {
+        return {
+          ...item,
+          children: item.children.filter((child) => !child.adminOnly),
+        };
+      }
+      return item;
+    });
+  };
+
+  const visibleItems = getVisibleItems();
+
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-slate-900 transition-transform duration-300 lg:relative lg:translate-x-0 ${
@@ -53,7 +85,7 @@ export default function Sidebar({
           </div>
           <div>
             <h1 className="font-bold text-white">Sweet Bakery</h1>
-            <p className="text-xs text-slate-400">Admin Panel</p>
+            <p className="text-xs text-slate-400">{isAdmin ? "Admin Panel" : "Employee Panel"}</p>
           </div>
         </div>
         <button
@@ -66,7 +98,7 @@ export default function Sidebar({
 
       {/* Menu */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-        {MENU_ITEMS.map((item) => (
+        {visibleItems.map((item) => (
           <div key={item.id}>
             {item.children ? (
               <>
