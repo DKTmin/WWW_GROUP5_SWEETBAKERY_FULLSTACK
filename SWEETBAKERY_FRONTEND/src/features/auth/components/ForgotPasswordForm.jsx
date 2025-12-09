@@ -73,19 +73,20 @@ export default function ForgotPasswordForm() {
 
     try {
       // Gọi API gửi yêu cầu đặt lại mật khẩu
-      // const res = await authApi.post("/auth/forgot-password", { email });
+      const res = await authApi.getOtpToResetPassword({ email });
 
-      // if (res.status === 200 || res.data?.code === 200) {
-      //   setSuccess(true);
+      if (res.status === 200 || res.data?.code === 200 || res.data.data.otp != null) {
+        setSuccess(true);
 
-      //   // Lưu email vào sessionStorage để xác minh OTP
-      //   sessionStorage.setItem("reset_password_email", email);
-      //   sessionStorage.setItem("reset_password_pending", "true");
+        // Lưu email vào sessionStorage để xác minh OTP
+        sessionStorage.setItem("reset_password_email", email);
+        sessionStorage.setItem("reset_password_pending", "true");
+        // sessionStorage.setItem("otp_resetpassword", res.data.data.otp);
 
-      //   // Redirect sang trang OTP verification sau 1.5 giây
-      //   setTimeout(() => navigate("/reset-password-otp"), 1500);
-      // }
-      setTimeout(() => navigate("/reset-password-otp"), 1500);
+        // Redirect sang trang OTP verification sau 1.5 giây
+        setTimeout(() => navigate("/reset-password-otp"), 1500);
+      }
+      // setTimeout(() => navigate("/reset-password-otp"), 1500);
     } catch (err) {
       const msg = err.response?.data?.message || "Gửi yêu cầu thất bại. Vui lòng thử lại.";
       setError(msg);

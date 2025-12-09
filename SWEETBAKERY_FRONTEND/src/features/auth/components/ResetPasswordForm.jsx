@@ -54,11 +54,11 @@ export default function ResetPasswordNewForm() {
   const email = sessionStorage.getItem("reset_password_email");
 
   // Kiểm tra OTP đã verify chưa
-  //   useEffect(() => {
-  //     if (!sessionStorage.getItem("otp_verified")) {
-  //       navigate("/reset-password-otp");
-  //     }
-  //   }, [navigate]);
+  useEffect(() => {
+    if (!sessionStorage.getItem("otp_verified")) {
+      navigate("/reset-password-otp");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,11 +84,10 @@ export default function ResetPasswordNewForm() {
     try {
       const verificationToken = sessionStorage.getItem("otp_verification_token");
 
-      const res = await authApi.post("/auth/reset-password", {
-        email,
+      const res = await authApi.forgetPassword({
         newPassword: password,
-        confirmPassword: confirmPassword,
-        verificationToken: verificationToken || undefined,
+        confirmNewPassword: confirmPassword,
+        resetPasswordToken: verificationToken || undefined,
       });
 
       if (res.data?.code === 200 || res.status === 200) {

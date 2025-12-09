@@ -113,43 +113,48 @@ export default function ResetPasswordOTPForm() {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
-    // const enteredOtp = otp.join("");
+    e.preventDefault();
+    const enteredOtp = otp.join("");
 
-    // if (enteredOtp.length !== OTP_LENGTH) {
-    //   setError("Vui lòng nhập đủ 6 chữ số OTP.");
-    //   return;
-    // }
+    if (enteredOtp.length !== OTP_LENGTH) {
+      setError("Vui lòng nhập đủ 6 chữ số OTP.");
+      return;
+    }
 
-    // setLoading(true);
-    // setError("");
+    setLoading(true);
+    setError("");
 
-    // try {
-    //   // Xác minh OTP
-    //   const res = await authApi.post("/auth/verify-reset-password-otp-only", {
-    //     email,
-    //     otp: enteredOtp,
-    //   });
+    try {
+      // Xác minh OTP
+      const res = await authApi.verifyOTpToResetPassword({
+        otp: enteredOtp,
+        email,
+      });
 
-    //   if (res.data?.code === 200 || res.status === 200) {
-    //     // Lưu token hoặc flag để xác nhận OTP đã valid
-    //     sessionStorage.setItem("otp_verified", "true");
-    //     sessionStorage.setItem("otp_verification_token", res.data?.token || "");
+      if (
+        res.data?.code === 200 &&
+        res.status === 200 &&
+        res.data?.data.valid &&
+        res.data?.data.resetPasswordToken != null
+      ) {
+        // Lưu token hoặc flag để xác nhận OTP đã valid
+        sessionStorage.setItem("otp_verified", "true");
+        sessionStorage.setItem("otp_verification_token", res.data?.data.resetPasswordToken || "");
 
-    //     // Chuyển sang trang nhập mật khẩu mới
-    //     navigate("/reset-password-new");
-    //   } else {
-    //     throw new Error(res.data?.message || "Xác minh thất bại");
-    //   }
-    // } catch (err) {
-    //   const msg = err.response?.data?.message || err.message || "Mã OTP không đúng hoặc hết hạn.";
-    //   setError(msg);
-    //   setOtp(Array(OTP_LENGTH).fill(""));
-    //   inputRefs.current[0]?.focus();
-    // } finally {
-    //   setLoading(false);
-    // }
-    navigate("/reset-password-new");
+        // Chuyển sang trang nhập mật khẩu mới
+        navigate("/reset-password-new");
+      } else {
+        throw new Error(res.data?.message || "Xác minh thất bại");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || "Mã OTP không đúng hoặc hết hạn.";
+      setError(msg);
+      setOtp(Array(OTP_LENGTH).fill(""));
+      inputRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+    // navigate("/reset-password-new");
   };
 
   const handleResend = async () => {
