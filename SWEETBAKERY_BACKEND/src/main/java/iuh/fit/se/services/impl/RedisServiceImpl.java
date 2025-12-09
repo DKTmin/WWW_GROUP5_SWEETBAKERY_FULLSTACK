@@ -51,4 +51,9 @@ public class RedisServiceImpl implements RedisService {
     public String getByKey(String key) {
         return redisTemplate.opsForValue().get(key);
     }
+
+    @Override
+    public void deleteByKey(String key) {
+        redisTemplate.delete(key);
+    }
 }

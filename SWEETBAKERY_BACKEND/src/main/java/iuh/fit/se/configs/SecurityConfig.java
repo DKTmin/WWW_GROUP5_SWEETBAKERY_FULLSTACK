@@ -34,6 +34,7 @@ public class SecurityConfig {
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
             "/auth-management/api/v1/auth/refresh",
+            "/auth-management/api/v1/auth/forget-password",
             "/payments/vnpay/create",
             "/payments/vnpay/simulate",
             "/customer-management/api/v1/customers/register",

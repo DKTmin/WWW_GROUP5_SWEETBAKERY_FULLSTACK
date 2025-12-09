@@ -19,4 +19,5 @@ import lombok.experimental.FieldDefaults;
 public class OtpVerificationResponse {
     String otp;
     boolean valid;
+    String resetPasswordToken;
 }

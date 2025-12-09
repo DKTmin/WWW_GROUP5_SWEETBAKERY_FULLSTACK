@@ -17,5 +17,5 @@ import lombok.experimental.FieldDefaults;
 public class ForgetPasswordOTPResponse {
     String otp;
     Boolean valid;
-    String emai;
+    String email;
 }

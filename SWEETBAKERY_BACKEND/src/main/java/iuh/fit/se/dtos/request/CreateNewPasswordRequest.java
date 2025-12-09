@@ -17,4 +17,5 @@ import lombok.experimental.FieldDefaults;
 public class CreateNewPasswordRequest {
     String newPassword;
     String confirmNewPassword;
+    String resetPasswordToken;
 }

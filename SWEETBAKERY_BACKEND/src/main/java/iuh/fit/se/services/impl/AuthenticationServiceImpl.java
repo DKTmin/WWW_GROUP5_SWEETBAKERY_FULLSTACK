@@ -27,6 +27,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -150,10 +151,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public CreateNewPasswordResponse forgetPassword(CreateNewPasswordRequest request) {
-        return null;
-    }
+        if(request.getNewPassword() == null) throw new AppException(HttpCode.NOT_FOUND);
+        if(!request.getNewPassword().equalsIgnoreCase(request.getConfirmNewPassword()))
+            throw new AppException((HttpCode.PASSWORD_NOMATCH));
+        SignedJWT signedJWT = verifyToken(request.getResetPasswordToken());
+        try {
+            String email = signedJWT.getJWTClaimsSet().getSubject();
+            AccountCredential emailAccount = accountCredentialRepository.findByCredential(email);
+            if(emailAccount == null) throw new AppException(HttpCode.EMAIL_NOT_FOUND);
+            String userId = emailAccount.getUser().getId();
 
-    private String generateAccessToken(User user, AccountCredential accountCredential){
+            Set<AccountCredential> accounts = accountCredentialRepository.findAllByUserId(userId);
+            String newPasswordEncode = passwordEncoder.encode(request.getNewPassword());
+            accounts.forEach(acc -> acc.setPassword(newPasswordEncode));
+            accountCredentialRepository.saveAll(accounts);
+            return CreateNewPasswordResponse.builder()
+                    .newPassword(newPasswordEncode)
+                    .build();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    @Override
+    public String generateAccessToken(User user, AccountCredential accountCredential){
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")

@@ -4,6 +4,8 @@ import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.CreateNewPasswordResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
+import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.User;
 
 /**
  * @author : user664dntp
@@ -17,5 +19,6 @@ public interface AuthenticationService {
     AuthenticationResponse refreshToken(RefreshTokenRequest request);
 
     CreateNewPasswordResponse forgetPassword(CreateNewPasswordRequest request);
+    String generateAccessToken(User user, AccountCredential accountCredential);
 
 }

@@ -13,4 +13,6 @@ public interface RedisService {
     void setOtpAdmin(String otp, long duration, TimeUnit timeUnit);
     void setOtpCustomer(String email, String otp, long duration, TimeUnit timeUnit);
     String getByKey(String key);
+
+    void deleteByKey(String key);
 }

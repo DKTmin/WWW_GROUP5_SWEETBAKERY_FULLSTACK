@@ -1,10 +1,7 @@
 package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.request.*;
-import iuh.fit.se.dtos.response.ApiResponse;
-import iuh.fit.se.dtos.response.AuthenticationResponse;
-import iuh.fit.se.dtos.response.IntrospectResponse;
-import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
+import iuh.fit.se.dtos.response.*;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.services.AuthenticationService;
 import jakarta.validation.Valid;
@@ -59,6 +56,16 @@ public class AuthenticationController {
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
                 .data(authenticationService.refreshToken(request))
+                .build();
+    }
+
+    @PostMapping("/forget-password")
+    ApiResponse<CreateNewPasswordResponse> forgetPassword(@RequestBody CreateNewPasswordRequest request){
+        CreateNewPasswordResponse response = authenticationService.forgetPassword(request);
+        return ApiResponse.<CreateNewPasswordResponse>builder()
+                .code(HttpCode.OK.getCODE())
+                .message(HttpCode.OK.getMESSAGE())
+                .data(response)
                 .build();
     }
 }

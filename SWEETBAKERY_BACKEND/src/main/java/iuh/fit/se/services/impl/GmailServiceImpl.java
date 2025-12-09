@@ -9,6 +9,7 @@ import iuh.fit.se.entities.AccountCredential;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.repositories.AccountCredentialRepository;
+import iuh.fit.se.services.AuthenticationService;
 import iuh.fit.se.services.GmailService;
 import iuh.fit.se.services.RedisService;
 import jakarta.mail.MessagingException;
@@ -43,6 +44,7 @@ public class GmailServiceImpl implements GmailService {
     JavaMailSender javaMailSender;
     RedisService redisService;
     AccountCredentialRepository accountCredentialRepository;
+    AuthenticationService authenticationService;
 
     @NonFinal
     @Value("${spring.valid-time}")
@@ -119,14 +121,14 @@ public class GmailServiceImpl implements GmailService {
         return ForgetPasswordOTPResponse.builder()
                 .otp(otp)
                 .valid(true)
-                .emai(request.getEmail())
+                .email(request.getEmail())
                 .build();
     }
 
     @Override
     public boolean verifyOtp(OtpVerificationRequest request) {
         String savedOtp = redisService.getByKey(request.getOtp());
-
+        redisService.deleteByKey(request.getOtp());
         if (savedOtp == null) return false;
         return savedOtp.equals(OTP_VALUE);
     }
@@ -134,16 +136,24 @@ public class GmailServiceImpl implements GmailService {
     @Override
     public OtpVerificationResponse verifyOtpForgetPassword(OtpForgetPasswordVerificationRequest request) {
         String savedOtp = redisService.getByKey(request.getEmail());
-
         if (savedOtp == null)
             return OtpVerificationResponse.builder()
                     .valid(false)
                     .otp(null)
                     .build();
         boolean valid = savedOtp.equals(request.getOtp());
+        String resetToken = null;
+        if(valid){
+            String email = request.getEmail();
+            AccountCredential emailAccount = accountCredentialRepository.findByCredential(email);
+            if(emailAccount == null) throw new AppException(HttpCode.EMAIL_NOT_FOUND);
+            resetToken = authenticationService.generateAccessToken(emailAccount.getUser(), emailAccount);
+            redisService.deleteByKey(request.getEmail());
+        }
         return OtpVerificationResponse.builder()
                 .valid(valid)
                 .otp(valid ? request.getOtp() : null)
+                .resetPasswordToken(resetToken)
                 .build();
     }
 }
