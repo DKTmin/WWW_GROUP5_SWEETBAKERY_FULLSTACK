@@ -21,38 +21,71 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
     CustomJwtDecoder customJwtDecoder;
-
-    // ====== KHAI BÁO HẰNG Ở ĐÂY ======
-    // Các endpoint POST cho auth: public
-    private static final String[] PUBLIC_POST_ENDPOINTS = {
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/api-docs/**",
+            "/swagger-resources/**",
+            "/webjars/**"
+    };
+    private final String[] POST_PUBLIC_ENDPOINT = {
             "/auth-management/api/v1/auth/register",
             "/auth-management/api/v1/auth/log-in",
             "/auth-management/api/v1/auth/introspect",
-            "/category-management/api/v1/categories/**",
+            "/auth-management/api/v1/auth/refresh",
+            "/auth-management/api/v1/auth/forget-password",
+            "/auth-management/api/v1/auth/google",
+            "/payments/vnpay/create",
+            "/payments/vnpay/simulate",
+            "/customer-management/api/v1/customers/register",
+//            "/category-management/api/v1/categories/**",
+            "/api/chat",
+            "/gmail-management/api/v1/gmail/otp-forget-password",
+            "/gmail-management/api/v1/gmail/verify-otp-forget-password"
     };
 
-    // Các endpoint GET bánh: public (homepage dùng)
-    private static final String[] PUBLIC_GET_ENDPOINTS = {
-            "/pastry-management/api/v1/pastries",
+    private final String[] POST_CUSTOMER_ENDPOINT = {
+            "/customer-management/api/v1/customers/update/**",
+            "/gmail-management/api/v1/gmail/otp-forget-password"
+    };
+
+    private final String[] GET_PUBLIC_ENDPOINT = {
+            "/user-management/api/v1/users/information",
             "/pastry-management/api/v1/pastries/**",
-            "/pastry-management/api/v1/pastry-categories",
-            "/pastry-management/api/v1/pastry-categories/**"
+            "/category-management/api/v1/categories/**",
+            // Cho phép VNPay redirect về mà không cần JWT
+            "/payments/vnpay/return",
+            "/payments/vnpay/ipn",
     };
 
-
-    // Endpoint chỉ ADMIN được phép
-    private static final String[] ADMIN_ENDPOINT = {
-            "/auth-management/api/v1/auth/*",
-            "/user-management/api/v1/users/**"
+    private final String[] EMPLOYEE_ENDPOINT = {
+            "/auth-management/api/v1/auth/**",
+            "/gmail-management/api/v1/gmail/**",
+            "/admin/api/v1/orders/**",
+            "/admin/api/v1/pastries/**",
+            "/customer-management/api/v1/customers/**",
     };
-    // ================================
+    private final String[] ADMIN_ENDPOINT = {
+            "/auth-management/api/v1/auth/**",
+            "/pastry-management/api/v1/pastries/**",
+            "/user-management/api/v1/users/**",
+            "/employee-management/api/v1/employees/**",
+            "/gmail-management/api/v1/gmail/**",
+            "/customer-management/api/v1/customers/**",
+            "/admin/api/v1/employees/**",
+            "/admin/api/v1/customers/**",
+            "/admin/api/v1/pastries/**",
+            "/admin/api/v1/categories/**",
+            "/admin/api/v1/customers/**",
+            "/admin/api/v1/orders/**"
+    };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         // CORS
         httpSecurity.cors(cors -> cors.configurationSource(request -> {
             var corConfig = new CorsConfiguration();
-            // KHÔNG có dấu "/" ở cuối
             corConfig.addAllowedOrigin("http://localhost:5173");
             corConfig.addAllowedHeader("*");
             corConfig.addAllowedMethod("*");
@@ -61,9 +94,28 @@ public class SecurityConfig {
         })).csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity.authorizeHttpRequests(request -> {
-            request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
-            .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
+            request.requestMatchers(HttpMethod.POST, POST_PUBLIC_ENDPOINT).permitAll()
+                    .requestMatchers(HttpMethod.GET, GET_PUBLIC_ENDPOINT).permitAll()
+                    .requestMatchers(HttpMethod.POST, POST_CUSTOMER_ENDPOINT).hasAnyRole(
+                            UserRole.CUSTOMER.name(),
+                            UserRole.ADMIN.name()
+                    )
+                    .requestMatchers(HttpMethod.POST, EMPLOYEE_ENDPOINT).hasAnyRole(
+                            UserRole.EMPLOYEE.name(),
+                            UserRole.ADMIN.name()
+                    )
+                    .requestMatchers(HttpMethod.GET, EMPLOYEE_ENDPOINT).hasAnyRole(
+                            UserRole.EMPLOYEE.name(),
+                            UserRole.ADMIN.name()
+                    )
+                    .requestMatchers(HttpMethod.PUT, EMPLOYEE_ENDPOINT).hasAnyRole(
+                            UserRole.EMPLOYEE.name(),
+                            UserRole.ADMIN.name()
+                    )
                     .requestMatchers(HttpMethod.GET, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(HttpMethod.PUT, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(HttpMethod.POST, ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
+                    .requestMatchers(SWAGGER_WHITELIST).permitAll()
                     .anyRequest().authenticated();
         }).oauth2ResourceServer(oauth2 -> {
             oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
@@ -71,23 +123,6 @@ public class SecurityConfig {
                     .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
                     .accessDeniedHandler(new CustomAccessDeniedHandler());
         });
-        // PHÂN QUYỀN
-        httpSecurity.authorizeHttpRequests(req -> req
-                // 3 endpoint POST auth: ai cũng gọi được
-                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
-                // GET danh sách bánh: ai cũng xem được (homepage)
-                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
-                // Các endpoint admin
-                .requestMatchers(ADMIN_ENDPOINT).hasRole(UserRole.ADMIN.name())
-                // Còn lại thì phải có token
-                .anyRequest().authenticated()
-        ).oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt
-                        .decoder(customJwtDecoder)
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                .authenticationEntryPoint(new JwtAuthenticationEntrypoint())
-                .accessDeniedHandler(new CustomAccessDeniedHandler())
-        );
 
         return httpSecurity.build();
     }

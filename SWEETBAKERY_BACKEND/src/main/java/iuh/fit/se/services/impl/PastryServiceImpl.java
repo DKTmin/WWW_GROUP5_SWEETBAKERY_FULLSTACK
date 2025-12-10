@@ -5,117 +5,155 @@ import iuh.fit.se.dtos.request.PastryUpdateRequest;
 import iuh.fit.se.dtos.response.PastryCreationResponse;
 import iuh.fit.se.dtos.response.PastryUpdateResponse;
 import iuh.fit.se.entities.Pastry;
+import iuh.fit.se.entities.PastryCategory;
+import iuh.fit.se.entities.enums.PastryStatus;
 import iuh.fit.se.mapper.PastryMapper;
+import iuh.fit.se.repositories.PastryCategoryRepository;
 import iuh.fit.se.repositories.PastryRepository;
 import iuh.fit.se.services.PastryService;
-import jakarta.validation.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Pastry service implementation
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Service
 public class PastryServiceImpl implements PastryService {
+
     PastryRepository pastryRepository;
     PastryMapper pastryMapper;
-//    private BanhNgotDTO convertToDTO(Pastry entity) {
-//        return modelMapper.map(entity, BanhNgotDTO.class);
-//    }
+    PastryCategoryRepository pastryCategoryRepository;
 
     @Override
     public PastryCreationResponse findById(String id) {
-        Pastry pastry = pastryRepository.findById(id).orElse(null);
-        if(pastry == null)
-            throw new NullPointerException("Banh ngot not found!");
+        Pastry pastry = pastryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pastry not found"));
+
         return pastryMapper.toPastryCreationResponse(pastry);
     }
 
+    /**
+     * Dùng cho FE khách hàng:
+     * Chỉ trả bánh: status = ACTIVE & category.isActive = true
+     */
     @Override
     public List<PastryCreationResponse> findAll() {
-        return pastryRepository.findAll()
+        // Gọi repository với tham số ACTIVE
+        return pastryRepository.findAllAvailablePastries(PastryStatus.ACTIVE)
                 .stream()
                 .map(pastryMapper::toPastryCreationResponse)
                 .collect(Collectors.toList());
     }
 
-//    @Override
-//    public Page<BanhNgotDTO> findAllWithPaging(Pageable pageable) {
-//        return null;
-//    }
-
-//    @Override
-//    public Page<BanhNgotDTO> findAllWithPaging(@ParameterObject Pageable pageable) {
-//        return banhNgotRepository.findAll(pageable).map(this::convertToDTO);
-//    }
-
     @Transactional
     @Override
     public PastryCreationResponse save(PastryCreationRequest request) {
+        // MapStruct map trực tiếp các field: name, price, description, imageUrl, stockQuantity, status
         Pastry pastry = pastryMapper.toPastry(request);
-        return pastryMapper.toPastryCreationResponse(pastryRepository.save(pastry));
+
+        // Gắn category nếu có categoryId
+        if (request.getCategoryId() != null && !request.getCategoryId().isBlank()) {
+            PastryCategory category = pastryCategoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            pastry.setCategory(category);
+        }
+
+        // Nếu request không gửi status -> giữ default DRAFT từ entity
+        if (pastry.getStatus() == null) {
+            pastry.setStatus(PastryStatus.DRAFT);
+        }
+
+        // Nếu stockQuantity < 0 thì về 0
+        if (pastry.getStockQuantity() < 0) {
+            pastry.setStockQuantity(0);
+        }
+
+        Pastry saved = pastryRepository.save(pastry);
+        return pastryMapper.toPastryCreationResponse(saved);
     }
+
     @Transactional
     @Override
     public PastryUpdateResponse update(String id, PastryUpdateRequest request) {
-        Pastry pastry = pastryRepository.findById(id).orElse(null);
-        if(pastry == null)
-            throw new NullPointerException("Banh ngot not found!");
+        Pastry pastry = pastryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pastry not found"));
+
+        // MapStruct update các field cơ bản
         pastryMapper.update(pastry, request);
-        return pastryMapper.toPastryUpdateResponse(pastryRepository.save(pastry));
+
+        // Nếu có categoryId mới -> đổi category
+        if (request.getCategoryId() != null && !request.getCategoryId().isBlank()) {
+            PastryCategory category = pastryCategoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            pastry.setCategory(category);
+        }
+
+        // Nếu status có gửi lên thì cập nhật
+        if (request.getStatus() != null) {
+            pastry.setStatus(request.getStatus());
+        }
+
+        // Nếu stockQuantity có gửi lên thì cập nhật, chặn số âm
+        if (request.getStockQuantity() != null) {
+            int sq = request.getStockQuantity();
+            pastry.setStockQuantity(Math.max(sq, 0));
+        }
+
+        Pastry updated = pastryRepository.save(pastry);
+        return pastryMapper.toPastryUpdateResponse(updated);
     }
 
+    /**
+     * Soft delete: không xóa cứng.
+     * Chuyển status về DISCONTINUED.
+     */
+    @Transactional
     @Override
     public boolean delete(String id) {
-        Pastry pastry = pastryRepository.findById(id).orElse(null);
-        if(pastry == null)
-            throw new NullPointerException("Banh ngot not found!");
-        try {
-            pastryRepository.delete(pastry);
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+        Pastry pastry = pastryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pastry not found"));
+
+        pastry.setStatus(PastryStatus.DISCONTINUED);
+        pastryRepository.save(pastry);
+        return true;
     }
+
     @Override
     public List<PastryCreationResponse> findByCategory(String categoryId) {
         if (categoryId == null || categoryId.isBlank()) {
             return findAll();
         }
+
+        // Lấy theo category rồi filter theo status + isActive
         return pastryRepository.findAllByCategory_Id(categoryId)
                 .stream()
+                .filter(p -> p.getStatus() == PastryStatus.ACTIVE
+                        && p.getCategory() != null
+                        && p.getCategory().isActive())
                 .map(pastryMapper::toPastryCreationResponse)
                 .collect(Collectors.toList());
     }
 
-//    @Override
-//    public List<BanhNgotDTO> search(String keyword) {
-//        return null;
-//    }
+    @Override
+    public List<PastryCreationResponse> search(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return findAll();
+        }
+        String q = keyword.trim();
 
-//    @Override
-//    public List<BanhNgotDTO> search(String keyword) {
-//        return banhNgotRepository.findAll().stream()
-//                .filter(b -> b.getTenBanh().toLowerCase().contains(keyword.toLowerCase()))
-//                .map(this::convertToDTO)
-//                .collect(Collectors.toList());
-//    }
-
-//    private void validate(Pastry bn) {
-//        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-//        Validator validator = factory.getValidator();
-//        Set<ConstraintViolation<Pastry>> violations = validator.validate(bn);
-//
-//        if (!violations.isEmpty()) {
-//            Map<String, Object> errors = new LinkedHashMap<>();
-//            violations.forEach(v -> errors.put(v.getPropertyPath().toString(), v.getMessage()));
-//            throw new ValidationException("Lỗi khi xử lý bánh ngọt", errors);
-//        }
-//    }
+        // --- ĐÃ SỬA LỖI TẠI ĐÂY ---
+        // Truyền thêm PastryStatus.ACTIVE vào đầu để khớp với Repository
+        return pastryRepository.searchAvailablePastries(PastryStatus.ACTIVE, q)
+                .stream()
+                .map(pastryMapper::toPastryCreationResponse)
+                .collect(Collectors.toList());
+    }
 }

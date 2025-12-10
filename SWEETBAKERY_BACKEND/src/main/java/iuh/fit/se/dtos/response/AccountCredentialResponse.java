@@ -22,7 +22,6 @@ public class AccountCredentialResponse {
     String id;
     AccountType type;
     String credential;
-    String password;
     Boolean isVerified;
     LocalDateTime createdAt;
     LocalDateTime lastLogin;

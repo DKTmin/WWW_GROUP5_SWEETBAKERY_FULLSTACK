@@ -2,8 +2,10 @@ package iuh.fit.se.services;
 
 import iuh.fit.se.dtos.request.*;
 import iuh.fit.se.dtos.response.AuthenticationResponse;
+import iuh.fit.se.dtos.response.CreateNewPasswordResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
-import iuh.fit.se.dtos.response.RegistrationResponse;
+import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.User;
 
 /**
  * @author : user664dntp
@@ -11,9 +13,12 @@ import iuh.fit.se.dtos.response.RegistrationResponse;
  * @created : 19/11/2025, Wednesday
  **/
 public interface AuthenticationService {
-    RegistrationResponse register(RegistrationRequest request);
     AuthenticationResponse authenticate(AuthenticationRequest request);
     IntrospectResponse introspect(IntrospectRequest request);
     void logout(LogoutRequest request);
     AuthenticationResponse refreshToken(RefreshTokenRequest request);
+    CreateNewPasswordResponse forgetPassword(CreateNewPasswordRequest request);
+    String generateAccessToken(User user, AccountCredential accountCredential);
+    String generateRefreshToken(User user, AccountCredential accountCredential);
+    AuthenticationResponse authenticateGoogleUser(String code);
 }

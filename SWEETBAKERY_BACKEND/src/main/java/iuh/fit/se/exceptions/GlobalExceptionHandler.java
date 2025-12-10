@@ -4,6 +4,8 @@ import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.entities.enums.ValidationMessage;
 import jakarta.validation.ConstraintViolation;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -84,5 +86,15 @@ public class GlobalExceptionHandler {
     String getMessage(String validationMessage, Map<String, Object> attrs){
         String minValue = attrs.get("min").toString();
         return validationMessage.replace("{" + "min" + "}", minValue);
+    }
+
+    @ExceptionHandler(value = RuntimeException.class)
+    ResponseEntity<ApiResponse<?>> handlingRuntimeException(RuntimeException exception){
+        HttpCode httpCode = HttpCode.BAD_REQUEST;
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(httpCode.getCODE())
+                .message(exception.getMessage())
+                .build();
+        return ResponseEntity.status(httpCode.getHTTP_CODE()).body(apiResponse);
     }
 }

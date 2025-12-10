@@ -8,9 +8,8 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
-
 public class PastryCategoryCreationResponse {
-    private  String id;
-    private String tenLoai;
+    String id;
+    String name;
+    boolean isActive;   // true = đang dùng, false = ẩn
 }

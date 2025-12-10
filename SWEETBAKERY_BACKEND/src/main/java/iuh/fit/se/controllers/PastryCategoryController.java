@@ -6,10 +6,6 @@ import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.PastryCategoryCreationResponse;
 import iuh.fit.se.dtos.response.PastryCategoryUpdateResponse;
 import iuh.fit.se.entities.enums.HttpCode;
-import iuh.fit.se.dtos.response.ApiResponse;
-import iuh.fit.se.entities.PastryCategory;
-import iuh.fit.se.entities.enums.HttpCode;
-import iuh.fit.se.repositories.PastryCategoryRepository;
 import iuh.fit.se.services.PastryCategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +19,7 @@ import java.util.List;
 @RequestMapping("category-management/api/v1/categories")
 @RequiredArgsConstructor
 public class PastryCategoryController {
+
     PastryCategoryService categoryService;
 
     @GetMapping("/{id}")
@@ -67,12 +64,13 @@ public class PastryCategoryController {
     }
 
     @GetMapping
+    // --- ĐÃ SỬA LỖI TẠI ĐÂY ---
+    // Đổi từ PastryCategory sang PastryCategoryCreationResponse
     public ApiResponse<List<PastryCategoryCreationResponse>> getAll() {
         return ApiResponse.<List<PastryCategoryCreationResponse>>builder()
                 .code(HttpCode.OK.getCODE())
                 .message(HttpCode.OK.getMESSAGE())
-                .data(categoryService.findAll())
+                .data(categoryService.findAll()) // Bây giờ kiểu dữ liệu đã khớp
                 .build();
     }
-
 }

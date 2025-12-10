@@ -1,75 +1,200 @@
 // src/features/home/components/PastryCard.jsx
 import { Link } from "react-router-dom";
+import { useState } from "react"; // <--- 1. Import useState
+import cartApi from "../../cart/apis/cartApi";
+
+// ... (Giữ nguyên các Icon ShoppingCartIcon, EyeIcon, HeartIcon) ...
+const ShoppingCartIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+  </svg>
+);
+
+const EyeIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const HeartIcon = ({ className, filled }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={filled ? "red" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    className={className}
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
 
 export default function PastryCard({ pastry }) {
   const image = pastry.imageUrl || pastry.image || "/placeholder.png";
   const name = pastry.name || pastry.title || "Sản phẩm";
-  const price = pastry.price != null ? (Number(pastry.price).toLocaleString("vi-VN") + "₫") : "";
+  const price =
+    pastry.price != null ? Number(pastry.price).toLocaleString("vi-VN") + "₫" : "Liên hệ";
   const description = pastry.description || "";
 
+  // -----------------------------
+  // ❤️ SỬA LỖI REFRESH TẠI ĐÂY
+  // -----------------------------
+
+  // 2. Khởi tạo state dựa trên localStorage
+  const [isFavorite, setIsFavorite] = useState(() => {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    return favorites.some((item) => item.id === pastry.id);
+  });
+
+  const toggleFavorite = (e) => {
+    e.preventDefault();
+
+    // Lấy danh sách mới nhất từ localStorage
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    let updated = [];
+
+    if (isFavorite) {
+      // Đang thích -> Xóa
+      updated = favorites.filter((item) => item.id !== pastry.id);
+    } else {
+      // Chưa thích -> Thêm
+      updated = [
+        ...favorites,
+        {
+          id: pastry.id,
+          name,
+          image,
+          price: pastry.price,
+        },
+      ];
+    }
+
+    // Lưu vào localStorage
+    localStorage.setItem("favorites", JSON.stringify(updated));
+
+    // Cập nhật State để UI đổi màu icon ngay lập tức
+    setIsFavorite(!isFavorite);
+
+    // Bắn event để Header (nếu có) cập nhật số lượng
+    window.dispatchEvent(new Event("favorites_update"));
+
+    // 3. ĐÃ XÓA DÒNG window.location.reload();
+  };
+
+  // ... (Giữ nguyên hàm handleAddToCart và phần return) ...
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    try {
+      const cartJson = localStorage.getItem("cart") || "[]";
+      const cart = JSON.parse(cartJson);
+      const item = {
+        id: pastry.id,
+        name: pastry.name || pastry.title,
+        price: Number(pastry.price || 0),
+        qty: 1,
+        size: "",
+        image: pastry.imageUrl || pastry.image || "/placeholder.png",
+      };
+      const idx = cart.findIndex((c) => c.id === item.id);
+      if (idx >= 0) cart[idx].qty = Number(cart[idx].qty) + 1;
+      else cart.push(item);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent("cart_update"));
+      try {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          cartApi.sync(cart).catch((e) => console.warn("cart sync failed", e));
+        }
+      } catch (e) {
+        console.warn("cart sync error", e);
+      }
+      try {
+        window.dispatchEvent(new CustomEvent("cart_item_added"));
+      } catch (e) {
+        console.log(e);
+      }
+    } catch (err) {
+      console.error("Add to cart failed", err);
+    }
+  };
+
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0_10px_25px_rgba(0,0,0,0.08)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
-      {/* Top: image + overlay + tag */}
-      <Link to={`/product/${pastry.id}`} className="relative block h-44 w-full overflow-hidden">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white border border-stone-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-900/10">
+      <Link
+        to={`/product/${pastry.id}`}
+        className="relative block aspect-[4/3] w-full overflow-hidden bg-stone-100"
+      >
         <img
           src={image}
           alt={name}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-110"
         />
-
-        {/* Semi-transparent tag centered near top */}
-        <div className="absolute left-1/2 top-4 flex -translate-x-1/2 items-center justify-center rounded-full bg-white/70 px-3 py-1 text-[11px] font-semibold tracking-wide text-amber-800 shadow-sm">
-          Sweet Bakery
+        <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-800 shadow-sm backdrop-blur-sm">
+          Sweet Patries
         </div>
-
-        {/* Overlay "Xem chi tiết" on hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 hover:opacity-100">
-          <div className="rounded-md bg-black/50 px-3 py-1 text-sm text-white">Xem chi tiết</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="flex items-center gap-1 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-stone-800 shadow-lg backdrop-blur-sm">
+            <EyeIcon className="h-3 w-3" /> Xem nhanh
+          </div>
         </div>
       </Link>
 
-      {/* Bottom: info + actions */}
-      <div className="flex flex-1 flex-col justify-between bg-white px-4 pb-4 pt-3">
-        <div>
-          <h3 className="line-clamp-2 text-sm font-semibold text-stone-900">
-            <Link to={`/product/${pastry.id}`} className="hover:underline">
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-3 flex-1">
+          <Link to={`/product/${pastry.id}`}>
+            <h3 className="line-clamp-1 text-base font-bold text-stone-800 transition-colors hover:text-amber-700">
               {name}
-            </Link>
-          </h3>
-
-          {price && (
-            <p className="mt-1 text-sm font-semibold text-amber-800">
-              {price}
-            </p>
-          )}
-
+            </h3>
+          </Link>
           {description && (
-            <p className="mt-1 line-clamp-2 text-xs text-stone-500">
-              {description}
-            </p>
+            <p className="mt-1 line-clamp-2 text-xs text-stone-500 font-medium">{description}</p>
           )}
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        {/* Nút tim sử dụng state isFavorite */}
+        <button
+          onClick={toggleFavorite}
+          className="absolute right-3 top-3 p-2 rounded-full bg-white/80 backdrop-blur shadow hover:scale-110 transition"
+        >
+          <HeartIcon className="h-5 w-5 text-red-600" filled={isFavorite} />
+        </button>
+
+        <div className="flex items-center justify-between border-t border-stone-100 pt-3 mt-auto">
+          <div className="flex flex-col">
+            <span className="text-xs text-stone-400 font-medium">Giá bán</span>
+            <span className="text-lg font-bold text-amber-700">{price}</span>
+          </div>
+
           <button
             type="button"
-            className="text-xs font-medium text-stone-600 hover:text-amber-800"
-            onClick={(e) => {
-              e.preventDefault();
-              // placeholder: bạn có thể mở modal contact ở đây
-              console.log("Liên hệ với nhà bán hàng cho:", pastry.id);
-            }}
+            onClick={handleAddToCart}
+            className="group/btn relative flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-stone-600 transition-all hover:bg-amber-600 hover:text-white hover:shadow-md hover:scale-105 active:scale-95"
+            title="Thêm vào giỏ hàng"
           >
-            Liên hệ
+            <ShoppingCartIcon className="h-5 w-5" />
           </button>
-
-          <Link
-            to={`/product/${pastry.id}`}
-            className="rounded-full bg-gradient-to-r from-amber-600 to-amber-800 px-4 py-1.5 text-xs font-semibold text-amber-50 shadow-sm transition hover:-translate-y-px hover:shadow-md"
-          >
-            Mua ngay
-          </Link>
         </div>
       </div>
     </div>

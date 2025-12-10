@@ -15,5 +15,3 @@ public interface PastryCategoryService {
     PastryCategoryUpdateResponse update(String id, PastryCategoryUpdateRequest request);
     boolean delete(String id);
 }
-    List<PastryCategory> findAll();
-}

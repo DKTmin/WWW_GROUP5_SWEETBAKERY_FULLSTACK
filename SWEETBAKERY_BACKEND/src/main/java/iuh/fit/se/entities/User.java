@@ -3,7 +3,9 @@ package iuh.fit.se.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -17,10 +19,11 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 @Entity
 @Table(name = "users")
-public class User {
+@Inheritance(strategy = InheritanceType.JOINED)
+@SuperBuilder
+public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
@@ -30,6 +33,14 @@ public class User {
     String phoneNumber;
     String address;
 
-    @ManyToMany
-    Set<Role> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<AccountCredential> accounts = new HashSet<>();
 }

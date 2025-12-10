@@ -1,53 +1,445 @@
-import { useState } from "react";
-import authApi from "../api/authApi";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import authApi from "../apis/authApi";
+import cartApi from "../../cart/apis/cartApi";
+import logoImg from "../../../assets/logo/logo.jpg";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+// --- ICONS ---
+const UserIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+    />
+  </svg>
+);
+
+const LockIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+    />
+  </svg>
+);
+
+const EyeIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.573-3.007-9.963-7.178Z"
+    />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+  </svg>
+);
+
+const EyeSlashIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+    />
+  </svg>
+);
 
 export default function LoginForm() {
+  const REDIRECT_URI = "http://localhost:5173";
+
   const [identifier, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       const res = await authApi.login({ identifier, password });
       console.log(res.data);
-      localStorage.setItem("access_token", res.data.data.token);
+      localStorage.setItem("access_token", res.data.data.accessToken);
+      localStorage.setItem("refresh_token", res.data.data.refreshToken);
+
+      // After login, merge server-side cart and localStorage cart (sum quantities)
+      try {
+        // fetch server cart (may be empty)
+        let serverItems = [];
+        try {
+          const cartRes = await cartApi.get();
+          serverItems = cartRes?.data?.items || [];
+        } catch (e) {
+          console.warn("Could not fetch server cart after login", e);
+          serverItems = [];
+        }
+
+        // map server items to local shape
+        const serverMapped = (serverItems || []).map((it) => ({
+          id: it.pastryId,
+          name: it.name,
+          price: it.price || 0,
+          qty: it.qty || 0,
+          size: it.size || "",
+          image: it.imageUrl || "/placeholder.png",
+        }));
+
+        // read local cart
+        let localItems = [];
+        try {
+          const localJson = localStorage.getItem("cart") || "[]";
+          const parsed = JSON.parse(localJson);
+          localItems = Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          localItems = [];
+        }
+
+        // merge by pastryId + size, summing quantities
+        const keyOf = (it) => `${it.id}::${it.size || ""}`;
+        const map = new Map();
+        serverMapped.forEach((it) => map.set(keyOf(it), { ...it }));
+        localItems.forEach((it) => {
+          const safe = {
+            id: it.id,
+            name: it.name,
+            price: it.price || 0,
+            qty: Number(it.qty) || 0,
+            size: it.size || "",
+            image: it.image || "/placeholder.png",
+          };
+          const k = keyOf(safe);
+          if (map.has(k)) {
+            const ex = map.get(k);
+            ex.qty = (Number(ex.qty) || 0) + (Number(safe.qty) || 0);
+            map.set(k, ex);
+          } else {
+            map.set(k, safe);
+          }
+        });
+
+        const merged = Array.from(map.values());
+
+        // persist merged cart locally and notify UI
+        localStorage.setItem("cart", JSON.stringify(merged));
+        window.dispatchEvent(new CustomEvent("cart_update"));
+
+        // persist merged cart to server
+        try {
+          // replace server cart with merged list so we don't double-add
+          await cartApi.sync(merged, true);
+        } catch (e) {
+          console.warn("Failed to sync merged cart to server", e);
+        }
+      } catch (e) {
+        console.warn("Cart merge failed after login", e);
+      }
+
+      setIsLoggedIn(!!res.data.data.accessToken);
       window.location.href = "/pastries";
     } catch (err) {
       console.error(err);
       setError("Sai username hoặc mật khẩu");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleGoogleLogin = () => {
+    const url =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${GOOGLE_CLIENT_ID}&` +
+      `redirect_uri=${REDIRECT_URI}&` +
+      `response_type=code&` + // Backend cần 'code'
+      `scope=profile email&` +
+      `access_type=offline&` +
+      `prompt=consent`;
+
+    window.location.href = url;
+  };
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const authCode = queryParams.get("code");
+
+    if (authCode) {
+      handleGoogleCallback(authCode);
+    }
+  }, [location]);
+
+  const handleGoogleCallback = async (code) => {
+    setLoading(true);
+    try {
+      console.log("Đã lấy được code từ Google:", code);
+
+      const res = await fetch("http://localhost:8082/auth-management/api/v1/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code }),
+      });
+
+      const data = await res.json();
+
+      if (data.code === 200) {
+        // Check theo format ApiResponse của bạn
+        console.log("Login Google thành công:", data);
+
+        const { accessToken, refreshToken } = data.data;
+
+        // 3. Lưu token
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+
+        // 4. Xử lý Cart (Merge giỏ hàng - Logic cũ của bạn)
+        // ... Bạn có thể copy lại đoạn logic merge cart vào đây hoặc tách hàm riêng ...
+
+        // 5. Chuyển hướng vào trang chính và xóa query param trên URL cho đẹp
+        window.location.href = "/pastries";
+      } else {
+        setError("Lỗi đăng nhập Google: " + data.message);
+      }
+    } catch (err) {
+      console.error("Lỗi gọi API Google Login:", err);
+      setError("Có lỗi xảy ra khi kết nối tới server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCredentialResponse = (response) => {
+    // Nhận ID Token
+    const idToken = response.credential;
+
+    // Gửi lên backend
+    fetch("http://localhost:8080/auth-management/api/v1/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: idToken }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("JWT từ backend:", data.jwt);
+        localStorage.setItem("jwt", data.jwt);
+        // Điều hướng đi trang khác nếu muốn
+      })
+      .catch((err) => console.error(err));
+  };
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-sm mx-auto p-6 bg-white rounded-2xl shadow-md"
-    >
-      <h2 className="text-2xl font-bold text-center mb-6">Đăng nhập</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        className="w-full mb-3 p-2 border rounded-lg"
-        value={identifier}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Mật khẩu"
-        className="w-full mb-3 p-2 border rounded-lg"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded-lg mt-3 hover:bg-blue-700"
-      >
-        Đăng nhập
-      </button>
-    </form>
+    <div className="w-full max-w-md">
+      {/* Card Container */}
+      <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl shadow-amber-900/10">
+        {/* Decorative Header */}
+        <div className="relative bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 px-8 py-10 text-center">
+          {/* Decorative circles */}
+          <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-amber-500/20"></div>
+          <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-amber-900/20"></div>
+
+          {/* Logo */}
+          <div className="relative mx-auto mb-4 h-20 w-20 overflow-hidden rounded-full border-4 border-white/30 shadow-lg">
+            <img
+              src={logoImg || "/placeholder.svg"}
+              alt="Sweet Bakery Logo"
+              className="h-full w-full object-cover"
+            />
+          </div>
+
+          <h2 className="relative text-2xl font-bold text-white">Chào mừng trở lại!</h2>
+          <p className="relative mt-1 text-sm text-amber-100/80">Đăng nhập để tiếp tục mua sắm</p>
+        </div>
+
+        {/* Form Content */}
+        <form onSubmit={handleSubmit} className="px-8 py-8">
+          {/* Username Field */}
+          <div className="mb-5">
+            <label className="mb-2 block text-sm font-semibold text-stone-700">Tên đăng nhập</label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <UserIcon className="h-5 w-5 text-stone-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Nhập username của bạn"
+                className="w-full rounded-xl border border-stone-200 bg-stone-50/50 py-3 pl-12 pr-4 text-sm text-stone-700 placeholder-stone-400 transition-all duration-200 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                value={identifier}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Password Field */}
+          <div className="mb-6">
+            <label className="mb-2 block text-sm font-semibold text-stone-700">Mật khẩu</label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <LockIcon className="h-5 w-5 text-stone-400" />
+              </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Nhập mật khẩu"
+                className="w-full rounded-xl border border-stone-200 bg-stone-50/50 py-3 pl-12 pr-12 text-sm text-stone-700 placeholder-stone-400 transition-all duration-200 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400 hover:text-stone-600"
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember & Forgot */}
+          <div className="mb-6 flex items-center justify-between text-sm">
+            <Link
+              to="/forgot-password"
+              className="font-medium text-amber-700 hover:text-amber-800 hover:underline"
+            >
+              Quên mật khẩu?
+            </Link>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+              <span className="font-medium">Lỗi:</span> {error}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 py-3.5 font-bold text-white shadow-lg shadow-amber-600/30 transition-all duration-300 hover:from-amber-700 hover:to-amber-800 hover:shadow-xl hover:shadow-amber-700/30 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <span
+              className={`flex items-center justify-center gap-2 transition-all ${loading ? "opacity-0" : "opacity-100"}`}
+            >
+              Đăng nhập
+            </span>
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              </div>
+            )}
+          </button>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-stone-200"></div>
+            <span className="text-xs font-medium text-stone-400">HOẶC</span>
+            <div className="h-px flex-1 bg-stone-200"></div>
+          </div>
+
+          {/* Social Login */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              Đăng nhập với Google
+            </button>
+          </div>
+
+          {/* Register Link */}
+          <p className="mt-6 text-center text-sm text-stone-600">
+            Chưa có tài khoản?{" "}
+            <Link
+              to="/register"
+              className="font-bold text-amber-700 hover:text-amber-800 hover:underline"
+            >
+              Đăng ký ngay
+            </Link>
+          </p>
+        </form>
+      </div>
+
+      {/* Back to Home Link */}
+      <div className="mt-6 text-center">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-amber-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="h-4 w-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+            />
+          </svg>
+          Quay về trang chủ
+        </Link>
+      </div>
+    </div>
   );
 }

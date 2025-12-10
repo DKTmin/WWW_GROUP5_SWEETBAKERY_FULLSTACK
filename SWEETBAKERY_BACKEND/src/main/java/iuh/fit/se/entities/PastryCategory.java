@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @NoArgsConstructor
@@ -13,18 +13,28 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "categories")
+@Table(name = "pastry_category")
 public class PastryCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
-    private String id;
+    String id;
 
-    @Column(name = "name")
-    private String name;
+    String name;
+
+    @Column(name = "is_active", nullable = false)
+    @JsonProperty("isActive")
+    boolean isActive = true;
 
     @OneToMany(mappedBy = "category")
     @JsonIgnore
-    private List<Pastry> pastries;
+    List<Pastry> pastries;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 }

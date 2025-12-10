@@ -1,5 +1,6 @@
 package iuh.fit.se.entities;
 
+import iuh.fit.se.entities.enums.PastryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -31,6 +32,13 @@ public class Pastry {
 
     @Column(name = "image_url")
     String imageUrl;
+
+    @Column(name = "stock_quantity")
+    private int stockQuantity = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PastryStatus status = PastryStatus.DRAFT;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
