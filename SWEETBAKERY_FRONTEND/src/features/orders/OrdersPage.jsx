@@ -51,6 +51,29 @@ function statusClass(status) {
     }
 }
 
+// Sắp xếp orders: mới nhất trước.
+// Hỗ trợ nhiều trường ngày: ngayDatHang, createdAt, createdDate, created, date.
+// Nếu không có ngày, cố lấy id số, ngược lại trả 0.
+function sortOrdersArray(arr) {
+    if (!Array.isArray(arr)) return arr
+    return arr.slice().sort((a, b) => {
+        const getTime = (o) => {
+            if (!o) return 0
+            const dateVal = o?.ngayDatHang ?? o?.createdAt ?? o?.createdDate ?? o?.created ?? o?.date
+            if (dateVal) {
+                const t = new Date(dateVal).getTime()
+                if (!isNaN(t)) return t
+            }
+            // fallback: if id is numeric, use that (useful for some local orders)
+            const id = o?.id
+            if (typeof id === 'number') return id
+            if (typeof id === 'string' && /^\d+$/.test(id)) return parseInt(id, 10)
+            return 0
+        }
+        return getTime(b) - getTime(a)
+    })
+}
+
 export default function OrdersPage() {
     const [orders, setOrders] = useState(null)
     const [searchText, setSearchText] = useState("")
@@ -112,7 +135,8 @@ export default function OrdersPage() {
                 const localOrders = JSON.parse(localJson) || []
                 // mark local orders
                 const markedLocal = localOrders.map(o => ({ ...o, local: true }))
-                setOrders([...markedLocal, ...serverOrders])
+                // Sort combined list so newest orders appear first
+                setOrders(sortOrdersArray([...markedLocal, ...serverOrders]))
             } catch (parseErr) {
                 console.error('Failed to parse orders response', parseErr, res)
                 setOrders(false)
@@ -145,7 +169,7 @@ export default function OrdersPage() {
                 const localJson = localStorage.getItem('local_orders') || '[]'
                 const localOrders = JSON.parse(localJson) || []
                 const markedLocal = localOrders.map(o => ({ ...o, local: true }))
-                setOrders([...markedLocal, ...serverOrders])
+                setOrders(sortOrdersArray([...markedLocal, ...serverOrders]))
             } catch (parseErr) {
                 console.error('Failed to parse orders response', parseErr, res)
                 setOrders(false)
@@ -201,8 +225,9 @@ export default function OrdersPage() {
     // if fetch failed (orders === false), then try to read local_orders
     if (orders === false) {
         const localJson = localStorage.getItem('local_orders') || '[]'
-        const localOrders = JSON.parse(localJson)
-        if (!localOrders || localOrders.length === 0) {
+        const localOrders = JSON.parse(localJson) || []
+        const sortedLocalOrders = sortOrdersArray(localOrders)
+        if (!sortedLocalOrders || sortedLocalOrders.length === 0) {
             return (
                 <main className="min-h-screen bg-[#FFFBF0] py-20">
                     <div className="mx-auto max-w-4xl px-6 text-center">
@@ -213,14 +238,14 @@ export default function OrdersPage() {
                 </main>
             )
         }
-        // show local orders
+        // show local orders (sắp xếp: mới nhất trước)
         return (
             <main className="min-h-screen bg-gradient-to-b from-[#FFF7ED] to-[#FFFBF0] py-12">
                 <div className="mx-auto max-w-6xl px-6">
                     <h2 className="mb-6 text-3xl font-extrabold text-amber-800">Đơn hàng </h2>
 
                     <div className="grid grid-cols-1 gap-4">
-                        {localOrders.map((o) => (
+                        {sortedLocalOrders.map((o) => (
                             <div key={o.id} className="rounded-xl bg-white p-5 shadow-md transition transform hover:scale-[1.01]">
                                 <div className="flex items-start justify-between">
                                     <div>
