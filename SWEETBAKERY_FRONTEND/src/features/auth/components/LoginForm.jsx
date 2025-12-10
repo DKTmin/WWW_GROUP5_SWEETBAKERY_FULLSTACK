@@ -6,6 +6,8 @@ import authApi from "../apis/authApi";
 import cartApi from "../../cart/apis/cartApi";
 import logoImg from "../../../assets/logo/logo.jpg";
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 // --- ICONS ---
 const UserIcon = ({ className }) => (
   <svg
@@ -176,6 +178,40 @@ export default function LoginForm() {
     }
   };
 
+  const REDIRECT_URI = "http://localhost:5173";
+
+  const handleGoogleLogin = () => {
+    const url =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${GOOGLE_CLIENT_ID}&` +
+      `redirect_uri=${REDIRECT_URI}&` +
+      `response_type=code&` +
+      `scope=profile email&` +
+      `access_type=offline&` +
+      `prompt=consent`;
+
+    window.location.href = url;
+  };
+
+  const handleCredentialResponse = (response) => {
+    // Nhận ID Token
+    const idToken = response.credential;
+
+    // Gửi lên backend
+    fetch("http://localhost:8080/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: idToken }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("JWT từ backend:", data.jwt);
+        localStorage.setItem("jwt", data.jwt);
+        // Điều hướng đi trang khác nếu muốn
+      })
+      .catch((err) => console.error(err));
+  };
+
   return (
     <div className="w-full max-w-md">
       {/* Card Container */}
@@ -301,6 +337,7 @@ export default function LoginForm() {
           <div className="flex gap-3">
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
