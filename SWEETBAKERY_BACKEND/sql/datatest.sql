@@ -73,27 +73,72 @@ INSERT INTO `customers` (`id`, `loyalty_points`) VALUES
 
 -- 2.1. Insert Orders
 -- Lưu ý: Ngày đặt hàng (ngay_dat_hang) phải SAU ngày tạo tài khoản của user đó
-INSERT INTO `orders` (`id`, `user_id`, `ngay_dat_hang`, `tong_tien`, `trang_thai`, `payment_method`, `ly_do_huy`) VALUES
-('order-005', 'user-uuid-004', '2025-07-02 09:00:00', 335000, 'COMPLETED', 'CASH', NULL),  -- Mousse (Q3)
-('order-006', 'user-uuid-005', '2025-07-20 10:30:00', 60000, 'COMPLETED', 'VN_PAY', NULL),  -- Bánh mì đen x2 (Q3)
-('order-007', 'user-uuid-006', '2025-08-01 15:00:00', 325000, 'PAID', 'VN_PAY', NULL),       -- Black Forest (Q3)
-('order-008', 'user-uuid-007', '2025-08-10 18:00:00', 17000, 'CANCELLED', 'CASH', 'Đặt nhầm món'), -- Croissant (Q3)
-('order-009', 'user-uuid-008', '2025-08-25 11:20:00', 67000, 'COMPLETED', 'CASH', NULL),   -- Butter Raisins + Que (Q3)
-('order-010', 'user-uuid-009', '2025-09-06 08:45:00', 345000, 'COMPLETED', 'VN_PAY', NULL), -- Mango cheese (Q3)
-('order-011', 'user-uuid-010', '2025-09-15 12:00:00', 52000, 'PENDING', 'BANK_TRANSFER', NULL), -- Coconut cake (Q3)
-('order-012', 'user-uuid-011', '2025-09-30 19:15:00', 335000, 'COMPLETED', 'CASH', NULL),  -- Tiramisu (Q3)
-('order-013', 'user-uuid-012', '2025-10-05 10:00:00', 48000, 'COMPLETED', 'VN_PAY', NULL),  -- 3x Chocolate (Q4)
-('order-014', 'user-uuid-013', '2025-10-15 14:30:00', 160000, 'COMPLETED', 'CASH', NULL), -- 10x Hamburger (Q4)
-('order-015', 'user-uuid-014', '2025-10-25 09:10:00', 315000, 'REFUND_PENDING', 'VN_PAY', 'Bánh bị móp khi giao'), -- Passion mousse (Q4)
-('order-016', 'user-uuid-015', '2025-11-05 16:40:00', 110000, 'COMPLETED', 'CASH', NULL), -- 2x Cigarette cookies (Q4)
-('order-017', 'user-uuid-016', '2025-11-20 11:00:00', 25000, 'CANCELLED', 'CASH', 'Thôi không ăn nữa'), -- Bánh chả (Q4)
-('order-018', 'user-uuid-017', '2025-12-01 13:20:00', 37000, 'COMPLETED', 'VN_PAY', NULL),  -- Green tea cake (Q4)
-('order-019', 'user-uuid-018', '2025-12-08 08:30:00', 42000, 'PAID', 'VN_PAY', NULL),       -- Red velvet piece (Q4)
-('order-020', 'user-uuid-019', '2025-12-12 17:00:00', 15000, 'COMPLETED', 'CASH', NULL),   -- Baguette (Q4)
-('order-021', 'user-uuid-020', '2025-12-18 10:45:00', 64000, 'PENDING', 'CASH', NULL),     -- 2x Su kem cốm (Q4)
-('order-022', 'user-uuid-021', '2025-12-22 15:50:00', 16000, 'COMPLETED', 'CASH', NULL),   -- Chocolate 1 (Q4)
-('order-023', 'user-uuid-022', '2025-12-25 09:00:00', 670000, 'COMPLETED', 'VN_PAY', NULL), -- 2x Hawaii Mousse (Noel) (Q4)
-('order-024', 'user-uuid-023', '2025-12-30 20:00:00', 335000, 'COMPLETED', 'VN_PAY', NULL); -- White cheese caramel (Q4)
+INSERT INTO `orders` (
+    `id`, `user_id`, `ngay_dat_hang`, `tong_tien`, `trang_thai`,
+    `payment_method`, `ly_do_huy`,
+    `bank_account_name`, `bank_account_number`, `bank_name`,
+    `refund_proof_image_url`
+) VALUES
+('order-005', 'user-uuid-004', '2025-07-02 09:00:00', 335000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-006', 'user-uuid-005', '2025-07-20 10:30:00', 60000, 'COMPLETED', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-007', 'user-uuid-006', '2025-08-01 15:00:00', 325000, 'PAID', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-008', 'user-uuid-007', '2025-08-10 18:00:00', 17000, 'CANCELLED', 'CASH', 'Đặt nhầm món',
+    NULL, NULL, NULL, NULL),
+
+('order-009', 'user-uuid-008', '2025-08-25 11:20:00', 67000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-010', 'user-uuid-009', '2025-09-06 08:45:00', 345000, 'COMPLETED', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-011', 'user-uuid-010', '2025-09-15 12:00:00', 52000, 'PENDING', 'BANK_TRANSFER', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-012', 'user-uuid-011', '2025-09-30 19:15:00', 335000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-013', 'user-uuid-012', '2025-10-05 10:00:00', 48000, 'COMPLETED', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-014', 'user-uuid-013', '2025-10-15 14:30:00', 160000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-015', 'user-uuid-014', '2025-10-25 09:10:00', 315000, 'REFUND_PENDING', 'VN_PAY', 'Bánh bị móp khi giao',
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-016', 'user-uuid-015', '2025-11-05 16:40:00', 110000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-017', 'user-uuid-016', '2025-11-20 11:00:00', 25000, 'CANCELLED', 'CASH', 'Thôi không ăn nữa',
+    NULL, NULL, NULL, NULL),
+
+('order-018', 'user-uuid-017', '2025-12-01 13:20:00', 37000, 'COMPLETED', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-019', 'user-uuid-018', '2025-12-08 08:30:00', 42000, 'PAID', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-020', 'user-uuid-019', '2025-12-12 17:00:00', 15000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-021', 'user-uuid-020', '2025-12-18 10:45:00', 64000, 'PENDING', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-022', 'user-uuid-021', '2025-12-22 15:50:00', 16000, 'COMPLETED', 'CASH', NULL,
+    NULL, NULL, NULL, NULL),
+
+('order-023', 'user-uuid-022', '2025-12-25 09:00:00', 670000, 'COMPLETED', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL),
+
+('order-024', 'user-uuid-023', '2025-12-30 20:00:00', 335000, 'COMPLETED', 'VN_PAY', NULL,
+    'NGUYEN VAN A', '9704198526191432198', 'NCB', NULL);
+
 
 
 -- 2.2. Insert Order Details (Chi tiết từng món cho các đơn hàng trên)
