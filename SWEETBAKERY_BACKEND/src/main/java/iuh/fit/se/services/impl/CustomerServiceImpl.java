@@ -152,12 +152,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private String getUserName(String userId) {
-        Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(userId);
-        AccountCredential userNameAccount = accountCredentialSet.stream()
-                .filter(acc -> acc.getType().name().equalsIgnoreCase(AccountType.USERNAME.name()))
-                .toList().getFirst();
-        return userNameAccount.getCredential();
+        Set<AccountCredential> accountCredentialSet =
+                accountCredentialRepository.findAllByUserId(userId);
+
+        AccountCredential acc = accountCredentialSet.stream()
+                .filter(a -> a.getType() == AccountType.USERNAME || a.getType() == AccountType.GOOGLE)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("User has no username or google credential"));
+
+        return acc.getCredential();
     }
+
 
     private boolean getIsVerified(String userId){
         Set<AccountCredential> accountCredentialSet = accountCredentialRepository.findAllByUserId(userId);
