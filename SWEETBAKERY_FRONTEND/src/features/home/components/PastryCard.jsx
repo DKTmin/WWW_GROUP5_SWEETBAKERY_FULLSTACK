@@ -1,8 +1,9 @@
 // src/features/home/components/PastryCard.jsx
 import { Link } from "react-router-dom";
-import cartApi from "../../cart/apis/cartApi"
+import { useState } from "react"; // <--- 1. Import useState
+import cartApi from "../../cart/apis/cartApi";
 
-// Icon Giỏ hàng (Inline SVG)
+// ... (Giữ nguyên các Icon ShoppingCartIcon, EyeIcon, HeartIcon) ...
 const ShoppingCartIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +21,6 @@ const ShoppingCartIcon = ({ className }) => (
   </svg>
 );
 
-// Icon Eye (Xem chi tiết - Optional)
 const EyeIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -37,7 +37,6 @@ const EyeIcon = ({ className }) => (
   </svg>
 );
 
-// ❤️ Icon yêu thích
 const HeartIcon = ({ className, filled }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -52,30 +51,34 @@ const HeartIcon = ({ className, filled }) => (
 );
 
 export default function PastryCard({ pastry }) {
-  // Xử lý dữ liệu an toàn
   const image = pastry.imageUrl || pastry.image || "/placeholder.png";
   const name = pastry.name || pastry.title || "Sản phẩm";
-  const price = pastry.price != null
-    ? (Number(pastry.price).toLocaleString("vi-VN") + "₫")
-    : "Liên hệ";
+  const price =
+    pastry.price != null ? Number(pastry.price).toLocaleString("vi-VN") + "₫" : "Liên hệ";
   const description = pastry.description || "";
 
-   // -----------------------------
-  // ❤️ Thêm sản phẩm yêu thích
   // -----------------------------
-  const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-  const isFavorite = favorites.some((item) => item.id === pastry.id);
+  // ❤️ SỬA LỖI REFRESH TẠI ĐÂY
+  // -----------------------------
+
+  // 2. Khởi tạo state dựa trên localStorage
+  const [isFavorite, setIsFavorite] = useState(() => {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    return favorites.some((item) => item.id === pastry.id);
+  });
 
   const toggleFavorite = (e) => {
-    e.preventDefault(); // tránh việc click bị chuyển trang
+    e.preventDefault();
 
+    // Lấy danh sách mới nhất từ localStorage
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
     let updated = [];
 
     if (isFavorite) {
-      // Nếu đang yêu thích → Xóa khỏi danh sách
+      // Đang thích -> Xóa
       updated = favorites.filter((item) => item.id !== pastry.id);
     } else {
-      // Nếu chưa yêu thích → Thêm vào danh sách
+      // Chưa thích -> Thêm
       updated = [
         ...favorites,
         {
@@ -87,19 +90,24 @@ export default function PastryCard({ pastry }) {
       ];
     }
 
+    // Lưu vào localStorage
     localStorage.setItem("favorites", JSON.stringify(updated));
-    window.dispatchEvent(new Event("favorites_update")); // để cập nhật icon realtime
 
-    // Refresh component
-    window.location.reload();
+    // Cập nhật State để UI đổi màu icon ngay lập tức
+    setIsFavorite(!isFavorite);
+
+    // Bắn event để Header (nếu có) cập nhật số lượng
+    window.dispatchEvent(new Event("favorites_update"));
+
+    // 3. ĐÃ XÓA DÒNG window.location.reload();
   };
 
-  // Hàm xử lý khi bấm thêm vào giỏ
+  // ... (Giữ nguyên hàm handleAddToCart và phần return) ...
   const handleAddToCart = (e) => {
-    e.preventDefault(); // Ngăn việc chuyển trang của thẻ Link bao ngoài (nếu có)
+    e.preventDefault();
     try {
-      const cartJson = localStorage.getItem("cart") || "[]"
-      const cart = JSON.parse(cartJson)
+      const cartJson = localStorage.getItem("cart") || "[]";
+      const cart = JSON.parse(cartJson);
       const item = {
         id: pastry.id,
         name: pastry.name || pastry.title,
@@ -107,45 +115,45 @@ export default function PastryCard({ pastry }) {
         qty: 1,
         size: "",
         image: pastry.imageUrl || pastry.image || "/placeholder.png",
-      }
-      const idx = cart.findIndex((c) => c.id === item.id)
-      if (idx >= 0) cart[idx].qty = Number(cart[idx].qty) + 1
-      else cart.push(item)
-      localStorage.setItem("cart", JSON.stringify(cart))
-      window.dispatchEvent(new CustomEvent("cart_update"))
-      // If user is logged in (has token), attempt to sync to backend
+      };
+      const idx = cart.findIndex((c) => c.id === item.id);
+      if (idx >= 0) cart[idx].qty = Number(cart[idx].qty) + 1;
+      else cart.push(item);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent("cart_update"));
       try {
-        const token = localStorage.getItem("access_token")
+        const token = localStorage.getItem("access_token");
         if (token) {
-          cartApi.sync(cart).catch((e) => console.warn("cart sync failed", e))
+          cartApi.sync(cart).catch((e) => console.warn("cart sync failed", e));
         }
       } catch (e) {
-        console.warn("cart sync error", e)
+        console.warn("cart sync error", e);
       }
-      try { window.dispatchEvent(new CustomEvent('cart_item_added')) } catch (e) { }
+      try {
+        window.dispatchEvent(new CustomEvent("cart_item_added"));
+      } catch (e) {
+        console.log(e);
+      }
     } catch (err) {
-      console.error("Add to cart failed", err)
+      console.error("Add to cart failed", err);
     }
   };
 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white border border-stone-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-900/10">
-
-      {/* --- PHẦN HÌNH ẢNH --- */}
-      <Link to={`/product/${pastry.id}`} className="relative block aspect-[4/3] w-full overflow-hidden bg-stone-100">
+      <Link
+        to={`/product/${pastry.id}`}
+        className="relative block aspect-[4/3] w-full overflow-hidden bg-stone-100"
+      >
         <img
           src={image}
           alt={name}
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-110"
         />
-
-        {/* Tag nổi bật (Optional) */}
         <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-800 shadow-sm backdrop-blur-sm">
           Sweet Patries
         </div>
-
-        {/* Overlay nút xem chi tiết khi hover */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="flex items-center gap-1 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-stone-800 shadow-lg backdrop-blur-sm">
             <EyeIcon className="h-3 w-3" /> Xem nhanh
@@ -153,9 +161,7 @@ export default function PastryCard({ pastry }) {
         </div>
       </Link>
 
-      {/* --- PHẦN THÔNG TIN --- */}
       <div className="flex flex-1 flex-col p-4">
-        {/* Tên & Mô tả */}
         <div className="mb-3 flex-1">
           <Link to={`/product/${pastry.id}`}>
             <h3 className="line-clamp-1 text-base font-bold text-stone-800 transition-colors hover:text-amber-700">
@@ -163,13 +169,11 @@ export default function PastryCard({ pastry }) {
             </h3>
           </Link>
           {description && (
-            <p className="mt-1 line-clamp-2 text-xs text-stone-500 font-medium">
-              {description}
-            </p>
+            <p className="mt-1 line-clamp-2 text-xs text-stone-500 font-medium">{description}</p>
           )}
         </div>
 
-         {/* ❤️ ICON YÊU THÍCH */}
+        {/* Nút tim sử dụng state isFavorite */}
         <button
           onClick={toggleFavorite}
           className="absolute right-3 top-3 p-2 rounded-full bg-white/80 backdrop-blur shadow hover:scale-110 transition"
@@ -177,15 +181,12 @@ export default function PastryCard({ pastry }) {
           <HeartIcon className="h-5 w-5 text-red-600" filled={isFavorite} />
         </button>
 
-        {/* Giá & Nút hành động */}
         <div className="flex items-center justify-between border-t border-stone-100 pt-3 mt-auto">
-          {/* Giá tiền nổi bật */}
           <div className="flex flex-col">
             <span className="text-xs text-stone-400 font-medium">Giá bán</span>
             <span className="text-lg font-bold text-amber-700">{price}</span>
           </div>
 
-          {/* Nút Giỏ hàng  */}
           <button
             type="button"
             onClick={handleAddToCart}
