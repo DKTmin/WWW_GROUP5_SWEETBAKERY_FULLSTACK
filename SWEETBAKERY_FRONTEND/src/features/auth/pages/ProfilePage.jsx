@@ -9,6 +9,7 @@ import ProfileInfoTab from "./../components/profile/ProfileInfoTab";
 import ProfileFavoritesTab from "./../components/profile/ProfileFavoritesTab";
 import ProfileEditTab from "./../components/profile/ProfileEditTab";
 import { getFavorites, removeFavorite } from "../../../utils/favoriteUtils";
+import { HeartIcon } from "@heroicons/react/24/outline";
 
 // Import các component đã tách
 
@@ -19,15 +20,15 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("info");
   const [favoriteList, setFavoriteList] = useState([]);
 
-   useEffect(() => {
-  setFavoriteList(getFavorites());
+  useEffect(() => {
+    setFavoriteList(getFavorites());
 
-  // Cập nhật khi có thay đổi
-  const update = () => setFavoriteList(getFavorites());
-  window.addEventListener("favorites_update", update);
+    // Cập nhật khi có thay đổi
+    const update = () => setFavoriteList(getFavorites());
+    window.addEventListener("favorites_update", update);
 
-  return () => window.removeEventListener("favorites_update", update);
-}, []);
+    return () => window.removeEventListener("favorites_update", update);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -129,8 +130,11 @@ export default function ProfilePage() {
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <HeartIcon className="mb-4 h-16 w-16 text-stone-300" />
                     <h4 className="text-lg font-semibold text-stone-700">Danh sách trống</h4>
-                    <Link to="/category/all" className="mt-4 bg-amber-700 text-white px-5 py-2 rounded-full">
-                    Khám phá sản phẩm
+                    <Link
+                      to="/category/all"
+                      className="mt-4 bg-amber-700 text-white px-5 py-2 rounded-full"
+                    >
+                      Khám phá sản phẩm
                     </Link>
                   </div>
                 ) : (
@@ -146,10 +150,10 @@ export default function ProfilePage() {
 
                         <button
                           onClick={() => {
-                          removeFavorite(p.id);
-                          setFavoriteList(getFavorites());
-                        }}
-                        className="mt-3 text-sm text-red-600 hover:underline"
+                            removeFavorite(p.id);
+                            setFavoriteList(getFavorites());
+                          }}
+                          className="mt-3 text-sm text-red-600 hover:underline"
                         >
                           Xóa khỏi yêu thích
                         </button>
@@ -158,7 +162,7 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
-           )}
+            )}
             {activeTab === "edit" && <ProfileEditTab user={user} />}
           </div>
         </div>
