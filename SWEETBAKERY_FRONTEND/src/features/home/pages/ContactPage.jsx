@@ -12,8 +12,7 @@ export default function ContactPage() {
             Liên hệ với chúng tôi
           </h1>
           <p className="mt-2 text-sm text-stone-600 max-w-xl mx-auto">
-            Nếu bạn có bất kỳ câu hỏi nào, hãy gửi tin nhắn cho chúng tôi.
-            Sweet Bakery luôn sẵn sàng hỗ trợ bạn 24/7.
+            Nếu bạn có bất kỳ câu hỏi nào, Sweet Bakery luôn sẵn sàng hỗ trợ bạn.
           </p>
         </section>
 
@@ -42,7 +41,7 @@ export default function ContactPage() {
               <p className="mt-1 text-sm text-stone-600">sweetbakery@gmail.com</p>
             </div>
 
-            {/* highlight card */}
+            {/* Highlight card */}
             <div className="w-full max-w-sm rounded-3xl bg-linear-to-br from-amber-500 via-amber-600 to-stone-900 p-px shadow-lg">
               <div className="rounded-3xl bg-[#FFF8E9] p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-700">
@@ -72,46 +71,57 @@ export default function ContactPage() {
 
           </div>
 
-          {/* Right: Form */}
-          <form className="p-6 rounded-3xl bg-white shadow space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-stone-700">
-                Họ và tên
-              </label>
-              <input
-                className="mt-1 w-full p-3 border-none rounded-xl bg-[#FFF3D9] focus:outline-none"
-                placeholder="Nguyễn Văn A"
-              />
-            </div>
+          {/* Right: Introduction Section */}
+<div className="p-8 rounded-3xl bg-gradient-to-br from-white via-[#FFF7E1] to-[#FFECC7] shadow-xl border border-amber-100">
 
-            <div>
-              <label className="block text-sm font-semibold text-stone-700">
-                Email
-              </label>
-              <input
-                type="email"
-                className="mt-1 w-full p-3 border-none rounded-xl bg-[#FFF3D9] focus:outline-none"
-                placeholder="sweetbakery@gmail.com"
-              />
-            </div>
+  {/* Title */}
+  <div className="mb-5">
+    <h2 className="text-2xl font-bold text-stone-900">Về SweetBakery</h2>
+    <div className="w-16 h-1 rounded-full bg-amber-500 mt-2"></div>
+  </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-stone-700">
-                Tin nhắn
-              </label>
-              <textarea
-                className="mt-1 w-full p-3 border-none rounded-xl bg-[#FFF3D9] focus:outline-none h-32"
-                placeholder="Nội dung cần hỗ trợ..."
-              />
-            </div>
+  {/* Content */}
+  <div className="space-y-4 text-stone-700 leading-relaxed text-[15px]">
 
-            <button
-              type="submit"
-              className="w-full rounded-full bg-amber-700 px-5 py-3 text-sm font-semibold text-amber-50 shadow hover:bg-amber-800 transition"
-            >
-              Gửi liên hệ
-            </button>
-          </form>
+    <p>
+      Những ai yêu thích bánh ngọt, đặc biệt là các dòng bánh mang phong cách Pháp,
+      chắc hẳn sẽ cảm nhận được sự tinh tế khi thưởng thức các sản phẩm của
+      <span className="font-semibold text-stone-900"> SweetBakery</span>.
+    </p>
+
+    <p>
+      Chúng tôi chọn phong cách tối giản: không phô trương, không rực rỡ, nhưng chú trọng vào
+      <span className="font-semibold text-stone-900"> chất lượng thật</span>.
+      Vị ngọt nhẹ, độ béo thanh và hương thơm tự nhiên giúp bạn thưởng thức nhiều mà không ngán.
+    </p>
+
+    <p>
+      Tất cả sản phẩm đều được làm
+      <span className="font-semibold text-stone-900"> 100% thủ công (handmade)</span>,
+      từ bánh mì, bánh ngọt đến bánh quy — mỗi chiếc bánh đều mang dấu ấn riêng,
+      không theo lối “công nghiệp”.
+    </p>
+
+    <p>
+      SweetBakery luôn ưu tiên nguyên liệu tươi mới, rõ nguồn gốc. Quy trình làm bánh được thực hiện
+      tỉ mỉ trong từng bước để mang đến sự hài hòa giữa hương vị và thẩm mỹ.
+    </p>
+
+    <p>
+      Chúng tôi hoạt động dưới mô hình tiệm bánh sinh viên tại TP. Hồ Chí Minh, mang phong cách trẻ trung,
+      tinh tế và luôn giữ trọn tâm huyết trong từng sản phẩm gửi đến bạn.
+    </p>
+
+    {/* Highlight paragraph styled differently */}
+    <div className="mt-6 p-5 rounded-2xl bg-amber-100/60 border border-amber-300 
+                text-amber-900 text-[15px] leading-relaxed font-medium shadow-sm">
+      Hiện SweetBakery phát triển dưới mô hình tiệm bánh sinh viên tại TP. Hồ Chí Minh, mang phong cách trẻ trung nhưng vẫn giữ tinh thần trang nhã, tinh tế và chú trọng chất lượng trong từng sản phẩm.
+    </div>
+
+  </div>
+
+</div>
+
 
         </section>
       </div>

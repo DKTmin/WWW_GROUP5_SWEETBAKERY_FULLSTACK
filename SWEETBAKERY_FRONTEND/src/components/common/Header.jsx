@@ -201,15 +201,6 @@ export default function Header() {
             </span>
             <span className="hidden sm:inline">Email: sweetbakery@example.com</span>
           </div>
-          <div className="flex gap-3">
-            <Link to="/help" className="hover:underline">
-              Trợ giúp
-            </Link>
-            <span>|</span>
-            <Link to="/language" className="hover:underline">
-              Tiếng Việt
-            </Link>
-          </div>
         </div>
       </div>
 

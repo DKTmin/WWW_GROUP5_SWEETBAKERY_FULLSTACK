@@ -53,8 +53,8 @@ export default function Footer() {
 
             {/* Social Icons (Đưa lên đây cho gọn) */}
             <div className="flex gap-3">
-                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-500 hover:bg-amber-600 hover:text-white transition-colors"><FacebookIcon className="h-4 w-4" /></a>
-                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-500 hover:bg-amber-600 hover:text-white transition-colors"><InstagramIcon className="h-4 w-4" /></a>
+                <a href="https://www.facebook.com/dangkhanh4" className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-500 hover:bg-amber-600 hover:text-white transition-colors"><FacebookIcon className="h-4 w-4" /></a>
+                <a href="https://www.instagram.com/dark_thank" className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-500 hover:bg-amber-600 hover:text-white transition-colors"><InstagramIcon className="h-4 w-4" /></a>
             </div>
           </div>
 
