@@ -10,16 +10,22 @@ import iuh.fit.se.dtos.response.AuthenticationResponse;
 import iuh.fit.se.dtos.response.CreateNewPasswordResponse;
 import iuh.fit.se.dtos.response.IntrospectResponse;
 import iuh.fit.se.entities.AccountCredential;
+import iuh.fit.se.entities.Customer;
+import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
+import iuh.fit.se.entities.enums.AccountType;
 import iuh.fit.se.entities.enums.HttpCode;
 import iuh.fit.se.entities.enums.TokenType;
+import iuh.fit.se.entities.enums.UserRole;
 import iuh.fit.se.exceptions.AppException;
 import iuh.fit.se.mapper.AccountMapper;
 import iuh.fit.se.mapper.UserMapper;
 import iuh.fit.se.repositories.AccountCredentialRepository;
+import iuh.fit.se.repositories.CustomerRepository;
 import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.AuthenticationService;
+import iuh.fit.se.services.GoogleAuthService;
 import iuh.fit.se.services.RedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
@@ -47,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
     AccountMapper accountMapper;
     UserMapper userMapper;
@@ -55,6 +63,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
     RedisService redisService;
+    GoogleAuthService googleAuthService;
+    CustomerRepository customerRepository;
 
     @NonFinal
     @Value("${jwt.secret-key}")
@@ -186,7 +196,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return signToken(jwtClaimsSet);
     }
 
-    private String generateRefreshToken(User user, AccountCredential accountCredential){
+    public String generateRefreshToken(User user, AccountCredential accountCredential){
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(accountCredential.getCredential())
                 .issuer("user664dntp.dev")
@@ -195,6 +205,52 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .jwtID(UUID.randomUUID().toString())
                 .build();
         return signToken(claimsSet);
+    }
+
+    @Override
+    public AuthenticationResponse authenticateGoogleUser(String code) {
+        Map<String, Object> googleUser = googleAuthService.authenticateGoogle(code);
+
+        String email = (String) googleUser.get("email");
+        String name = (String) googleUser.get("name");
+        String avatar = (String) googleUser.get("picture");
+
+        AccountCredential account = accountCredentialRepository.findByCredential(email);
+        User user;
+
+        if (account != null) {
+            user = account.getUser();
+        } else {
+            Customer newCustomer = new Customer();
+            newCustomer.setEmail(email);
+            newCustomer.setFirstName(name);
+
+            Role customerRole = roleRepository.findById(UserRole.CUSTOMER.name())
+                    .orElseThrow(() -> new AppException(HttpCode.ROLE_NOT_FOUND));
+            newCustomer.setRoles(Set.of(customerRole));
+
+            user = customerRepository.save(newCustomer);
+
+            account = AccountCredential.builder()
+                    .credential(email)
+                    .user(user)
+                    .type(AccountType.GOOGLE)
+                    .isVerified(true)
+                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .build();
+
+            accountCredentialRepository.save(account);
+        }
+
+        String accessToken = generateAccessToken(user, account);
+        String refreshToken = generateRefreshToken(user, account);
+
+        return AuthenticationResponse.builder()
+                .authenticated(true)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType(TokenType.BEARER.getTokenType())
+                .build();
     }
 
     private String signToken(JWTClaimsSet claimsSet){
