@@ -60,6 +60,7 @@ export default function HeaderBar({ onToggleSidebar }) {
           </div>
           <img
 src={`https://ui-avatars.com/api/?name=${fullName}&background=amber&color=fff`}
+            src={`https://ui-avatars.com/api/?name=${fullName}&background=amber&color=fff`}
             alt="Avatar"
             className="h-8 w-8 rounded-full"
           />

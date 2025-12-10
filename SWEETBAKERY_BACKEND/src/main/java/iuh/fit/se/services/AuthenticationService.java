@@ -17,8 +17,8 @@ public interface AuthenticationService {
     IntrospectResponse introspect(IntrospectRequest request);
     void logout(LogoutRequest request);
     AuthenticationResponse refreshToken(RefreshTokenRequest request);
-
     CreateNewPasswordResponse forgetPassword(CreateNewPasswordRequest request);
     String generateAccessToken(User user, AccountCredential accountCredential);
-
+    String generateRefreshToken(User user, AccountCredential accountCredential);
+    AuthenticationResponse authenticateGoogleUser(String code);
 }

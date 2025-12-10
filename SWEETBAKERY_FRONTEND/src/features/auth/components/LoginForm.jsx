@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import authApi from "../apis/authApi";
 import cartApi from "../../cart/apis/cartApi";
 import logoImg from "../../../assets/logo/logo.jpg";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // --- ICONS ---
 const UserIcon = ({ className }) => (
@@ -77,12 +79,15 @@ const EyeSlashIcon = ({ className }) => (
 );
 
 export default function LoginForm() {
+  const REDIRECT_URI = "http://localhost:5173";
+
   const [identifier, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -176,6 +181,86 @@ export default function LoginForm() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    const url =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${GOOGLE_CLIENT_ID}&` +
+      `redirect_uri=${REDIRECT_URI}&` +
+      `response_type=code&` + // Backend cần 'code'
+      `scope=profile email&` +
+      `access_type=offline&` +
+      `prompt=consent`;
+
+    window.location.href = url;
+  };
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const authCode = queryParams.get("code");
+
+    if (authCode) {
+      handleGoogleCallback(authCode);
+    }
+  }, [location]);
+
+  const handleGoogleCallback = async (code) => {
+    setLoading(true);
+    try {
+      console.log("Đã lấy được code từ Google:", code);
+
+      const res = await fetch("http://localhost:8082/auth-management/api/v1/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code }),
+      });
+
+      const data = await res.json();
+
+      if (data.code === 200) {
+        // Check theo format ApiResponse của bạn
+        console.log("Login Google thành công:", data);
+
+        const { accessToken, refreshToken } = data.data;
+
+        // 3. Lưu token
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+
+        // 4. Xử lý Cart (Merge giỏ hàng - Logic cũ của bạn)
+        // ... Bạn có thể copy lại đoạn logic merge cart vào đây hoặc tách hàm riêng ...
+
+        // 5. Chuyển hướng vào trang chính và xóa query param trên URL cho đẹp
+        window.location.href = "/pastries";
+      } else {
+        setError("Lỗi đăng nhập Google: " + data.message);
+      }
+    } catch (err) {
+      console.error("Lỗi gọi API Google Login:", err);
+      setError("Có lỗi xảy ra khi kết nối tới server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCredentialResponse = (response) => {
+    // Nhận ID Token
+    const idToken = response.credential;
+
+    // Gửi lên backend
+    fetch("http://localhost:8080/auth-management/api/v1/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: idToken }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("JWT từ backend:", data.jwt);
+        localStorage.setItem("jwt", data.jwt);
+        // Điều hướng đi trang khác nếu muốn
+      })
+      .catch((err) => console.error(err));
+  };
+
   return (
     <div className="w-full max-w-md">
       {/* Card Container */}
@@ -250,13 +335,6 @@ export default function LoginForm() {
 
           {/* Remember & Forgot */}
           <div className="mb-6 flex items-center justify-between text-sm">
-            <label className="flex cursor-pointer items-center gap-2 text-stone-600">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
-              />
-              <span>Ghi nhớ đăng nhập</span>
-            </label>
             <Link
               to="/forgot-password"
               className="font-medium text-amber-700 hover:text-amber-800 hover:underline"
@@ -301,7 +379,8 @@ export default function LoginForm() {
           <div className="flex gap-3">
             <button
               type="button"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
+              onClick={handleGoogleLogin}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
@@ -321,16 +400,7 @@ export default function LoginForm() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Google
-            </button>
-            <button
-              type="button"
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
-            >
-              <svg className="h-5 w-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-              </svg>
-              Facebook
+              Đăng nhập với Google
             </button>
           </div>
 

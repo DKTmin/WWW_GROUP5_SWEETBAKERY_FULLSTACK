@@ -13,7 +13,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum AccountType {
     USERNAME("Username"),
-    EMAIL("Email");
+    EMAIL("Email"),
+    GOOGLE("Google");
 
     String enumType;
 
